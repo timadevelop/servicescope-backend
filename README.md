@@ -1,0 +1,3 @@
+# salonSoftwareApi
+
+see .odt doc
