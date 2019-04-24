@@ -1,17 +1,16 @@
 ## some
 
 TODO:
-- inventory
-- inventoryitem
-
-
-Done:
 - User
-- Businesses
-- Employees
-- Customers
-- Services
-- Appeals
-- Appointments
+- Ads / services
+    - Services (if active: ad, else: pay to recreate)
+        - Promotion
+
+- delete Employees
+- delete Customers
+
+- Posts / delete Appointments
+    - Offer / Appeals
+
 - Notifications
-- Reviews
+- Reviews for ads / services

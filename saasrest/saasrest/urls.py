@@ -29,15 +29,8 @@ from django.conf import settings
 # add models to django admin
 #
 admin.site.register(models.User)
-admin.site.register(models.Business)
-admin.site.register(models.Employee)
-admin.site.register(models.Customer)
-admin.site.register(models.Appeal)
 admin.site.register(models.Service)
 admin.site.register(models.Notification)
-admin.site.register(models.Appointment)
-admin.site.register(models.Inventory)
-admin.site.register(models.InventoryItem)
 #
 #
 # routers
@@ -45,20 +38,17 @@ admin.site.register(models.InventoryItem)
 
 router = routers.DefaultRouter()
 router.register(r'users', views.UserViewSet)
-# router.register(r'profiles', views.ProfileViewSet)
-router.register(r'businesses', views.BusinessViewSet)
-router.register(r'employees', views.EmployeeViewSet)
-router.register(r'customers', views.CustomerViewSet)
-# router.register(r'data', views.DataViewSet)
-# router.register(r'recipes', views.RecipeViewSet)
-router.register(r'appointments', views.AppointmentViewSet)
-router.register(r'appeals', views.AppealViewSet)
+router.register(r'locations', views.LocationViewSet)
+router.register(r'tags', views.TagViewSet)
+router.register(r'categories', views.CategoryViewSet)
 router.register(r'services', views.ServiceViewSet)
+router.register(r'service-promotions', views.ServicePromotionViewSet)
+router.register(r'service-images', views.ServiceImageViewSet)
+
+router.register(r'offers', views.OfferViewSet)
+
 router.register(r'notifications', views.NotificationViewSet)
 router.register(r'reviews', views.ReviewViewSet)
-
-router.register(r'inventories', views.InventoryViewSet)
-router.register(r'inventory-items', views.InventoryItemViewSet)
 #
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browsable API.

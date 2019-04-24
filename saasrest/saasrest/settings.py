@@ -65,6 +65,7 @@ INSTALLED_APPS = [
     # 'allauth.socialaccount.providers.twitter',
     'celery',
     'colorfield',
+    'djmoney',
 ]
 
 # CELERY_TIMEZONE = 'UTC'

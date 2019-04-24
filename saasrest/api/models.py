@@ -8,6 +8,7 @@ from django.contrib.auth.models import AbstractUser,BaseUserManager
 from django.contrib.auth.models import PermissionsMixin
 
 from colorfield.fields import ColorField
+from djmoney.models.fields import MoneyField
 
 
 class UserManager(BaseUserManager):
@@ -54,12 +55,7 @@ class User(AbstractUser):
     #         'Unselect this instead of deleting accounts.'
     # is_admin ?
     # date_joined = models.DateTimeField(_('date joined'), default=timezone.now)
-    # objects = UserManager()
-    # EMAIL_FIELD = 'email'
-    # USERNAME_FIELD = 'username'
-    # REQUIRED_FIELDS = ['email']
     # def clean(self):
-    #
     # def get_full_name(self):
     #     Return the first_name plus the last_name, with a space in between.
     # def get_short_name(self):
@@ -75,21 +71,13 @@ class User(AbstractUser):
     objects = UserManager()
 
     # additional fields
-    bio = models.TextField(max_length=500, blank=True)
-    phone = models.TextField(max_length=100, blank=True)
+    bio = models.TextField(max_length=500, blank=True, null=True)
+    phone = models.TextField(max_length=100, blank=True, null=True)
 
-    uid = models.TextField(max_length=22, blank=False, unique=True) # 22 due to google ids
+    def upload_to(instance, filename):
+        return 'images/users/%s/%s' % (instance.id, filename)
 
-    ROLE_CHOICES = (
-        ('employee', 'employee'),
-        ('customer', 'customer'),
-        ('business', 'business'),
-    )
-    role = models.CharField(
-        max_length=10,
-        blank=False,
-        choices=ROLE_CHOICES,
-    )
+    image = models.ImageField(upload_to=upload_to, blank=True)
 
     # stripe_id = models.CharField(max_length=250, blank=True)
     # plan = models.CharField(max_length=50)
@@ -101,218 +89,162 @@ class User(AbstractUser):
     # def get_absolute_url(self):
     #     return reverse('users', args=[str(self.id)])
 
-    # returs user's role (business, )
-    # @property
-    # def role(self):
-    #     employee = getattr(self, 'employee', False)
-    #     customer = getattr(self, 'customer', False)
-    #     business = getattr(self, 'business', False)
-    #     if employee:
-    #         return 'employee'
-    #     elif customer:
-    #         return 'customer'
-    #     elif business:
-    #         return 'business'
-    #     else:
-    #         return None
-
-    # last_check_id = 
     @property
     def is_demo(self):
         return True
         # TODO
         # return self.date_joined < timezone.now() and self.is_active
 
-
 """
-Receiver for user role creation
+Receiver for user payments?
+# TODO:
 """
-@receiver(post_save, sender=User)
-def create_user_role(sender, instance, created, **kwargs):
-    if created:
-        print('creating role {}'.format(instance.role))
-        if instance.role == 'employee':
-            Employee.objects.create(user=instance, uid=instance.uid)
-        elif instance.role == 'business':
-            Business.objects.create(user=instance, uid=instance.uid)
-        elif instance.role == 'customer':
-            Customer.objects.create(user=instance, first_name=instance.first_name, last_name=instance.last_name, uid=instance.uid)
-        elif instance.role == 'admin':
-            return None
+# @receiver(post_save, sender=User)
+# def create_user_role(sender, instance, created, **kwargs):
+#     if created:
+#         print('creating role {}'.format(instance.role))
+#         if instance.role == 'employee':
+#             Employee.objects.create(user=instance, uid=instance.uid)
+#         elif instance.role == 'business':
+#             Business.objects.create(user=instance, uid=instance.uid)
+#         elif instance.role == 'customer':
+#             Customer.objects.create(user=instance, first_name=instance.first_name, last_name=instance.last_name, uid=instance.uid)
+#         elif instance.role == 'admin':
+#             return None
+#
 
-
-"""
-User roles
-"""
-class Business(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-
-    location = models.CharField(max_length=50, blank=True)
-    description = models.TextField(max_length=500, blank=True)
-    color = ColorField(max_length=10, default='#3c6382')
-
-    #inventory = models.ForeignKey(Inventory, null=True, on_delete=models.SET_NULL) #moved to related name
-    uid = models.TextField(max_length=22, blank=False, unique=True) # 22 due to google ids
-
-    # employee_set
-    @property
-    def title(self):
-        return self.user.first_name
+class Tag(models.Model):
+    name = models.TextField(max_length=20, blank=False, null=False, unique=True)
+    color = ColorField(max_length=10, default='#686de0')
 
     def __str__(self):
-        return 'Business of {}'.format(self.user)
-
-"""
-Inventory
-"""
+        return 'Tag[id: {id}, name: {name}]'.format(id=self.id, name=self.name)
 
 
-class Inventory(models.Model):
-    business = models.ForeignKey(Business, on_delete=models.CASCADE, related_name='inventory')
-    title = models.TextField(max_length=100, blank=False)
-    # items as related name
+class Category(models.Model):
+    name = models.TextField(max_length=20, blank=False, null=False, unique=True)
+    color = ColorField(max_length=10, default='#686de0')
 
     def __str__(self):
-        return 'Inventory of {}'.format(self.business)
+        return 'Category[id: {id}, name: {name}]'.format(id=self.id, name=self.name)
 
-    # TODO: contains another inventory
-    # def contains_inventory(self, inventory):
-    #     for item in inventory.items:
-    #
+class Location(models.Model):
+    LTYPE_CHOICES = (
+        ('city', 'city'),
+        ('vilage', 'vilage'),
+        ('region', 'region'),
+        ('area', 'area'),
+    )
 
-class InventoryItem(models.Model):
-    inventory = models.ForeignKey(Inventory, on_delete=models.CASCADE, related_name='items')
+    ltype = models.CharField(
+        max_length=10,
+        blank=False,
+        choices=LTYPE_CHOICES,
+    )
+
+    name = models.TextField(max_length=100, null=False, blank=False)
+    parent = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True)
+
+
+class Service(models.Model):
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='services')
 
     title = models.TextField(max_length=100, blank=False)
-    # item uuid as barcode, not uuid for our db
-    uuid = models.UUIDField(primary_key=False, editable=True)
+    description = models.TextField(max_length=900, blank=True)
+    tags = models.ManyToManyField(Tag, related_name='services')
+    category = models.ForeignKey(Category, related_name='services', null=True, blank=True, on_delete=models.SET_NULL)
 
-    details = models.TextField(max_length=500, blank=True)
-    quantity = models.PositiveIntegerField(default=0)
-    color = ColorField(max_length=10, default='#38ada9')
+    contact_phone = models.TextField(max_length=30, blank=True)
+    contact_email = models.TextField(max_length=30, blank=True)
 
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return 'Inventory item {}'.format(self.title)
-
-    @property
-    def out_of_stock(self):
-        return self.quantity == 0
-
-
-
-class Employee(models.Model):
-    #business = models.ForeignKey(Business, null=True, on_delete=models.SET_NULL)
-    user = models.OneToOneField(User, null=False, on_delete=models.CASCADE)
-    businesses = models.ManyToManyField(Business, blank=True)
-
-    uid = models.TextField(max_length=22, blank=False, unique=True) # 22 due to google ids
-    # rating = models.
-    color = ColorField(max_length=10, default='#38ada9')
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return "Employee {}".format(self.user)
-
-    def add_business(self, business):
-        if not self.businesses.filter(id=business.id).exists():
-            self.businesses.add(business)
-            self.save()
-
-class Customer(models.Model):
-    user = models.OneToOneField(User, null=True, on_delete=models.CASCADE, related_name='customer')
-    owner = models.ForeignKey(Business, null=True, on_delete=models.CASCADE)
-    uid = models.TextField(max_length=22, blank=False, unique=True) # 22 due to google ids
-
-    first_name = models.CharField(max_length=30, blank=False)
-    last_name = models.CharField(max_length=150, blank=False)
+    price = MoneyField(max_digits=14, decimal_places=2, default_currency='USD')
 
     color = ColorField(max_length=10, default='#686de0')
 
+    location = models.ForeignKey(Location, on_delete=models.SET_NULL, blank=True, null=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    def __str__(self):
-        return "Customer {}".format(self.user)
+    @property
+    def is_promoted(self):
+        return self.promotions.filter(end_datetime__gte=now()).exists()
 
-    def set_owner(self, business):
-        if not self.owner == business:
-            self.owner = business
-            self.save()
+class ServiceImage(models.Model):
+    service = models.ForeignKey(Service, on_delete=models.CASCADE, null=False, related_name='images')
+    image = models.ImageField(upload_to='images/services/%Y/%m/%d')
+
+class ServicePromotion(models.Model):
+    author = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='service_promotions')
+    service = models.ForeignKey(Service, on_delete=models.SET_NULL, null=True, blank=True, related_name='promotions')
+
+    end_datetime = models.DateTimeField(blank=False, null=False)
+    transaction_id = models.CharField(max_length=110)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+    @property
+    def is_valid(self):
+        return self.end_datetime > now()
 
 """
-Main models
+i.e. post to be customer of employee, employee of business, employee of customer
 """
-
-"""
-i.e. appeal to be customer of employee, employee of business, employee of customer
-"""
-class Appeal(models.Model):
-    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='outcome_appeals')
-    recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='income_appeals')
+class Post(models.Model):
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='posts')
 
     title = models.TextField(max_length=100, blank=False)
-    text = models.TextField(max_length=500, blank=True)
+    description = models.TextField(max_length=500, blank=True)
+
+    contact_phone = models.TextField(max_length=30, blank=True)
+    contact_email = models.TextField(max_length=30, blank=True)
+
+    color = ColorField(max_length=10, default='#686de0')
+
+    location = models.ForeignKey(Location, on_delete=models.SET_NULL, blank=True, null=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+class PostImage(models.Model):
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, null=False, related_name='images')
+    image = models.ImageField(upload_to='images/posts/%Y/%m/%d')
+
+class PostPromotion(models.Model):
+    author = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='post_promotions')
+    post = models.ForeignKey(Post, on_delete=models.SET_NULL, null=True, blank=True, related_name='promotions')
+
+    end_datetime = models.DateTimeField(default=now, blank=True)
+    transaction_id = models.CharField(max_length=110)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+    @property
+    def is_valid(self):
+        return self.end_datetime > now()
+
+
+class Offer(models.Model):
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='offers')
+    post = models.ForeignKey(Post, on_delete=models.SET_NULL, null=True, blank=True, related_name='offers')
+
+    title = models.TextField(max_length=30, blank=False, null=False)
+    text = models.TextField(max_length=200, blank=True, null=True)
+
+    price = MoneyField(max_digits=14, decimal_places=2, default_currency='USD')
+    color = ColorField(max_length=10, default='#686de0')
+
+    is_public = models.BooleanField(default=True)
 
     answered = models.BooleanField(default=False)
     accepted = models.NullBooleanField()
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
-
-class Service(models.Model):
-    business = models.ForeignKey(Business, on_delete=models.CASCADE)
-
-    title = models.TextField(max_length=30, blank=False)
-    description = models.TextField(max_length=500, blank=True)
-    price = models.TextField(max_length=30, blank=True)
-
-    required_inventory = models.ForeignKey(Inventory, null=True, on_delete=models.SET_NULL, related_name='service')
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    # @property
-    # def is_available(self):
-    #     # TODO: is_available using business inventory check
-    #     for item in self.required_inventory:
-    #         if item not in self.business.inventory:
-    #             return False
-    #     return True
-
-class Appointment(models.Model):
-    customer = models.ForeignKey(Customer, null=True, on_delete=models.SET_NULL, related_name='appointment')
-    service = models.ForeignKey(Service, null=True, on_delete=models.SET_NULL, related_name='appointment')
-
-    employee = models.ForeignKey(Employee, null=True, on_delete=models.SET_NULL, related_name='appointment')
-    business = models.ForeignKey(Business, null=True, on_delete=models.SET_NULL, related_name='appointment')
-    # TODO: instead of business field use Share emplyee for each business
-
-    title = models.TextField(max_length=30, blank=False, null=False)
-    comment = models.TextField(max_length=200, blank=True, null=True)
-
-    color = ColorField(max_length=10, default='#686de0')
-
-    is_all_day = models.BooleanField(default=False)
-    is_public = models.BooleanField(default=False)
-
-    start_datetime = models.DateTimeField(default=now, blank=True)
-    notification_datetime = models.DateTimeField(default=now, blank=True)
-    end_datetime = models.DateTimeField(default=now, blank=True)
-
-    notified = models.BooleanField(default=False)
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def save(self, *args, **kwargs):
-        # set notified to false on instance update
-        if 'update_fields' not in kwargs or 'notified' not in kwargs['update_fields']:
-            self.notified = False
-        super(Appointment, self).save(*args, **kwargs)
 
 
 class Notification(models.Model):
@@ -332,7 +264,6 @@ class Notification(models.Model):
 
 class Review(models.Model):
     author = models.ForeignKey(User, null=False, on_delete=models.CASCADE, related_name='outcome_reviews')
-
     recipient = models.ForeignKey(User, null=False, on_delete=models.CASCADE, related_name='income_reviews')
     # and
     service = models.ForeignKey(Service, null=True, on_delete=models.SET_NULL)
