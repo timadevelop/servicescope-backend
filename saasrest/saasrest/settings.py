@@ -66,6 +66,7 @@ INSTALLED_APPS = [
     'celery',
     'colorfield',
     'djmoney',
+    'import_export',
 ]
 
 # CELERY_TIMEZONE = 'UTC'

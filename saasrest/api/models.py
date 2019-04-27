@@ -10,7 +10,49 @@ from django.contrib.auth.models import PermissionsMixin
 from colorfield.fields import ColorField
 from djmoney.models.fields import MoneyField
 
+from django.contrib.contenttypes.models import ContentType
 
+from django.contrib.contenttypes.fields import GenericRelation, GenericForeignKey
+# except ImportError:
+#     from django.contrib.contenttypes.generic import GenericForeignKey
+
+# class VoteManager(models.Manager):
+#     def filter(self, *args, **kwargs):
+#         if 'content_object' in kwargs:
+#             content_object = kwargs.pop('content_object')
+#             content_type = ContentType.objects.get_for_model(content_object)
+#             kwargs.update({
+#                 'content_type': content_type,
+#                 'object_id': content_object.pk
+#             })
+#         return super(VoteManager, self).filter(*args, **kwargs)
+#
+#
+# class Vote(models.Model):
+#     user = models.ForeignKey(User, on_delete=models.CASCADE)
+#     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+#     object_id = models.PositiveIntegerField()
+#     content_object = GenericForeignKey()
+#     create_at = models.DateTimeField(auto_now_add=True)
+#
+#     vote = models.NullBooleanField()
+#     objects = VoteManager()
+#
+#     class Meta:
+#         unique_together = ('user', 'content_type', 'object_id')
+#
+#     @classmethod
+#     def votes_for(cls, model, instance=None):
+#
+#         ct = ContentType.objects.get_for_model(model)
+#         kwargs = {
+#             "content_type": ct
+#         }
+#         if instance is not None:
+#             kwargs["object_id"] = instance.pk
+#
+#         return cls.objects.filter(**kwargs)
+#
 class UserManager(BaseUserManager):
 
     use_in_migrations = True
@@ -112,6 +154,27 @@ Receiver for user payments?
 #         elif instance.role == 'admin':
 #             return None
 #
+class Vote(models.Model):
+    FAVORITE = 'F'
+    UP_VOTE = 'U'
+    DOWN_VOTE = 'D'
+    ACTIVITY_TYPES = (
+        (FAVORITE, 'Favorite'),
+        (UP_VOTE, 'Up Vote'),
+        (DOWN_VOTE, 'Down Vote'),
+    )
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=False)
+    activity_type = models.CharField(max_length=1, choices=ACTIVITY_TYPES)
+    date = models.DateTimeField(auto_now_add=True)
+
+    # Below the mandatory fields for generic relation
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey()
+
+
+
 
 class Tag(models.Model):
     name = models.TextField(max_length=20, blank=False, null=False, unique=True)
@@ -128,22 +191,25 @@ class Category(models.Model):
     def __str__(self):
         return 'Category[id: {id}, name: {name}]'.format(id=self.id, name=self.name)
 
-class Location(models.Model):
-    LTYPE_CHOICES = (
-        ('city', 'city'),
-        ('vilage', 'vilage'),
-        ('region', 'region'),
-        ('area', 'area'),
-    )
-
-    ltype = models.CharField(
-        max_length=10,
-        blank=False,
-        choices=LTYPE_CHOICES,
-    )
+class District(models.Model):
+    oblast = models.TextField(max_length=5, blank=False, null=False)
+    ekatte = models.TextField(max_length=5, blank=False, null=False)
 
     name = models.TextField(max_length=100, null=False, blank=False)
-    parent = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True)
+    region = models.TextField(max_length=5, blank=False, null=False)
+
+
+class Location(models.Model):
+    ekatte = models.TextField(max_length=5, blank=False, null=False)
+    t_v_m = models.TextField(max_length=5, blank=False, null=False)
+    name = models.TextField(max_length=100, null=False, blank=False)
+    oblast = models.TextField(max_length=5, blank=False, null=False)
+    obstina = models.TextField(max_length=5, blank=False, null=False)
+    kmetstvo= models.TextField(max_length=10, blank=False, null=False)
+
+    kind = models.PositiveSmallIntegerField(blank=False, null=False)
+    category = models.PositiveSmallIntegerField(blank=False, null=False)
+    altitude = models.PositiveSmallIntegerField(blank=False, null=False)
 
 
 class Service(models.Model):
@@ -165,6 +231,26 @@ class Service(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    votes = GenericRelation(Vote)
+    @property
+    def likes(self):
+        return self.votes.filter(activity_type=Vote.UP_VOTE)
+
+    @property
+    def dislikes(self):
+        return self.votes.filter(activity_type=Vote.DOWN_VOTE)
+
+    @property
+    def score(self):
+        return self.likes.count() - self.dislikes.count()
+    # hints
+    # Get the post object
+    #post = Post.objects.get(pk=1)
+    # Add a like activity
+    #post.likes.create(activity_type=Vote.LIKE, user=request.user)
+    # Or in a similar way using the Activity model to add the like
+    #Vote.objects.create(content_object=post, activity_type=Activity.LIKE, user=request.user)
 
     @property
     def is_promoted(self):

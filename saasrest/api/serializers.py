@@ -1,8 +1,8 @@
 from rest_framework import serializers
 from .models import User, Notification, Review, \
-    Location, Tag, Category, \
+    District, Location, Tag, Category, \
     Service, ServiceImage, ServicePromotion, \
-    Post, PostImage, PostPromotion, Offer
+    Post, PostImage, PostPromotion, Offer, Vote
 
 from django.urls import resolve
 
@@ -71,6 +71,13 @@ class CustomRegisterView(RegisterView):
 """
 MODELS Serializers
 """
+
+class VoteSerializer(serializers.HyperlinkedModelSerializer):
+    """ Returns serialized data of Vote instances. """
+    class Meta:
+        model = Vote
+        fields = ('id', 'url', 'user', 'activity_type', 'date')
+
 class UserSerializer(serializers.HyperlinkedModelSerializer):
 
     services_count = serializers.SerializerMethodField()
@@ -111,14 +118,33 @@ class PrivateUserSerializer(serializers.HyperlinkedModelSerializer):
         # outcome_reviews, income_reviwes
         read_only_fields = ('id', 'url', )
 
-class LocationSerializer(serializers.HyperlinkedModelSerializer):
+class DistrictSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = District
+        fields = ('id', 'url', 'oblast', 'ekatte', 'name', 'region', )
+        read_only_fields = ()
+        lookup_field = 'oblast'
+        extra_kwargs = {
+            'url': {'lookup_field': 'oblast'}
+        }
 
+class LocationSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Location
-        fields = ('name', 'parent', 'ltype')
+        fields = ('id', 'url', 'ekatte', 't_v_m', 'name', 'oblast', 'obstina', 'kmetstvo', 'kind', 'category', 'altitude')
         read_only_fields = ()
-        required_fields = ('name', 'ltype')
-        extra_kwargs = {field: {'required': True} for field in required_fields}
+
+    def to_representation(self, instance):
+        response = super().to_representation(instance)
+        if (self.context['request']):
+            # response['images'] = ServiceImageSerializer(instance.images, many=True, context = self.context).data
+            # try:
+            district = District.objects.get(oblast=instance.oblast)
+            response['district'] = DistrictSerializer(district, many=False, context = self.context).data
+            # except:
+            #     pass
+        return response
+
 
 
 
@@ -151,6 +177,9 @@ class ServiceImageSerializer(serializers.HyperlinkedModelSerializer):
 class ServiceSerializer(serializers.HyperlinkedModelSerializer):
     images = ServiceImageSerializer(many=True, read_only=True)
 
+    # likes = VoteSerializer(many=True, read_only=True)
+    # dislikes = VoteSerializer(many=True, read_only=True)
+
     tags = serializers.SlugRelatedField(
         many=True,
         queryset=Tag.objects.all(),
@@ -163,17 +192,40 @@ class ServiceSerializer(serializers.HyperlinkedModelSerializer):
         slug_field='name'
     )
 
+    current_user_vote = serializers.SerializerMethodField()
+    def get_current_user_vote(self, instance):
+        user = self.get_current_user()
+        if not user:
+            return None
+
+        queryset = instance.votes.filter(user=user)
+        if queryset.exists():
+            vote = queryset.first()
+            return VoteSerializer(vote, many=False, context=self.context).data
+        return None
 
     class Meta:
         model = Service
         fields = ('id', 'url', 'author', 'title', 'description', 'price', 'price_currency', \
                   'contact_phone', 'contact_email', 'color', 'location', \
                   'images', 'promotions', 'is_promoted', \
-                  'created_at', 'updated_at', 'tags', 'category')
-        read_only_fields = ('id', 'url', 'created_at', 'updated_at', 'author', 'images', 'promotions',)
+                  'created_at', 'updated_at', 'tags', 'category', \
+                  # 'likes', 'dislikes', \
+                  'score', 'current_user_vote')
+        read_only_fields = ('id', 'url', 'created_at', 'updated_at', 'author', 'images', 'promotions',\
+                            # 'likes', 'dislikes', \
+                            'score', 'current_user_vote')
         required_fields = ('title', 'description', 'price', 'price_currency',)
         extra_kwargs = {field: {'required': True} for field in required_fields}
 
+
+    def get_current_user(self):
+        user = None
+        request = self.context.get("request")
+        if request and hasattr(request, "user"):
+            user = request.user
+            return user
+        return None
 
     def validate_author(self, value):
         request = self.context.get("request")
@@ -208,6 +260,7 @@ class ServiceSerializer(serializers.HyperlinkedModelSerializer):
             response['author'] = UserSerializer(instance.author, many=False, context = self.context).data
             response['tags'] = TagSerializer(instance.tags, many=True, context = self.context).data
             response['category'] = CategorySerializer(instance.category, many=False, context = self.context).data
+            response['location'] = LocationSerializer(instance.location, many=False, context = self.context).data
         return response
 
 class ServicePromotionSerializer(serializers.HyperlinkedModelSerializer):
@@ -356,3 +409,4 @@ class ReviewSerializer(serializers.HyperlinkedModelSerializer):
             raise serializers.ValidationError("You can not make reviews for yourself.")
 
         return value
+

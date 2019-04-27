@@ -31,6 +31,41 @@ from django.conf import settings
 admin.site.register(models.User)
 admin.site.register(models.Service)
 admin.site.register(models.Notification)
+
+from import_export.admin import ImportExportModelAdmin
+
+from import_export.results import RowResult
+
+
+from import_export import resources
+class LocationResource(resources.ModelResource):
+
+    class Meta:
+        model = models.Location
+        import_id_fields = ('ekatte',)
+        skip_unchanged = True
+        report_skipped = False
+        # raise_errors = False
+        fields = ('ekatte', 't_v_m', 'name', 'oblast', 'obstina', 'kmetstvo', 'kind', 'category', 'altitude')
+
+class LocationAdmin(ImportExportModelAdmin):
+    resource_class = LocationResource
+
+class DistrictResource(resources.ModelResource):
+
+    class Meta:
+        model = models.District
+        import_id_fields = ('oblast',)
+        skip_unchanged = True
+        report_skipped = False
+        # raise_errors = False
+        fields = ('id', 'url', 'oblast', 'ekatte', 'name', 'region', )
+
+class DistrictAdmin(ImportExportModelAdmin):
+    resource_class = DistrictResource
+
+admin.site.register(models.Location, LocationAdmin)
+admin.site.register(models.District, DistrictAdmin)
 #
 #
 # routers
@@ -39,11 +74,13 @@ admin.site.register(models.Notification)
 router = routers.DefaultRouter()
 router.register(r'users', views.UserViewSet)
 router.register(r'locations', views.LocationViewSet)
+router.register(r'districts', views.DistrictViewSet)
 router.register(r'tags', views.TagViewSet)
 router.register(r'categories', views.CategoryViewSet)
 router.register(r'services', views.ServiceViewSet)
 router.register(r'service-promotions', views.ServicePromotionViewSet)
 router.register(r'service-images', views.ServiceImageViewSet)
+router.register(r'votes', views.VoteViewSet)
 
 router.register(r'offers', views.OfferViewSet)
 

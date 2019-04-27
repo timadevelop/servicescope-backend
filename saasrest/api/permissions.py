@@ -4,7 +4,7 @@ from rest_framework import permissions
 from .models import User, Notification, Review, \
     Location, \
     Service, ServiceImage, ServicePromotion, \
-    Post, PostImage, PostPromotion, Offer
+    Post, PostImage, PostPromotion, Offer, Vote
 
 class IsAdminUserOrReadOnly(permissions.IsAdminUser):
 
@@ -56,6 +56,8 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
             return obj.author == request.user
         if isinstance(obj, Offer):
             return obj.author == request.user
+        if isinstance(obj, Vote):
+            return obj.user == request.user
 
         # no.
         return False

@@ -1,9 +1,9 @@
 from rest_framework import status, viewsets
 
 from .models import User, Notification, Review, \
-    Location, \
+    Location, District, \
     Service, ServiceImage, ServicePromotion, \
-    Post, PostImage, PostPromotion, Offer, Tag, Category
+    Post, PostImage, PostPromotion, Offer, Tag, Category, Vote
 
 from . import serializers
 
@@ -47,12 +47,12 @@ class UserViewSet(viewsets.ModelViewSet):
 class LocationViewSet(viewsets.ModelViewSet):
     """
     """
-    queryset = Location.objects.all()
+    queryset = Location.objects.all().order_by('kind')
     serializer_class = serializers.LocationSerializer
     permission_classes = (IsAuthenticated, IsAdminUserOrReadOnly, )
     filter_backends = (filters.SearchFilter, DjangoFilterBackend, )
-    search_fields = ('name', 'parent__name',)
-    filter_fields = ('parent__id', 'parent', 'ltype', )
+    search_fields = ('name',)
+    filter_fields = ()
 
     # create only for employee & customer.
     def perform_create(self, serializer):
@@ -64,12 +64,34 @@ class LocationViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'], url_path='geo/(?P<geo_query>[^/]+)')
     def get_geo(self, request, geo_query):
         try:
-            resp = geocoder.geonames(geo_query, country=['BG'], key='timadevelop', maxRows=5, lang='bg')
+            resp = geocoder.geonames(geo_query, country=['BG'], key='timadevelop', maxRows=10, lang='bg',
+                                     featureClass=['P', 'A'], # adm and cities / village
+                                     fuzzy=1.0)
+                                     # isNameRequired=True)
+                                     # name_startsWith=[geo_query],
         except:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         result = [r.json for r in resp]
         return Response(result)
+
+class DistrictViewSet(viewsets.ModelViewSet):
+    """
+    """
+    queryset = District.objects.all()
+    serializer_class = serializers.DistrictSerializer
+    permission_classes = (IsAuthenticated, IsAdminUserOrReadOnly, )
+    filter_backends = (filters.SearchFilter, DjangoFilterBackend, )
+    search_fields = ('name',)
+    filter_fields = ()
+    lookup_field = 'oblast'
+
+    # create only for employee & customer.
+    def perform_create(self, serializer):
+        if self.request.user and self.request.user.is_admin:
+            serializer.save()
+        else:
+            raise PermissionDenied()
 
 
 class TagViewSet(viewsets.ModelViewSet):
@@ -177,6 +199,26 @@ class ServiceViewSet(viewsets.ModelViewSet):
             return Response(serializer.data)
         else:
             raise PermissionDenied()
+
+    def vote(self, request, pk, votetype):
+        if self.request.user:
+            current_service = self.get_object()
+            if current_service.votes.filter(user=self.request.user).exists():
+                return Response({'detail': 'Already voted'}, status=status.HTTP_400_BAD_REQUEST)
+            vote = current_service.votes.create(activity_type=votetype, user=request.user)
+            serializer = serializers.VoteSerializer(vote, many=False, context={'request': request})
+            return Response(serializer.data)
+        else:
+            raise PermissionDenied()
+
+
+    @action(detail=True, methods=['post'])
+    def upvote(self, request, pk=None):
+        return self.vote(request, pk, Vote.UP_VOTE)
+
+    @action(detail=True, methods=['post'])
+    def downvote(self, request, pk=None):
+        return self.vote(request, pk, Vote.DOWN_VOTE)
 
 class ServicePromotionViewSet(viewsets.ModelViewSet):
     """
@@ -375,6 +417,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
+
 class OfferViewSet(viewsets.ModelViewSet):
     """
     Offers view set
@@ -544,3 +587,12 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
+
+
+class VoteViewSet(viewsets.ModelViewSet):
+    """
+    """
+    queryset = Vote.objects.all()
+    serializer_class = serializers.VoteSerializer
+    permission_classes = (IsOwnerOrReadOnly, )
+
