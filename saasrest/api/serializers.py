@@ -211,11 +211,11 @@ class ServiceSerializer(serializers.HyperlinkedModelSerializer):
                   'images', 'promotions', 'is_promoted', \
                   'created_at', 'updated_at', 'tags', 'category', \
                   # 'likes', 'dislikes', \
-                  'score', 'current_user_vote')
+                  'score', 'current_user_vote', 'price_details')
         read_only_fields = ('id', 'url', 'created_at', 'updated_at', 'author', 'images', 'promotions',\
                             # 'likes', 'dislikes', \
                             'score', 'current_user_vote')
-        required_fields = ('title', 'description', 'price', 'price_currency',)
+        required_fields = ('title', 'description', 'price', 'price_currency', 'location')
         extra_kwargs = {field: {'required': True} for field in required_fields}
 
 

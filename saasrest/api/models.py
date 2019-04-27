@@ -9,6 +9,7 @@ from django.contrib.auth.models import PermissionsMixin
 
 from colorfield.fields import ColorField
 from djmoney.models.fields import MoneyField
+from django.contrib.postgres.fields import JSONField
 
 from django.contrib.contenttypes.models import ContentType
 
@@ -224,6 +225,7 @@ class Service(models.Model):
     contact_email = models.TextField(max_length=30, blank=True)
 
     price = MoneyField(max_digits=14, decimal_places=2, default_currency='USD')
+    price_details = JSONField(default=list)
 
     color = ColorField(max_length=10, default='#686de0')
 
