@@ -128,9 +128,9 @@ class ServiceFilter(django_filters.FilterSet):
 
     class Meta:
         model = Service
-        fields = ['title', 'description', 'tags', 'category', 'location__id']
+        fields = ['title', 'description', 'tags', 'category', 'location__id', 'price']
 
-
+    price = django_filters.RangeFilter()
     # default for CharFilter is to have exact lookup_type
     title = django_filters.CharFilter()
     description = django_filters.CharFilter()
@@ -156,7 +156,9 @@ class ServiceFilter(django_filters.FilterSet):
 
     def filter_tags(self, queryset, name, tags):
         if tags:
-            return queryset.filter(tags__in=tags)
+            q = queryset.distinct().filter(tags__in=tags)
+            print(q.all())
+            return q
         else:
             return queryset
 
