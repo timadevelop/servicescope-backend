@@ -128,7 +128,7 @@ class ServiceFilter(django_filters.FilterSet):
 
     class Meta:
         model = Service
-        fields = ['title', 'description', 'tags', 'category']
+        fields = ['title', 'description', 'tags', 'category', 'location__id']
 
 
     # default for CharFilter is to have exact lookup_type
@@ -212,11 +212,11 @@ class ServiceViewSet(viewsets.ModelViewSet):
             raise PermissionDenied()
 
 
-    @action(detail=True, methods=['post'])
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated, ])
     def upvote(self, request, pk=None):
         return self.vote(request, pk, Vote.UP_VOTE)
 
-    @action(detail=True, methods=['post'])
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated, ])
     def downvote(self, request, pk=None):
         return self.vote(request, pk, Vote.DOWN_VOTE)
 
