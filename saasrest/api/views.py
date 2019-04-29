@@ -175,7 +175,8 @@ class ServiceViewSet(viewsets.ModelViewSet):
     queryset = Service.objects.all().order_by('-created_at')
     serializer_class = serializers.ServiceSerializer
     permission_classes = (IsOwnerOrReadOnly, )
-    filter_backends = (filters.SearchFilter, DjangoFilterBackend, )
+    filter_backends = (filters.SearchFilter, DjangoFilterBackend, filters.OrderingFilter )
+    ordering_fields = ('price', 'created_at', 'score')
     search_fields = ('title', 'description',)
     # filter_fields = ('author', 'author__id', 'location', 'tags__contain')
     filter_class = ServiceFilter

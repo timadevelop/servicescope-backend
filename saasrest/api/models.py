@@ -1,5 +1,5 @@
 from django.db import models
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.utils.timezone import now
 from django.urls import reverse
@@ -176,6 +176,23 @@ class Vote(models.Model):
 
 
 
+@receiver(post_save, sender=Vote, dispatch_uid='vote_post_save_signal')
+def update_obj_score(sender, instance, created, **kwargs):
+    print('new score')
+    if created:
+        obj = instance.content_object
+        obj.score = obj.likes.count() - obj.dislikes.count()
+        obj.save(update_fields=['score'])
+
+
+@receiver(post_delete, sender=Vote, dispatch_uid='vote_pre_delete_signal')
+def change_obj_score(sender, instance, using, **kwargs):
+    print('new score')
+    obj = instance.content_object
+    obj.score = obj.likes.count() - obj.dislikes.count()
+    obj.save(update_fields=['score'])
+
+
 
 class Tag(models.Model):
     name = models.TextField(max_length=20, blank=False, null=False, unique=True)
@@ -234,6 +251,7 @@ class Service(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    score = models.IntegerField(default=0)
     votes = GenericRelation(Vote)
     @property
     def likes(self):
@@ -243,9 +261,6 @@ class Service(models.Model):
     def dislikes(self):
         return self.votes.filter(activity_type=Vote.DOWN_VOTE)
 
-    @property
-    def score(self):
-        return self.likes.count() - self.dislikes.count()
     # hints
     # Get the post object
     #post = Post.objects.get(pk=1)
