@@ -36,7 +36,7 @@ class UserViewSet(viewsets.ModelViewSet):
     """
     queryset = User.objects.all().order_by('-date_joined')
     serializer_class = serializers.UserSerializer
-    permission_classes = (IsAuthenticated, IsOwnerOrReadOnly, )
+    permission_classes = (IsOwnerOrReadOnly, )
 
     @action(detail=False, methods=['get'])
     def me(self, request):
@@ -49,7 +49,7 @@ class LocationViewSet(viewsets.ModelViewSet):
     """
     queryset = Location.objects.all().order_by('kind')
     serializer_class = serializers.LocationSerializer
-    permission_classes = (IsAuthenticated, IsAdminUserOrReadOnly, )
+    permission_classes = (IsAdminUserOrReadOnly, )
     filter_backends = (filters.SearchFilter, DjangoFilterBackend, )
     search_fields = ('name',)
     filter_fields = ()
@@ -97,7 +97,7 @@ class DistrictViewSet(viewsets.ModelViewSet):
 class TagViewSet(viewsets.ModelViewSet):
     """
     """
-    queryset = Tag.objects.all()
+    queryset = Tag.objects.all().order_by('-name')
     serializer_class = serializers.TagSerializer
     permission_classes = (IsAuthenticatedOrReadOnly, )
     filter_backends = (filters.SearchFilter, DjangoFilterBackend, )
@@ -120,7 +120,7 @@ class TagViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 class CategoryViewSet(TagViewSet):
-    queryset = Category.objects.all()
+    queryset = Category.objects.all().order_by('-name')
     serializer_class = serializers.CategorySerializer
 
 
@@ -128,7 +128,7 @@ class ServiceFilter(django_filters.FilterSet):
 
     class Meta:
         model = Service
-        fields = ['title', 'description', 'tags', 'category', 'location__id', 'price']
+        fields = ['title', 'description', 'tags', 'category', 'location__id', 'price', 'author__id']
 
     price = django_filters.RangeFilter()
     # default for CharFilter is to have exact lookup_type
@@ -241,6 +241,8 @@ class ServicePromotionViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
+        if not user or user.is_anonymous:
+            return None
         # todo: Q
         return self.queryset.filter(author=user)
 

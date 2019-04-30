@@ -195,9 +195,10 @@ class ServiceSerializer(serializers.HyperlinkedModelSerializer):
     current_user_vote = serializers.SerializerMethodField()
     def get_current_user_vote(self, instance):
         user = self.get_current_user()
-        if not user:
+        if not user or user.is_anonymous:
             return None
 
+        print('user')
         queryset = instance.votes.filter(user=user)
         if queryset.exists():
             vote = queryset.first()
@@ -356,7 +357,7 @@ class OfferSerializer(serializers.HyperlinkedModelSerializer):
         if request and hasattr(request, "user"):
             user = request.user
 
-        if not user:
+        if not user or user.is_anonymous:
             raise serializers.ValidationError({"detail":"Login please"})
         return user
 
@@ -405,7 +406,7 @@ class ReviewSerializer(serializers.HyperlinkedModelSerializer):
         if request and hasattr(request, "user"):
             user = request.user
 
-        if not user or value.id == user.id:
+        if not user or user.is_anonymous or value.id == user.id:
             raise serializers.ValidationError("You can not make reviews for yourself.")
 
         return value
