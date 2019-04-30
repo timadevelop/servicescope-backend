@@ -198,7 +198,6 @@ class ServiceSerializer(serializers.HyperlinkedModelSerializer):
         if not user or user.is_anonymous:
             return None
 
-        print('user')
         queryset = instance.votes.filter(user=user)
         if queryset.exists():
             vote = queryset.first()

@@ -178,7 +178,6 @@ class Vote(models.Model):
 
 @receiver(post_save, sender=Vote, dispatch_uid='vote_post_save_signal')
 def update_obj_score(sender, instance, created, **kwargs):
-    print('new score')
     if created:
         obj = instance.content_object
         obj.score = obj.likes.count() - obj.dislikes.count()
@@ -187,7 +186,6 @@ def update_obj_score(sender, instance, created, **kwargs):
 
 @receiver(post_delete, sender=Vote, dispatch_uid='vote_pre_delete_signal')
 def change_obj_score(sender, instance, using, **kwargs):
-    print('new score')
     obj = instance.content_object
     obj.score = obj.likes.count() - obj.dislikes.count()
     obj.save(update_fields=['score'])

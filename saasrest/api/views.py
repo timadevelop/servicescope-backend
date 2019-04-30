@@ -157,7 +157,6 @@ class ServiceFilter(django_filters.FilterSet):
     def filter_tags(self, queryset, name, tags):
         if tags:
             q = queryset.distinct().filter(tags__in=tags)
-            print(q.all())
             return q
         else:
             return queryset
