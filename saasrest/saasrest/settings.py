@@ -67,6 +67,9 @@ INSTALLED_APPS = [
     'colorfield',
     'djmoney',
     'import_export',
+# realtime
+    'channels'
+
 ]
 
 # CELERY_TIMEZONE = 'UTC'
@@ -151,6 +154,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'saasrest.wsgi.application'
+ASGI_APPLICATION = 'api.routing.application'
 
 
 # Database
