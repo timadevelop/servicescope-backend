@@ -5,6 +5,7 @@ from .models import User, Notification, Review, \
     Location, \
     Service, ServiceImage, ServicePromotion, \
     Post, PostImage, PostPromotion, Offer, Vote
+import api.models as models
 
 class IsAdminUserOrReadOnly(permissions.IsAdminUser):
 
@@ -16,9 +17,9 @@ class IsAdminUserOrReadOnly(permissions.IsAdminUser):
         return request.method in permissions.SAFE_METHODS or is_admin
 
 
-class IsOwnerOrReadOnly(permissions.BasePermission):
-
+class IsOwner(permissions.BasePermission):
     def has_permission(self, request, view):
+        print('is_owner1')
         return True
 
     """
@@ -26,13 +27,9 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
     Assumes the model instance has an `owner` attribute.
     """
     def has_object_permission(self, request, view, obj):
+        print('is_owner')
         # Read permissions are allowed to any request,
         # so we'll always allow GET, HEAD or OPTIONS requests.
-        print('isOwnerorreadonly')
-        if request.method in permissions.SAFE_METHODS:
-            return True
-
-        # obj is user
         if isinstance(obj, User):
             # only user can edit himself
             if obj == request.user:
@@ -58,6 +55,20 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
             return obj.author == request.user
         if isinstance(obj, Vote):
             return obj.user == request.user
+        if isinstance(obj, models.Message):
+            return obj.message.conversation.users.filter(id=request.user.id)
+        if isinstance(obj, models.Conversation):
+            return obj.users.filter(id=request.user.id)
+        if isinstance(obj, models.MessageImage):
+            return False #?
 
         # no.
         return False
+
+class IsOwnerOrReadOnly(IsOwner):
+
+    def has_object_permission(self, request, view, obj):
+        if request.method in permissions.SAFE_METHODS:
+            return True
+
+        return super(IsOwner, self).has_object_permission(request, view, obj)

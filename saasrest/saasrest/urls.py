@@ -43,6 +43,10 @@ router.register(r'offers', views.OfferViewSet)
 
 router.register(r'notifications', views.NotificationViewSet)
 router.register(r'reviews', views.ReviewViewSet)
+
+router.register(r'conversations', views.ConversationViewSet)
+router.register(r'messages', views.MessageViewSet)
+router.register(r'message-images', views.MessageImageViewSet)
 #
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browsable API.

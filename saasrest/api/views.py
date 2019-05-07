@@ -5,11 +5,12 @@ from .models import User, Notification, Review, \
     Service, ServiceImage, ServicePromotion, \
     Post, PostImage, PostPromotion, Offer, Tag, Category, Vote
 
+import api.models as models
 from . import serializers
 
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 
-from .permissions import IsOwnerOrReadOnly, IsAdminUserOrReadOnly
+from .permissions import IsOwnerOrReadOnly, IsAdminUserOrReadOnly, IsOwner
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
@@ -600,3 +601,53 @@ class VoteViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.VoteSerializer
     permission_classes = (IsOwnerOrReadOnly, )
 
+
+
+"""
+Messages
+"""
+class MessageImageViewSet(viewsets.ModelViewSet):
+    """
+    """
+    queryset = models.MessageImage.objects.all()
+    serializer_class = serializers.MessageImageSerializer
+    permission_classes = (IsAuthenticated, IsOwner, )
+
+
+    def get_queryset(self):
+        if self.request.user:
+            return self.queryset.filter(conversation__users__in=[self.request.user])
+        else:
+            raise PermissionDenied()
+
+class MessageViewSet(viewsets.ModelViewSet):
+    """
+    """
+    queryset = models.Message.objects.all().order_by('-created_at')
+    serializer_class = serializers.MessageSerializer
+    permission_classes = (IsAuthenticated, IsOwner, )
+
+    def perform_create(self, serializer):
+        if self.request.user:
+            serializer.save(author=self.request.user)
+        else:
+            raise PermissionDenied()
+
+    def get_queryset(self):
+        if self.request.user:
+            return self.queryset.filter(conversation__users__in=[self.request.user])
+        else:
+            raise PermissionDenied()
+
+class ConversationViewSet(viewsets.ModelViewSet):
+    """
+    """
+    queryset = models.Conversation.objects.all().order_by('-created_at')
+    serializer_class = serializers.ConversationSerializer
+    permission_classes = (IsAuthenticated, IsOwner, )
+
+    def get_queryset(self):
+        if self.request.user:
+            return self.queryset.filter(users__in=[self.request.user])
+        else:
+            raise PermissionDenied()
