@@ -68,8 +68,7 @@ INSTALLED_APPS = [
     'djmoney',
     'import_export',
 # realtime
-    'channels'
-
+    'channels',
 ]
 
 # CELERY_TIMEZONE = 'UTC'
@@ -157,6 +156,16 @@ WSGI_APPLICATION = 'saasrest.wsgi.application'
 ASGI_APPLICATION = 'api.routing.application'
 
 
+from .local_settings import REDIS_HOSTS
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": REDIS_HOSTS,
+        },
+    },
+}
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
 

@@ -19,6 +19,15 @@ RABBITMQ_PORT = os.environ.get('RABBITMQ_PORT')
 # Celery
 CELERY_BROKER_URL = 'amqp://{}:{}@{}:{}'.format(CELERY_USERNAME, CELERY_PASSWORD, RABBITMQ_HOST, RABBITMQ_PORT)
 
+# redis
+REDIS_HOST = os.environ.get('REDIS_HOST')
+REDIS_PORT = os.environ.get('REDIS_PORT')
+#REDIS_HOSTS = [('redis', REDIS_PORT)]
+REDIS_HOSTS = ["redis://{}:{}".format(REDIS_HOST, REDIS_PORT)]
+print('redis_broker')
+print(REDIS_PORT)
+
+
 REALTIME_BACKEND_HOST = os.environ.get('REALTIME_BACKEND_HOST')
 REALTIME_BACKEND_PORT = os.environ.get('REALTIME_BACKEND_PORT')
 # SAAS realtime backend

@@ -1,4 +1,5 @@
 aiohttp==3.4.4
+aioredis==1.2.0
 amqp==2.4.1
 appdirs==1.4.3
 asgiref==3.1.2
@@ -15,6 +16,7 @@ case==1.5.3
 celery==4.2.1
 certifi==2018.10.15
 channels==2.2.0
+channels-redis==2.4.0
 chardet==3.0.4
 Click==7.0
 colorama==0.4.1
@@ -47,6 +49,7 @@ flake8==3.6.0
 future==0.17.1
 geocoder==1.38.1
 greenlet==0.4.15
+hiredis==1.0.0
 html5lib==1.0.1
 hyperlink==19.0.0
 idna==2.7
