@@ -534,7 +534,10 @@ class MessageSerializer(serializers.HyperlinkedModelSerializer):
             return user
         return None
 
-    # def to_representation(self, instance):
-    #     response = super().to_representation(instance)
-    #     return response
+    def to_representation(self, instance):
+        response = super().to_representation(instance)
+        if (self.context['request']):
+            if not self.get_is_my_message(instance):
+                response['author'] = UserSerializer(instance.author, many=False, context = self.context).data
+        return response
 

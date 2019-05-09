@@ -9,6 +9,7 @@ admin.site.register(models.User)
 admin.site.register(models.Service)
 admin.site.register(models.Notification)
 admin.site.register(models.Conversation)
+admin.site.register(models.Message)
 
 from import_export.admin import ImportExportModelAdmin
 

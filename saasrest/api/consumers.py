@@ -48,7 +48,7 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
         allowed to subscribe to the requested object.
         """
         message = content['message']
-        print(self.scope['user'])
+        print(content)
 
         # Send message to room group
         await self.channel_layer.group_send(

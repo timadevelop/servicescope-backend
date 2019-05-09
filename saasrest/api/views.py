@@ -623,9 +623,13 @@ class MessageImageViewSet(viewsets.ModelViewSet):
 class MessageViewSet(viewsets.ModelViewSet):
     """
     """
-    queryset = models.Message.objects.all().order_by('-created_at')
+    queryset = models.Message.objects.all()
     serializer_class = serializers.MessageSerializer
     permission_classes = (IsAuthenticated, IsOwner, )
+    filter_backends = (filters.SearchFilter, DjangoFilterBackend, filters.OrderingFilter )
+    ordering_fields = ('created_at', )
+    search_fields = ('text')
+    filter_fields = ('conversation__id',)
 
     def perform_create(self, serializer):
         if self.request.user:
@@ -645,6 +649,8 @@ class ConversationViewSet(viewsets.ModelViewSet):
     queryset = models.Conversation.objects.all().order_by('-created_at')
     serializer_class = serializers.ConversationSerializer
     permission_classes = (IsAuthenticated, IsOwner, )
+    filter_backends = (filters.SearchFilter, DjangoFilterBackend, )
+    search_fields = ('title')
 
     def get_queryset(self):
         if self.request.user:
