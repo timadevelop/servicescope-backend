@@ -646,10 +646,11 @@ class MessageViewSet(viewsets.ModelViewSet):
 class ConversationViewSet(viewsets.ModelViewSet):
     """
     """
-    queryset = models.Conversation.objects.all().order_by('-created_at')
+    queryset = models.Conversation.objects.all()
     serializer_class = serializers.ConversationSerializer
     permission_classes = (IsAuthenticated, IsOwner, )
-    filter_backends = (filters.SearchFilter, DjangoFilterBackend, )
+    filter_backends = (filters.SearchFilter, DjangoFilterBackend, filters.OrderingFilter )
+    ordering_fields = ('created_at', 'updated_at')
     search_fields = ('title')
 
     def get_queryset(self):

@@ -541,3 +541,6 @@ class MessageSerializer(serializers.HyperlinkedModelSerializer):
                 response['author'] = UserSerializer(instance.author, many=False, context = self.context).data
         return response
 
+    def get_group_name(self, instance):
+        return instance.conversation.id
+

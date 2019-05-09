@@ -3,9 +3,47 @@ from channels.generic.websocket import AsyncJsonWebsocketConsumer
 
 import json
 
+from channels.db import database_sync_to_async
+
+
+from channels.layers import get_channel_layer
+from .serializers import MessageSerializer
+
+import api.models as models
+
+async def broadcast_message(msg):
+    serializer = MessageSerializer(msg, context={'request': None})
+    group_name = 'chat_%s' % msg.conversation.id
+    channel_layer = get_channel_layer()
+    print(group_name)
+    content = {
+        "type": "Message",
+        "payload": serializer.data,
+    }
+    await channel_layer.group_send(group_name, {
+        "type": "chat_message",
+        "content": content,
+    })
+
 class ChatConsumer(AsyncJsonWebsocketConsumer):
     user_token = None
     room_group_name = None
+
+    @database_sync_to_async
+    def get_conversation(self, id):
+        try:
+            conv = models.Conversation.objects.get(id=id)
+            return conv
+        except:
+            return None
+
+    @database_sync_to_async
+    def get_msg(self):
+        try:
+            result = models.Message.objects.all()[0]
+            return result
+        except:
+            return None
 
     async def connect(self):
         self.user = self.scope["user"]
@@ -19,8 +57,17 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
         if not self.user or self.user.is_anonymous:
             await self.close()
         else:
-            # Join room group
-            self.room_name = self.scope['url_route']['kwargs']['room_name']
+            await self.join_room()
+
+    async def join_room(self):
+        # Join room group
+        self.room_name = self.scope['url_route']['kwargs']['conversation_id']
+
+        self.conversation = await self.get_conversation(self.room_name)
+
+        if not self.conversation or not self.conversation.users.filter(id=self.user.id).exists():
+            await self.close()
+        else:
             self.room_group_name = 'chat_%s' % self.room_name
 
             await self.channel_layer.group_add(
@@ -31,9 +78,15 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
             # must be the same as token
             try:
                 protocol = self.scope['subprotocols'][0]
+                print('connected to room {}'.format(self.room_group_name))
                 await self.accept(protocol)
             except:
-                self.close()
+                await self.close()
+
+    async def test(self):
+        msg = await self.get_msg()
+        print(msg)
+        await broadcast_message(msg)
 
     async def receive_json(self, content, **kwargs):
         """
@@ -47,17 +100,19 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
         the use of channels.auth.AuthMiddlewareStack in routing) is
         allowed to subscribe to the requested object.
         """
-        message = content['message']
-        print(content)
+        # message = content['message']
+        # print('got')
+        # print(content)
 
+        # await self.test()
         # Send message to room group
-        await self.channel_layer.group_send(
-            self.room_group_name,
-            {
-                'type': 'chat_message',
-                'message': message
-            }
-        )
+        # await self.channel_layer.group_send(
+        #     self.room_group_name,
+        #     {
+        #         'type': 'chat_message',
+        #         'message': message
+        #     }
+        # )
 
 
         # serializer = self.get_serializer(data=content)
@@ -86,11 +141,12 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
 
     # Receive message from room group
     async def chat_message(self, event):
-        message = event['message']
+        message = event['content']["payload"]
 
+        # print(message)
         # Send message to WebSocket
         await self.send_json({
-            'message': message
+            "message": message
         })
 
 
@@ -108,5 +164,3 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
         decoupling will help you as things grow.
         """
         await self.send_json(event["content"])
-
-
