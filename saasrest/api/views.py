@@ -620,6 +620,9 @@ class MessageImageViewSet(viewsets.ModelViewSet):
         else:
             raise PermissionDenied()
 
+from asgiref.sync import async_to_sync
+from .consumers import broadcast_message
+
 class MessageViewSet(viewsets.ModelViewSet):
     """
     """
@@ -633,7 +636,9 @@ class MessageViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         if self.request.user:
-            serializer.save(author=self.request.user)
+            msg = serializer.save(author=self.request.user)
+            # serializer_1 = self.serializer_class(msg, many=False, )
+            async_to_sync(broadcast_message)(msg, serializer.data)
         else:
             raise PermissionDenied()
 

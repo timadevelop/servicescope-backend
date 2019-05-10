@@ -406,7 +406,7 @@ class MessageImage(models.Model):
 from asgiref.sync import async_to_sync
 from .consumers import broadcast_message
 
-@receiver(post_save, sender=Message, dispatch_uid='message_post_save_signal')
-def broadcast_new_message(sender, instance, created, **kwargs):
-    if created:
-        async_to_sync(broadcast_message)(instance)
+# @receiver(post_save, sender=Message, dispatch_uid='message_post_save_signal')
+# def broadcast_new_message(sender, instance, created, **kwargs):
+#     if created:
+#         async_to_sync(broadcast_message)(instance)

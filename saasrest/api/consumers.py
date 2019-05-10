@@ -7,18 +7,15 @@ from channels.db import database_sync_to_async
 
 
 from channels.layers import get_channel_layer
-from .serializers import MessageSerializer
 
 import api.models as models
 
-async def broadcast_message(msg):
-    serializer = MessageSerializer(msg, context={'request': None})
+async def broadcast_message(msg, serializer_data):
     group_name = 'chat_%s' % msg.conversation.id
     channel_layer = get_channel_layer()
-    print(group_name)
     content = {
         "type": "Message",
-        "payload": serializer.data,
+        "payload": serializer_data,
     }
     await channel_layer.group_send(group_name, {
         "type": "chat_message",

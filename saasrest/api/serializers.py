@@ -478,6 +478,7 @@ class MessageImageSerializer(serializers.HyperlinkedModelSerializer):
         imageurl = data.image.url
         return request.build_absolute_uri(imageurl)
 
+
 class MessageSerializer(serializers.HyperlinkedModelSerializer):
     is_my_message = serializers.SerializerMethodField()
     images = MessageImageSerializer(many=True, read_only=True)
@@ -536,11 +537,13 @@ class MessageSerializer(serializers.HyperlinkedModelSerializer):
 
     def to_representation(self, instance):
         response = super().to_representation(instance)
-        if (self.context['request']):
-            if not self.get_is_my_message(instance):
-                response['author'] = UserSerializer(instance.author, many=False, context = self.context).data
+        # if (self.context['request']):
+        #     if not self.get_is_my_message(instance):
+        #         response['author'] = UserSerializer(instance.author, many=False, context = self.context).data
+        # else:
+        response['author'] = UserSerializer(instance.author, many=False, context = self.context).data
         return response
 
-    def get_group_name(self, instance):
+    def group_name(self, instance):
         return instance.conversation.id
 
