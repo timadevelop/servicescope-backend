@@ -651,7 +651,7 @@ class ConversationViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated, IsOwner, )
     filter_backends = (filters.SearchFilter, DjangoFilterBackend, filters.OrderingFilter )
     ordering_fields = ('created_at', 'updated_at')
-    search_fields = ('title')
+    search_fields = ('title', 'users__first_name', 'users__last_name')
 
     def get_queryset(self):
         if self.request.user:
