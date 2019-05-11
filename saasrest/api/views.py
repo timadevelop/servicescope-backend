@@ -621,7 +621,7 @@ class MessageImageViewSet(viewsets.ModelViewSet):
             raise PermissionDenied()
 
 from asgiref.sync import async_to_sync
-from .consumers import broadcast_message
+from .consumers import broadcast_message, broadcast_deleted_message
 
 class MessageViewSet(viewsets.ModelViewSet):
     """
@@ -642,6 +642,11 @@ class MessageViewSet(viewsets.ModelViewSet):
         else:
             raise PermissionDenied()
 
+    def perform_destroy(self, instance):
+        conversationId = instance.conversation.id
+        msgId = instance.id
+        instance.delete()
+        async_to_sync(broadcast_deleted_message)(conversationId, msgId)
     def get_queryset(self):
         if self.request.user:
             return self.queryset.filter(conversation__users__in=[self.request.user])

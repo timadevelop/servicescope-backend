@@ -14,13 +14,31 @@ async def broadcast_message(msg, serializer_data):
     group_name = 'chat_%s' % msg.conversation.id
     channel_layer = get_channel_layer()
     content = {
-        "type": "Message",
+        "type": "new_message",
         "payload": serializer_data,
     }
     await channel_layer.group_send(group_name, {
         "type": "chat_message",
         "content": content,
     })
+
+
+async def broadcast_deleted_message(conversationId, msgId):
+    group_name = 'chat_%s' % conversationId
+    channel_layer = get_channel_layer()
+    content = {
+        "type": "deleted_message",
+        "payload": msgId,
+    }
+    print('here')
+    print(msgId)
+    print(conversationId)
+    await channel_layer.group_send(group_name, {
+        "type": "chat_message",
+        "content": content,
+    })
+
+
 
 class ChatConsumer(AsyncJsonWebsocketConsumer):
     user_token = None
@@ -138,7 +156,7 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
 
     # Receive message from room group
     async def chat_message(self, event):
-        message = event['content']["payload"]
+        message = event['content']
 
         # print(message)
         # Send message to WebSocket

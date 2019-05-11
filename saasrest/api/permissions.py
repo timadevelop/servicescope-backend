@@ -56,7 +56,7 @@ class IsOwner(permissions.BasePermission):
         if isinstance(obj, Vote):
             return obj.user == request.user
         if isinstance(obj, models.Message):
-            return obj.conversation.users.filter(id=request.user.id)
+            return obj.author.id == request.user.id
         if isinstance(obj, models.Conversation):
             return obj.users.filter(id=request.user.id)
         if isinstance(obj, models.MessageImage):
