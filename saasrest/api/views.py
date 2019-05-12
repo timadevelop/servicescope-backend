@@ -668,3 +668,15 @@ class ConversationViewSet(viewsets.ModelViewSet):
             return self.queryset.filter(users__in=[self.request.user])
         else:
             raise PermissionDenied()
+
+    @action(detail=False, methods=['get'], url_path='get_by_user_id/(?P<uid>\d+)')
+    def get_by_users_ids(self, request, uid):
+        if request.user.id == int(uid):
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+        q = self.queryset.filter(users=request.user.id).filter(users=uid)
+        if q.exists():
+            serializer = serializers.ConversationSerializer(q.first(), many=False, context={'request': request})
+            return Response(serializer.data)
+
+        return Response(status=status.HTTP_404_NOT_FOUND)

@@ -456,7 +456,11 @@ class ConversationSerializer(serializers.HyperlinkedModelSerializer):
         if not request_user_is_in_users:
             raise serializers.ValidationError("Users field must contain request user")
 
-        if models.Conversation.objects.filter(users__in=users).exists():
+        q = models.Conversation.objects.all()
+        for u in users:
+            q = q.filter(users=u)
+
+        if q.exists():
             raise serializers.ValidationError("Conversation exists")
 
 
