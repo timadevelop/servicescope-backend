@@ -18,7 +18,7 @@ async def broadcast_message(msg, serializer_data):
         "payload": serializer_data,
     }
     await channel_layer.group_send(group_name, {
-        "type": "chat_message",
+        "type": "notify",
         "content": content,
     })
 
@@ -30,11 +30,8 @@ async def broadcast_deleted_message(conversationId, msgId):
         "type": "deleted_message",
         "payload": msgId,
     }
-    print('here')
-    print(msgId)
-    print(conversationId)
     await channel_layer.group_send(group_name, {
-        "type": "chat_message",
+        "type": "notify",
         "content": content,
     })
 
@@ -66,17 +63,26 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
         if "token" in self.scope:
             self.user_token = self.scope["token"]
 
-        # print(self.user, self.user_token)
-
         # guard
         if not self.user or self.user.is_anonymous:
             await self.close()
         else:
-            await self.join_room()
+            try:
+                protocol = self.scope['subprotocols'][0]
+                await self.accept(protocol)
+                await self.notify_using_channel_layer({
+                    "type": "connected",
+                    "payload": None
+                })
+            except:
+                await self.close()
 
-    async def join_room(self):
+    async def join_room(self, room_name):
+        await self.leave_group()
+
         # Join room group
-        self.room_name = self.scope['url_route']['kwargs']['conversation_id']
+        # print('join room {}'.format(room_name))
+        self.room_name = room_name
 
         self.conversation = await self.get_conversation(self.room_name)
 
@@ -89,19 +95,15 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
                 self.room_group_name,
                 self.channel_name
             )
+            # print('connected to room {}'.format(self.room_group_name))
+            content = {
+                "type": "joined_room",
+                "payload": {
+                    "room_name": room_name
+                },
+            }
+            await self.notify_using_channel_layer(content)
 
-            # must be the same as token
-            try:
-                protocol = self.scope['subprotocols'][0]
-                print('connected to room {}'.format(self.room_group_name))
-                await self.accept(protocol)
-            except:
-                await self.close()
-
-    async def test(self):
-        msg = await self.get_msg()
-        print(msg)
-        await broadcast_message(msg)
 
     async def receive_json(self, content, **kwargs):
         """
@@ -111,24 +113,19 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
         form. You can do this with a simple DRF serializer.
 
         We then need to use that validated data to confirm that the
-        requesting user (available in self.scope["user"] because of
+        global/ng user (available in self.scope["user"] because of
         the use of channels.auth.AuthMiddlewareStack in routing) is
         allowed to subscribe to the requested object.
         """
         # message = content['message']
-        # print('got')
-        # print(content)
-
-        # await self.test()
-        # Send message to room group
-        # await self.channel_layer.group_send(
-        #     self.room_group_name,
-        #     {
-        #         'type': 'chat_message',
-        #         'message': message
-        #     }
-        # )
-
+        print('got')
+        print(content)
+        if content['type'] == 'join_room_request':
+            payload = content["payload"]
+            room_name = payload["room_name"]
+            await self.join_room(room_name)
+        elif content['type'] == 'leave_room':
+            await self.leave_group()
 
         # serializer = self.get_serializer(data=content)
         # if not serializer.is_valid():
@@ -146,6 +143,9 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
         # )
         #
     async def disconnect(self, close_code):
+        await self.leave_group()
+
+    async def leave_group(self):
         # Leave room group
         if self.room_group_name and self.channel_name:
             await self.channel_layer.group_discard(
@@ -153,17 +153,11 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
                 self.channel_name
             )
 
-
-    # Receive message from room group
-    async def chat_message(self, event):
-        message = event['content']
-
-        # print(message)
-        # Send message to WebSocket
-        await self.send_json({
-            "message": message
+    async def notify_using_channel_layer(self, content):
+        await self.channel_layer.send(self.channel_name, {
+            "type": "notify",
+            "content": content,
         })
-
 
     async def notify(self, event):
         """
