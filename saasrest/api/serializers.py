@@ -98,13 +98,17 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
     def get_offers_count(self, instance):
         return instance.offers.count()
 
+    notifications_count = serializers.SerializerMethodField()
+    def get_notifications_count(self, instance):
+        return instance.notifications.count()
+
     class Meta:
         model = User
         # TODO
         fields = ('id', 'url', 'email', 'phone', 'bio', 'first_name', 'last_name', 'image', \
                   #'services', 'posts', 'offers'
                   'services_count', 'posts_count', 'income_reviews_count', 'offers_count', \
-                  'date_joined', \
+                  'date_joined', 'notifications_count', \
                   )
         # outcome_reviews, income_reviwes
         read_only_fields = ('id', 'url', )

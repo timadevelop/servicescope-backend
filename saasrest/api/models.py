@@ -349,7 +349,7 @@ class Offer(models.Model):
 
 
 class Notification(models.Model):
-    recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notification_recipient')
+    recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
 
     title = models.TextField(max_length=30)
     text = models.TextField(max_length=150)
