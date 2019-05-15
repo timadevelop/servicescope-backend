@@ -9,6 +9,8 @@ from channels.db import database_sync_to_async
 from channels.layers import get_channel_layer
 
 import api.models as models
+import api.serializers as serializers
+
 
 async def broadcast_message(msg, serializer_data):
     group_name = 'chat_%s' % msg.conversation.id
@@ -21,6 +23,10 @@ async def broadcast_message(msg, serializer_data):
         "type": "notify",
         "content": content,
     })
+
+    n = models.Notification(text="Hahaha text", title="hahaha title")
+    s = serializers.NotificationSerializer(n, many=False, context={'request': None})
+    await send_group_notification(group_name, s.data)
 
 
 async def broadcast_deleted_message(conversationId, msgId):
@@ -36,6 +42,17 @@ async def broadcast_deleted_message(conversationId, msgId):
     })
 
 
+
+async def send_group_notification(group_name, notification):
+    channel_layer = get_channel_layer()
+    content = {
+        "type": "notification",
+        "payload": notification,
+    }
+    await channel_layer.group_send(group_name, {
+        "type": "notify",
+        "content": content,
+    })
 
 class ChatConsumer(AsyncJsonWebsocketConsumer):
     user_token = None

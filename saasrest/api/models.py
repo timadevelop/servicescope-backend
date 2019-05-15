@@ -356,6 +356,7 @@ class Notification(models.Model):
     notification_datetime = models.DateTimeField(default=now, blank=False)
     notified = models.BooleanField(default=False)
     redirect_url = models.TextField(max_length=20, blank=True)
+    type = models.TextField(max_length=30, default="info")
 
     def save(self, *args, **kwargs):
         # set notified to false on instance update

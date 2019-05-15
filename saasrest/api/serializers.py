@@ -385,9 +385,18 @@ class OfferSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class NotificationSerializer(serializers.HyperlinkedModelSerializer):
+    recipient_id = serializers.SerializerMethodField()
+
+    def get_recipient_id(self, instance):
+        recipient = getattr(instance, 'recipient', None)
+        if recipient:
+            return recipient.id
+        else:
+            return None
+
     class Meta:
         model = Notification
-        fields = ('id', 'url', 'recipient', 'title', 'text', 'notification_datetime', 'notified', 'redirect_url')
+        fields = ('id', 'url', 'recipient', 'recipient_id', 'title', 'type', 'text', 'notification_datetime', 'notified', 'redirect_url')
         read_only_fields = ('id', 'url', 'notified')
         required_fields = ('recipient', 'title', 'text', 'notification_datetime')
         extra_kwargs = {field: {'required': True} for field in required_fields}
