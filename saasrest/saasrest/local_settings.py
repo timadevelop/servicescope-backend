@@ -24,19 +24,10 @@ REDIS_HOST = os.environ.get('REDIS_HOST')
 REDIS_PORT = os.environ.get('REDIS_PORT')
 #REDIS_HOSTS = [('redis', REDIS_PORT)]
 REDIS_HOSTS = ["redis://{}:{}".format(REDIS_HOST, REDIS_PORT)]
-print('redis_broker')
-print(REDIS_PORT)
 
 
-REALTIME_BACKEND_HOST = os.environ.get('REALTIME_BACKEND_HOST')
-REALTIME_BACKEND_PORT = os.environ.get('REALTIME_BACKEND_PORT')
-# SAAS realtime backend
 
-
-print('realtime port {}'.format(REALTIME_BACKEND_PORT))
-SAAS_REALTIME_BACKEND_URL = "http://{}:{}".format(REALTIME_BACKEND_HOST, REALTIME_BACKEND_PORT)
-
-print('db port {}'.format(os.environ.get('POSTGRES_PORT')))
+# print('db port {}'.format(os.environ.get('POSTGRES_PORT')))
 # DATABASE
 DB_CONFIG = {
     'NAME': 'postgres',

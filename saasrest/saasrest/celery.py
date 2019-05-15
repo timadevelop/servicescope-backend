@@ -4,19 +4,15 @@ from celery import Celery
 from celery.schedules import crontab
 from django.conf import settings
 
+from celery.decorators import periodic_task
 # set the default Django settings module for the 'celery' program.
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'saasrest.settings')
 
+import django
+django.setup()
 # broker url will be loaded from settings configuration
-app = Celery('saasrest')
-
-# better use @periodictask in tasks discovered by autodiscover_tasks
-# @celery_app.on_after_configure.connect
-# def setup_periodic_tasks(sender, **kwargs):
-#     # Calls every 10 seconds.
-#     print('wat')
-#     sender.add_periodic_task(1.0, process_notifications.s(), name='add every 10')
-
+app = Celery('saasrest',
+             include=['api'])
 
 # Using a string here means the worker doesn't have to serialize
 # the configuration object to child processes.

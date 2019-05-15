@@ -40,9 +40,6 @@ ALLOWED_HOSTS = ['192.168.1.22', 'localhost', '127.0.0.1', "*"]
 # 500MB - 429916160
 DATA_UPLOAD_MAX_MEMORY_SIZE = 5242880
 
-# Saas realtime server adress
-from .local_settings import SAAS_REALTIME_BACKEND_URL
-SAAS_REALTIME_NOTIFICATION_URL = SAAS_REALTIME_BACKEND_URL + "/notify"
 
 # Application definition
 

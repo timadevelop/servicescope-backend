@@ -54,9 +54,16 @@ async def send_group_notification(group_name, notification):
         "content": content,
     })
 
+async def notify_user(user_id, notification_serializer_data):
+    print('user_%s' % user_id)
+    channel_layer = get_channel_layer()
+    await send_group_notification('user_%s' % user_id, notification_serializer_data)
+
 class ChatConsumer(AsyncJsonWebsocketConsumer):
     user_token = None
     room_group_name = None
+
+    user_room_group = None
 
     @database_sync_to_async
     def get_conversation(self, id):
@@ -67,9 +74,19 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
             return None
 
     @database_sync_to_async
-    def get_msg(self):
+    def get_notification(self, id):
         try:
-            result = models.Message.objects.all()[0]
+            result = models.Notification.objects.get(id=id)
+            return result
+        except:
+            return None
+
+    @database_sync_to_async
+    def set_notification_notified(self, id):
+        try:
+            result = models.Notification.objects.get(id=id)
+            result.notified = True
+            result.save(update_fields=['notified'])
             return result
         except:
             return None
@@ -86,12 +103,19 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
         else:
             try:
                 protocol = self.scope['subprotocols'][0]
+                self.user_room_group = 'user_%s' % self.user.id
+                await self.channel_layer.group_add(
+                    self.user_room_group,
+                    self.channel_name
+                )
+                print('connected to room {}, {}'.format(self.user_room_group, self.channel_name))
                 await self.accept(protocol)
                 await self.notify_using_channel_layer({
                     "type": "connected",
                     "payload": None
                 })
             except:
+                print('err')
                 await self.close()
 
     async def join_room(self, room_name):
@@ -143,6 +167,9 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
             await self.join_room(room_name)
         elif content['type'] == 'leave_room':
             await self.leave_group()
+        elif content['type'] == 'notification_ack':
+            payload = content["payload"]
+            await self.notification_ack(payload)
 
         # serializer = self.get_serializer(data=content)
         # if not serializer.is_valid():
@@ -159,6 +186,18 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
         #     self.channel_name,
         # )
         #
+    async def notification_ack(self, payload):
+        notification_id = payload["notification_id"]
+        print(notification_id)
+        # if not notification_id:
+        #     return
+        # result = await self.set_notification_notified(notification_id)
+        # if not result:
+        #     print('errr')
+        # else:
+        #     print('success')
+        #     print(result.notified)
+
     async def disconnect(self, close_code):
         await self.leave_group()
 
