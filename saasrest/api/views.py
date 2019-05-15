@@ -25,6 +25,12 @@ from .paginations import MyPagination
 
 from django.db.models import Q
 
+"""
+Channels
+"""
+from asgiref.sync import async_to_sync
+from .consumers import broadcast_message, broadcast_deleted_message
+
 
 """
 Geocoder
@@ -619,9 +625,6 @@ class MessageImageViewSet(viewsets.ModelViewSet):
             return self.queryset.filter(conversation__users__in=[self.request.user])
         else:
             raise PermissionDenied()
-
-from asgiref.sync import async_to_sync
-from .consumers import broadcast_message, broadcast_deleted_message
 
 class MessageViewSet(viewsets.ModelViewSet):
     """

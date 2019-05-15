@@ -1,16 +1,9 @@
-from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
-
-import json
-
 from channels.db import database_sync_to_async
-
-
 from channels.layers import get_channel_layer
 
 import api.models as models
 import api.serializers as serializers
-
 
 async def broadcast_message(msg, serializer_data):
     group_name = 'chat_%s' % msg.conversation.id
@@ -55,7 +48,6 @@ async def send_group_notification(group_name, notification):
     })
 
 async def notify_user(user_id, notification_serializer_data):
-    print('user_%s' % user_id)
     channel_layer = get_channel_layer()
     await send_group_notification('user_%s' % user_id, notification_serializer_data)
 
@@ -108,14 +100,13 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
                     self.user_room_group,
                     self.channel_name
                 )
-                print('connected to room {}, {}'.format(self.user_room_group, self.channel_name))
+                # print('connected to room {}, {}'.format(self.user_room_group, self.channel_name))
                 await self.accept(protocol)
                 await self.notify_using_channel_layer({
                     "type": "connected",
                     "payload": None
                 })
             except:
-                print('err')
                 await self.close()
 
     async def join_room(self, room_name):
@@ -185,18 +176,11 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
         #     group_name,
         #     self.channel_name,
         # )
-        #
+
     async def notification_ack(self, payload):
         notification_id = payload["notification_id"]
-        print(notification_id)
-        # if not notification_id:
-        #     return
-        # result = await self.set_notification_notified(notification_id)
-        # if not result:
-        #     print('errr')
-        # else:
-        #     print('success')
-        #     print(result.notified)
+        if notification_id:
+            await self.set_notification_notified(notification_id)
 
     async def disconnect(self, close_code):
         await self.leave_group()
