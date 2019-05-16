@@ -4,6 +4,10 @@ from .models import User, Notification, Review, \
     Service, ServiceImage, ServicePromotion, \
     Post, PostImage, PostPromotion, Offer, Vote
 
+from asgiref.sync import async_to_sync
+from django.db.models.signals import post_save, post_delete
+
+from django.dispatch import receiver
 import api.models as models
 
 from django.urls import resolve
@@ -16,6 +20,7 @@ DATETIME_FORMAT = REST_FRAMEWORK['DATETIME_FORMAT']
 
 from rest_auth.registration.serializers import RegisterSerializer
 
+from .consumers import notify_user
 """
 ! RULE : we do not serialize nested User, cuz User serializes user's role.
 ! RULE 2 : anymodel_set field inside other object should contain only url's to objects, not serialized objects
@@ -100,7 +105,7 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
 
     notifications_count = serializers.SerializerMethodField()
     def get_notifications_count(self, instance):
-        return instance.notifications.count()
+        return instance.notifications.filter(notified=False).count()
 
     class Meta:
         model = User
@@ -404,6 +409,22 @@ class NotificationSerializer(serializers.HyperlinkedModelSerializer):
         read_only_fields = ('id', 'url', 'notified')
         required_fields = ('recipient', 'title', 'text', 'notification_datetime')
         extra_kwargs = {field: {'required': True} for field in required_fields}
+
+    # def create(self, validated_data):
+    #     obj = models.Notification.objects.create(**validated_data)
+    #     return obj
+
+
+@receiver(post_save, sender=models.Notification, dispatch_uid='notification_post_save_signal')
+def send_new_notification(sender, instance, created, **kwargs):
+    def send_notification(notification):
+        if not notification or not getattr(notification, 'recipient', False):
+            return False
+        serializer = NotificationSerializer(notification, many=False, context = {'request': None})
+        async_to_sync(notify_user)(notification.recipient.id, serializer.data)
+
+    if created:
+        send_notification(instance)
 
 class ReviewSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:

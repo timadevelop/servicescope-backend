@@ -29,7 +29,7 @@ from django.db.models import Q
 Channels
 """
 from asgiref.sync import async_to_sync
-from .consumers import broadcast_message, broadcast_deleted_message
+from .consumers import broadcast_message, broadcast_deleted_message, notify_user
 
 
 """
