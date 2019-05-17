@@ -114,6 +114,8 @@ class User(AbstractUser):
     objects = UserManager()
 
     # additional fields
+    online = models.PositiveIntegerField(default=0)
+
     bio = models.TextField(max_length=500, blank=True, null=True)
     phone = models.TextField(max_length=100, blank=True, null=True)
 
@@ -348,21 +350,6 @@ class Offer(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
 
-class Notification(models.Model):
-    recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
-
-    title = models.TextField(max_length=30)
-    text = models.TextField(max_length=150)
-    notification_datetime = models.DateTimeField(default=now, blank=False)
-    notified = models.BooleanField(default=False)
-    redirect_url = models.TextField(max_length=20, blank=True)
-    type = models.TextField(max_length=30, default="info")
-
-    def save(self, *args, **kwargs):
-        # set notified to false on instance update
-        if 'update_fields' not in kwargs or 'notified' not in kwargs['update_fields']:
-            self.notified = False
-        super(Notification, self).save(*args, **kwargs)
 
 class Review(models.Model):
     author = models.ForeignKey(User, null=False, on_delete=models.CASCADE, related_name='outcome_reviews')
@@ -403,3 +390,19 @@ class MessageImage(models.Model):
     message = models.ForeignKey(Message, on_delete=models.CASCADE, null=False, related_name='images')
     image = models.ImageField(upload_to='images/messages/%Y/%m/%d')
 
+class Notification(models.Model):
+    recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
+    conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name='notifications', null=True, blank=True)
+
+    title = models.TextField(max_length=30)
+    text = models.TextField(max_length=150)
+    notification_datetime = models.DateTimeField(default=now, blank=False)
+    notified = models.BooleanField(default=False)
+    redirect_url = models.TextField(max_length=20, blank=True)
+    type = models.TextField(max_length=30, default="info")
+
+    def save(self, *args, **kwargs):
+        # set notified to false on instance update
+        if 'update_fields' not in kwargs or 'notified' not in kwargs['update_fields']:
+            self.notified = False
+        super(Notification, self).save(*args, **kwargs)

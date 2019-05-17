@@ -393,27 +393,6 @@ class OfferSerializer(serializers.HyperlinkedModelSerializer):
         return value
 
 
-class NotificationSerializer(serializers.HyperlinkedModelSerializer):
-    recipient_id = serializers.SerializerMethodField()
-
-    def get_recipient_id(self, instance):
-        recipient = getattr(instance, 'recipient', None)
-        if recipient:
-            return recipient.id
-        else:
-            return None
-
-    class Meta:
-        model = Notification
-        fields = ('id', 'url', 'recipient', 'recipient_id', 'title', 'type', 'text', 'notification_datetime', 'notified', 'redirect_url')
-        read_only_fields = ('id', 'url', 'notified')
-        required_fields = ('recipient', 'title', 'text', 'notification_datetime')
-        extra_kwargs = {field: {'required': True} for field in required_fields}
-
-    # def create(self, validated_data):
-    #     obj = models.Notification.objects.create(**validated_data)
-    #     return obj
-
 
 @receiver(post_save, sender=models.Notification, dispatch_uid='notification_post_save_signal')
 def send_new_notification(sender, instance, created, **kwargs):
@@ -585,3 +564,36 @@ class MessageSerializer(serializers.HyperlinkedModelSerializer):
     def group_name(self, instance):
         return instance.conversation.id
 
+
+class NotificationSerializer(serializers.HyperlinkedModelSerializer):
+    recipient_id = serializers.SerializerMethodField()
+    def get_recipient_id(self, instance):
+        recipient = getattr(instance, 'recipient', None)
+        if recipient:
+            return recipient.id
+        else:
+            return None
+
+    conversation_id = serializers.SerializerMethodField()
+    def get_conversation_id(self, instance):
+        conversation = getattr(instance, 'conversation', None)
+        if conversation:
+            return conversation.id
+        else:
+            return None
+
+    class Meta:
+        model = Notification
+        fields = ('id', 'url', 'recipient', 'conversation', 'conversation_id', 'recipient_id', 'title', 'type', 'text', 'notification_datetime', 'notified', 'redirect_url')
+        read_only_fields = ('id', 'url', 'notified')
+        required_fields = ('recipient', 'title', 'text', 'notification_datetime')
+        extra_kwargs = {field: {'required': True} for field in required_fields}
+
+    # def create(self, validated_data):
+    #     obj = models.Notification.objects.create(**validated_data)
+    #     return obj
+    # def to_representation(self, instance):
+    #     response = super().to_representation(instance)
+    #     if (self.context['request']) and getattr(instance, 'conversation', False):
+    #         response['conversation'] = ConversationSerializer(instance.conversation, many=False, context = self.context).data
+    #     return response

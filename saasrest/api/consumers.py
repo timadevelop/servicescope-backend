@@ -5,6 +5,15 @@ from channels.layers import get_channel_layer
 import api.models as models
 import api.serializers as serializers
 
+@database_sync_to_async
+def get_notifications(user, conversation, notified):
+    return models.Notification.objects.filter(recipient=user).filter(conversation=conversation).filter(notified=notified)
+
+@database_sync_to_async
+def create_notification(recipient, conversation, title, text, redirect_url):
+    return models.Notification.objects.create(recipient=recipient, conversation=conversation,\
+                                              title=title, text=text, redirect_url=redirect_url)
+
 async def broadcast_message(msg, serializer_data):
     group_name = 'chat_%s' % msg.conversation.id
     channel_layer = get_channel_layer()
@@ -16,11 +25,30 @@ async def broadcast_message(msg, serializer_data):
         "type": "notify",
         "content": content,
     })
+    print('here')
 
-    n = models.Notification(text="Hahaha text", title="hahaha title")
-    s = serializers.NotificationSerializer(n, many=False, context={'request': None})
-    await send_group_notification(group_name, s.data)
-
+    # create notification if user if offlie
+    for user in msg.conversation.users.exclude(id=msg.author.id).all():
+        print('------here')
+        if user.online < 1:
+            print('user offline')
+            q = await get_notifications(user, msg.conversation, False)
+            if not q.exists():
+                print('create')
+                await create_notification(recipient=user, conversation=msg.conversation,\
+                                          title="New Message",\
+                                          text="New message from {}".format(msg.author),\
+                                          redirect_url="/messages/c/{}".format(msg.conversation.id))
+            else:
+                print('no')
+        else:
+            print('user online')
+            n = models.Notification(recipient=user, conversation=msg.conversation,\
+                                    title="New Message",\
+                                    text="New message from {}".format(msg.author),\
+                                    redirect_url="/messages/c/{}".format(msg.conversation.id))
+            s = serializers.NotificationSerializer(n, many=False, context={'request': None})
+            await notify_user(user.id, s.data)
 
 async def broadcast_deleted_message(conversationId, msgId):
     group_name = 'chat_%s' % conversationId
@@ -56,6 +84,13 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
     room_group_name = None
 
     user_room_group = None
+
+    @database_sync_to_async
+    def change_user_online_status(self, n):
+        if self.user:
+            self.user.online = self.user.online + n
+            self.user.save(update_fields=['online'])
+
 
     @database_sync_to_async
     def get_conversation(self, id):
@@ -106,6 +141,7 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
                     "type": "connected",
                     "payload": None
                 })
+                await self.change_user_online_status(1)
             except:
                 await self.close()
 
@@ -183,6 +219,7 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
             await self.set_notification_notified(notification_id)
 
     async def disconnect(self, close_code):
+        await self.change_user_online_status(-1)
         await self.leave_group()
 
     async def leave_group(self):
