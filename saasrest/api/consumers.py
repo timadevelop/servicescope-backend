@@ -29,20 +29,14 @@ async def broadcast_message(msg, serializer_data):
 
     # create notification if user if offlie
     for user in msg.conversation.users.exclude(id=msg.author.id).all():
-        print('------here')
         if user.online < 1:
-            print('user offline')
             q = await get_notifications(user, msg.conversation, False)
             if not q.exists():
-                print('create')
                 await create_notification(recipient=user, conversation=msg.conversation,\
                                           title="New Message",\
                                           text="New message from {}".format(msg.author),\
                                           redirect_url="/messages/c/{}".format(msg.conversation.id))
-            else:
-                print('no')
         else:
-            print('user online')
             n = models.Notification(recipient=user, conversation=msg.conversation,\
                                     title="New Message",\
                                     text="New message from {}".format(msg.author),\
@@ -112,9 +106,13 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
     def set_notification_notified(self, id):
         try:
             result = models.Notification.objects.get(id=id)
-            result.notified = True
-            result.save(update_fields=['notified'])
-            return result
+            if getattr(result, 'conversation', None):
+                result.delete()
+                return None
+            else:
+                result.notified = True
+                result.save(update_fields=['notified'])
+                return result
         except:
             return None
 

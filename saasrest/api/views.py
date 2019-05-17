@@ -401,7 +401,7 @@ class OfferViewSet(viewsets.ModelViewSet):
 class NotificationViewSet(viewsets.ModelViewSet):
     """
     """
-    queryset = Notification.objects.all()
+    queryset = Notification.objects.all().order_by('-created_at')
     serializer_class = serializers.NotificationSerializer
     permission_classes = (IsAuthenticated, IsOwnerOrReadOnly, )
     filter_backends = (filters.SearchFilter, DjangoFilterBackend, )
@@ -599,6 +599,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
+        return None
 
 class VoteViewSet(viewsets.ModelViewSet):
     """

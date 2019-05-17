@@ -584,7 +584,7 @@ class NotificationSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Notification
-        fields = ('id', 'url', 'recipient', 'conversation', 'conversation_id', 'recipient_id', 'title', 'type', 'text', 'notification_datetime', 'notified', 'redirect_url')
+        fields = ('id', 'url', 'recipient', 'conversation', 'conversation_id', 'recipient_id', 'title', 'type', 'text', 'notification_datetime', 'notified', 'redirect_url', 'created_at', 'updated_at')
         read_only_fields = ('id', 'url', 'notified')
         required_fields = ('recipient', 'title', 'text', 'notification_datetime')
         extra_kwargs = {field: {'required': True} for field in required_fields}

@@ -401,6 +401,9 @@ class Notification(models.Model):
     redirect_url = models.TextField(max_length=20, blank=True)
     type = models.TextField(max_length=30, default="info")
 
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
     def save(self, *args, **kwargs):
         # set notified to false on instance update
         if 'update_fields' not in kwargs or 'notified' not in kwargs['update_fields']:
