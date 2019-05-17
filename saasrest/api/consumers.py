@@ -25,8 +25,6 @@ async def broadcast_message(msg, serializer_data):
         "type": "notify",
         "content": content,
     })
-    print('here')
-
     # create notification if user if offlie
     for user in msg.conversation.users.exclude(id=msg.author.id).all():
         if user.online < 1:
@@ -37,12 +35,12 @@ async def broadcast_message(msg, serializer_data):
                                           text="New message from {}".format(msg.author),\
                                           redirect_url="/messages/c/{}".format(msg.conversation.id))
         else:
-            n = models.Notification(recipient=user, conversation=msg.conversation,\
-                                    title="New Message",\
-                                    text="New message from {}".format(msg.author),\
+            n = await create_notification(recipient=user, conversation=msg.conversation,\
+                                    title="New Message from {}".format(msg.author.first_name),\
+                                    text="{}".format(msg.text),\
                                     redirect_url="/messages/c/{}".format(msg.conversation.id))
-            s = serializers.NotificationSerializer(n, many=False, context={'request': None})
-            await notify_user(user.id, s.data)
+            # s = serializers.NotificationSerializer(n, many=False, context={'request': None})
+            # await notify_user(user.id, s.data)
 
 async def broadcast_deleted_message(conversationId, msgId):
     group_name = 'chat_%s' % conversationId
