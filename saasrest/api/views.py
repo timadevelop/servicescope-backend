@@ -684,3 +684,27 @@ class ConversationViewSet(viewsets.ModelViewSet):
             return Response(serializer.data)
 
         return Response(status=status.HTTP_404_NOT_FOUND)
+
+
+
+
+class FeedbackViewSet(viewsets.ModelViewSet):
+    """
+    """
+    queryset = models.Feedback.objects.all()
+    serializer_class = serializers.FeedbackSerializer
+    permission_classes = (IsAuthenticated, IsOwnerOrReadOnly, )
+    filter_backends = (filters.SearchFilter, DjangoFilterBackend, )
+
+    # read only
+    def get_queryset(self):
+        if self.request.user:
+            return self.queryset.filter(author=self.request.user)
+        else:
+            raise PermissionDenied()
+
+    def perform_create(self, serializer):
+        if self.request.user:
+            serializer.save(author=self.request.user)
+        else:
+            raise PermissionDenied()

@@ -597,3 +597,13 @@ class NotificationSerializer(serializers.HyperlinkedModelSerializer):
     #     if (self.context['request']) and getattr(instance, 'conversation', False):
     #         response['conversation'] = ConversationSerializer(instance.conversation, many=False, context = self.context).data
     #     return response
+
+
+class FeedbackSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = models.Feedback
+        fields = ('id', 'url', 'author', 'rate', 'text', 'created_at')
+        read_only_fields = ('id', 'url', 'author', 'created_at')
+        required_fields = ('rate', 'text')
+        extra_kwargs = {field: {'required': True} for field in required_fields}
+

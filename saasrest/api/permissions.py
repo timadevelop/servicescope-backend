@@ -61,6 +61,8 @@ class IsOwner(permissions.BasePermission):
             return obj.users.filter(id=request.user.id)
         if isinstance(obj, models.MessageImage):
             return False #?
+        if isinstance(obj, models.Feedback):
+            return False
 
         # no.
         return False

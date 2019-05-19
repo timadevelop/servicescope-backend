@@ -409,3 +409,14 @@ class Notification(models.Model):
         if 'update_fields' not in kwargs or 'notified' not in kwargs['update_fields']:
             self.notified = False
         super(Notification, self).save(*args, **kwargs)
+
+
+
+class Feedback(models.Model):
+    author = models.ForeignKey(User, null=False, on_delete=models.CASCADE, related_name='feedbacks')
+    text = models.TextField(max_length=2000, blank=True)
+    rate = models.DecimalField(max_digits=2, decimal_places=1)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+

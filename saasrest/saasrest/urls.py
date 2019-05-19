@@ -39,6 +39,8 @@ router.register(r'service-promotions', views.ServicePromotionViewSet)
 router.register(r'service-images', views.ServiceImageViewSet)
 router.register(r'votes', views.VoteViewSet)
 
+router.register(r'feedback', views.FeedbackViewSet)
+
 router.register(r'offers', views.OfferViewSet)
 
 router.register(r'notifications', views.NotificationViewSet)
