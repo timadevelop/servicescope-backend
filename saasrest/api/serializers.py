@@ -282,6 +282,13 @@ class ServicePromotionSerializer(serializers.HyperlinkedModelSerializer):
         required_fields = ('service', 'end_datetime', 'transaction_id', )
         extra_kwargs = {field: {'required': True} for field in required_fields}
 
+    def to_representation(self, instance):
+        response = super().to_representation(instance)
+        if (self.context['request']):
+            response['author'] = UserSerializer(instance.author, many=False, context = self.context).data
+            response['service'] = ServiceSerializer(instance.service, many=False, context = self.context).data
+        return response
+
 ## Post
 
 class PostSerializer(serializers.HyperlinkedModelSerializer):
