@@ -13,6 +13,8 @@ from django.contrib.postgres.fields import JSONField
 
 from django.contrib.contenttypes.models import ContentType
 
+from django.contrib.postgres.fields import ArrayField
+
 from django.contrib.contenttypes.fields import GenericRelation, GenericForeignKey
 # except ImportError:
 #     from django.contrib.contenttypes.generic import GenericForeignKey
@@ -283,6 +285,8 @@ class ServicePromotion(models.Model):
 
     end_datetime = models.DateTimeField(blank=False, null=False)
     transaction_id = models.CharField(max_length=110)
+
+    stripe_payment_intents = ArrayField(models.CharField(max_length=110))
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

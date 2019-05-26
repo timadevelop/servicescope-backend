@@ -277,7 +277,7 @@ class ServiceSerializer(serializers.HyperlinkedModelSerializer):
 class ServicePromotionSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = ServicePromotion
-        fields = ('id', 'url', 'author', 'service', 'end_datetime', 'transaction_id', 'created_at', 'updated_at', 'is_valid', )
+        fields = ('id', 'url', 'author', 'service', 'end_datetime', 'stripe_payment_intents', 'transaction_id', 'created_at', 'updated_at', 'is_valid', )
         read_only_fields = ('id', 'url', )
         required_fields = ('service', 'end_datetime', 'transaction_id', )
         extra_kwargs = {field: {'required': True} for field in required_fields}

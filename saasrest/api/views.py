@@ -22,6 +22,7 @@ from django.core.exceptions import PermissionDenied
 from django.core.exceptions import ObjectDoesNotExist
 from .paginations import MyPagination
 
+from django.utils import timezone
 
 from django.db.models import Q
 from django.conf import settings
@@ -768,6 +769,8 @@ class PaymentsViewSet(viewsets.ViewSet):
         body = json.loads(request.body.decode())
         id = body.get('id', None)
         amount = body.get('amount', None)
+        currency = body.get('currency', None)
+        metadata = body.get('metadata', None)
 
         if not id:
             return Response(status=status.HTTP_400_BAD_REQUEST)
@@ -775,7 +778,9 @@ class PaymentsViewSet(viewsets.ViewSet):
         stripe.api_key = settings.STRIPE_TEST_SECRET_KEY
         intent = stripe.PaymentIntent.modify(
             id,
-            amount=amount
+            amount=amount,
+            currency=currency,
+            metadata=metadata
         )
 
         return Response(intent)
@@ -805,6 +810,8 @@ class PaymentsViewSet(viewsets.ViewSet):
         if event_dict['type'] == "payment_intent.succeeded":
             intent = event_dict['data']['object']
             print("Succeeded: ", intent['id'])
+            print("Succeeded: ", intent['metadata'])
+            self.process_succeeded_intent(intent)
             # Fulfill the customer's purchase
         elif event_dict['type'] == "payment_intent.payment_failed":
             intent = event_dict['data']['object']
@@ -816,6 +823,66 @@ class PaymentsViewSet(viewsets.ViewSet):
             print("Failed: ", intent['id'], error_message)
             # Notify the customer that payment failed
         return Response(status=status.HTTP_200_OK)
+
+    def process_succeeded_intent(self, intent):
+        metadata = intent['metadata']
+
+        reason = metadata.get('reason', None)
+        if not reason:
+            print('strange!')
+            # TODO
+            return
+
+        if reason == 'promote_service':
+            self.promote_service(intent)
+        elif reason == 'promote_post':
+            # TODO
+            pass
+
+    def promote_service(self, intent):
+        metadata = intent['metadata']
+
+        print('yeas~!')
+        user_id = int(metadata.get('user_id', None))
+        model = metadata.get('model', None)
+        model_id = int(metadata.get('model_id', None))
+        plan = metadata.get('plan', None)
+        days = int(metadata.get('days', None))
+
+        user = None
+        if user_id:
+            try:
+                user = models.User.objects.get(id=user_id)
+            except Exception as e:
+                print('error getting user', e)
+
+        serivce = None
+        try:
+            service = models.Service.objects.get(id=model_id)
+        except:
+            print('error getting service')
+            return
+
+        if not service:
+            return
+
+
+        if service.promotions.exists():
+            print('update old promotion')
+            service_promotion = service.promotions.first()
+            # add days
+            service_promotion.end_datetime = service_promotion.end_datetime + timezone.timedelta(days=days)
+            service_promotion.stripe_payment_intents.append(intent['id'])
+            service_promotion.save()
+            print('success')
+        else:
+            print('create new promotion')
+            end_datetime = timezone.now() + timezone.timedelta(days=days)
+            models.ServicePromotion.objects.create(
+                author=user, service=service, \
+                stripe_payment_intents=[intent['id']], \
+                end_datetime=end_datetime)
+            print('success')
 
 
 class ConfigViewSet(viewsets.ViewSet):
