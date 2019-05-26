@@ -24,6 +24,8 @@ from .paginations import MyPagination
 
 
 from django.db.models import Q
+from django.conf import settings
+import json
 
 """
 Channels
@@ -37,7 +39,20 @@ Geocoder
 """
 import geocoder
 
+"""
+Stripe
+"""
+import stripe
 
+"""
+For config view
+"""
+from saasrest import local_settings
+
+
+"""
+Views (TODO: split into files)
+"""
 class UserViewSet(viewsets.ModelViewSet):
     """
     """
@@ -708,3 +723,112 @@ class FeedbackViewSet(viewsets.ModelViewSet):
             serializer.save(author=self.request.user)
         else:
             raise PermissionDenied()
+
+
+def fix_django_headers(meta):
+    """
+    Fix this nonsensical API:
+    https://docs.djangoproject.com/en/1.11/ref/request-response/
+    https://code.djangoproject.com/ticket/20147
+    """
+    ret = {}
+    for k, v in meta.items():
+        if k.startswith("HTTP_"):
+            k = k[len("HTTP_") :]
+        elif k not in ("CONTENT_LENGTH", "CONTENT_TYPE"):
+            # Skip CGI garbage
+            continue
+        ret[k.lower().replace("_", "-")] = v
+    return ret
+
+
+class PaymentsViewSet(viewsets.ViewSet):
+    """
+    """
+    @action(detail=False, methods=['post'], url_path='create_new_intent', permission_classes = [IsAuthenticated, ])
+    def create_new_intent(self, request):
+        body = json.loads(request.body.decode())
+        amount = body.get('amount', None)
+        currency = body.get('currency', None)
+        metadata = body.get('metadata', None)
+        if not amount or not currency:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+        stripe.api_key = settings.STRIPE_TEST_SECRET_KEY
+        intent = stripe.PaymentIntent.create(
+            amount=amount,
+            currency=currency,
+            metadata=metadata
+        )
+
+        return Response(intent)
+
+    @action(detail=False, methods=['post'], url_path='update_intent', permission_classes = [IsAuthenticated, ])
+    def update_intent(self, request):
+        body = json.loads(request.body.decode())
+        id = body.get('id', None)
+        amount = body.get('amount', None)
+
+        if not id:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+        stripe.api_key = settings.STRIPE_TEST_SECRET_KEY
+        intent = stripe.PaymentIntent.modify(
+            id,
+            amount=amount
+        )
+
+        return Response(intent)
+
+    @action(detail=False, methods=['post'], url_path='webhook')
+    def webhook(self, request):
+        payload = request.body
+        headers = request.META
+
+        sig_header = fix_django_headers(request.META).get('stripe-signature', None)
+        event = None
+
+        try:
+            event = stripe.Webhook.construct_event(
+                payload, sig_header, settings.STRIPE_WEBHOOK_ENDPOINT_SECRET
+            )
+        except ValueError as e:
+            # invalid payload
+            print('invalid payload')
+            return Response({"detail": 'Invalid payload'}, status=status.HTTP_400_BAD_REQUEST)
+        except stripe.error.SignatureVerificationError as e:
+            # invalid signature
+            print('invalid sign')
+            return Response({"detail": 'Invalid signature'}, status=status.HTTP_400_BAD_REQUEST)
+
+        event_dict = event.to_dict()
+        if event_dict['type'] == "payment_intent.succeeded":
+            intent = event_dict['data']['object']
+            print("Succeeded: ", intent['id'])
+            # Fulfill the customer's purchase
+        elif event_dict['type'] == "payment_intent.payment_failed":
+            intent = event_dict['data']['object']
+            if intent.get('last_payment_error'):
+                error_message = intent['last_payment_error']['message']
+            else:
+                error_message = None
+
+            print("Failed: ", intent['id'], error_message)
+            # Notify the customer that payment failed
+        return Response(status=status.HTTP_200_OK)
+
+
+class ConfigViewSet(viewsets.ViewSet):
+    """
+    """
+    @action(detail=False, methods=['get'], url_path='get_configuration', permission_classes = [])
+    def get_configuration(self, request):
+        resp = {
+            'API_CLIENT_ID': local_settings.API_CLIENT_ID,
+            'API_CLIENT_SECRET': local_settings.API_CLIENT_SECRET,
+            'STRIPE_PUBLIC_KEY': local_settings.STRIPE_TEST_PUBLIC_KEY,
+        }
+
+        return Response(resp)
+
+

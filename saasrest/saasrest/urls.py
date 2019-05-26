@@ -49,6 +49,11 @@ router.register(r'reviews', views.ReviewViewSet)
 router.register(r'conversations', views.ConversationViewSet)
 router.register(r'messages', views.MessageViewSet)
 router.register(r'message-images', views.MessageImageViewSet)
+# payments (stripe)
+router.register(r'payments', views.PaymentsViewSet, basename='payments')
+# config
+router.register(r'config', views.ConfigViewSet, basename='config')
+
 #
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browsable API.
