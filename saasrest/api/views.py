@@ -261,6 +261,46 @@ class ServicePromotionViewSet(viewsets.ModelViewSet):
         else:
             raise PermissionDenied()
 
+    def filter_promotion_queryset(self, queryset, request):
+        category = request.GET.get('category')
+        query = request.GET.get('q')
+        tags = request.GET.getlist('tags')
+        # print(category)
+        # print(tags)
+        # print(query)
+        #
+        if category:
+            # filter service category
+            # Always change queryset
+            queryset = queryset.filter(service__category__name=category)
+
+        if tags:
+            # at least one tag from tags
+            # do not change queryset if there are no services with tags
+            tmp_queryset = queryset.filter(service__tags__name__in=tags)
+            if tmp_queryset.exists() or not category:
+                queryset = tmp_queryset
+
+        if query:
+            # filter service title
+            # do not change queryset if there are no services with similar title
+            tmp_queryset = queryset.filter(service__title__contains=query)
+            if tmp_queryset.exists() or (not tags and not category):
+                queryset = tmp_queryset
+
+        return queryset
+
+    def list(self, request):
+        queryset = self.filter_promotion_queryset(self.queryset, request)
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.serializer_class(page, many=True, context={'request': request})
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.serializer_class(queryset, many=True, context={'request': request})
+        return Response(serializer.data)
+
     def get_queryset(self):
         user = self.request.user
         if not user or user.is_anonymous:
