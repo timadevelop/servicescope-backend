@@ -288,7 +288,7 @@ class ServicePromotionViewSet(viewsets.ModelViewSet):
             if tmp_queryset.exists() or (not tags and not category):
                 queryset = tmp_queryset
 
-        return queryset
+        return queryset.order_by('?')
 
     def list(self, request):
         queryset = self.filter_promotion_queryset(self.queryset, request)
