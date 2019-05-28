@@ -264,11 +264,15 @@ class ServicePromotionViewSet(viewsets.ModelViewSet):
     def filter_promotion_queryset(self, queryset, request):
         category = request.GET.get('category')
         query = request.GET.get('q')
+        author__id = request.GET.get('author__id')
         tags = request.GET.getlist('tags')
         # print(category)
         # print(tags)
         # print(query)
         #
+        print(author__id)
+        if author__id:
+            queryset = queryset.filter(service__author__id=author__id)
         if category:
             # filter service category
             # Always change queryset
