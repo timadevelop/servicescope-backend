@@ -52,3 +52,6 @@ DB_CONFIG = {
     'PORT': os.environ.get('POSTGRES_PORT'),
     'HOST': os.environ.get('POSTGRES_HOST'), # set in docker-compose.yml
 }
+
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')

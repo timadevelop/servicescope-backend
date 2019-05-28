@@ -143,7 +143,7 @@ ROOT_URLCONF = 'saasrest.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': ['api'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -280,3 +280,10 @@ SOCIAL_AUTH_GOOGLE_PROFILE_EXTRA_PARAMS = {
 ## Stripe
 from .local_settings import STRIPE_LIVE_MODE, STRIPE_LIVE_PUBLIC_KEY, STRIPE_LIVE_SECRET_KEY, \
                             STRIPE_TEST_PUBLIC_KEY, STRIPE_TEST_SECRET_KEY, STRIPE_WEBHOOK_ENDPOINT_SECRET
+
+
+## Email sending
+EMAIL_USE_TLS = True
+EMAIL_HOST = 'smtp.zoho.com'
+EMAIL_PORT = 587
+from .local_settings import EMAIL_HOST_PASSWORD, EMAIL_HOST_USER

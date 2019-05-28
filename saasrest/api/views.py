@@ -50,6 +50,11 @@ For config view
 """
 from saasrest import local_settings
 
+"""
+Email
+"""
+from django.template.loader import render_to_string
+from django.core.mail import send_mail
 
 """
 Views (TODO: split into files)
@@ -803,6 +808,30 @@ class PaymentsViewSet(viewsets.ViewSet):
         )
 
         return Response(intent)
+
+    @action(detail=False, methods=['post'], url_path='send_email', permission_classes = [IsAuthenticated, ])
+    def send_email(self, request):
+        body = json.loads(request.body.decode())
+        amount = body.get('amount', None)
+        currency = body.get('currency', None)
+        metadata = body.get('metadata', None)
+
+        msg_plain = render_to_string('templates/email.txt', {'text': 'waaat'})
+        msg_html = render_to_string('templates/email_1.html', {'text': 'superduper'})
+        try:
+            send_mail(
+                'Subject here',
+                msg_plain,
+                settings.EMAIL_HOST_USER,
+                ['recipient@gmail.com'],
+                fail_silently=False,
+                html_message=msg_html
+            )
+        except:
+            return Response({'success': 'false'})
+
+
+        return Response({'success': 'true'})
 
     @action(detail=False, methods=['post'], url_path='update_intent', permission_classes = [IsAuthenticated, ])
     def update_intent(self, request):
