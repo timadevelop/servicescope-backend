@@ -208,7 +208,7 @@ class ServiceFilter(django_filters.FilterSet):
 class ServiceViewSet(viewsets.ModelViewSet):
     """
     """
-    queryset = Service.objects.all().order_by('-created_at')
+    queryset = Service.objects.prefetch_related('category').prefetch_related('location').order_by('-created_at')
     serializer_class = serializers.ServiceSerializer
     permission_classes = (IsOwnerOrReadOnly, )
     filter_backends = (filters.SearchFilter, DjangoFilterBackend, filters.OrderingFilter )

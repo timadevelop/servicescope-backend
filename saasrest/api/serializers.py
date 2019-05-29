@@ -162,8 +162,8 @@ class LocationSerializer(serializers.HyperlinkedModelSerializer):
 class TagSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Tag
-        fields = ('id', 'url', 'name', 'color')
-        read_only_fields = ('id', 'url',)
+        fields = ('name', 'color')
+        read_only_fields = ()
         required_fields = ('name',)
         extra_kwargs = {field: {'required': True} for field in required_fields}
 
@@ -174,8 +174,8 @@ class CategorySerializer(TagSerializer):
 class ServiceImageSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = ServiceImage
-        fields = ('id', 'url', 'service', 'image', )
-        read_only_fields = ('id', 'url', )
+        fields = ('service', 'image', )
+        read_only_fields = ()
         required_fields = ('service', 'image', )
         extra_kwargs = {field: {'required': True} for field in required_fields}
 
@@ -267,8 +267,10 @@ class ServiceSerializer(serializers.HyperlinkedModelSerializer):
     def to_representation(self, instance):
         response = super().to_representation(instance)
         if (self.context['request']):
+            if not isinstance(self.instance, list):
+                response['author'] = UserSerializer(instance.author, many=False, context = self.context).data
+
             # response['images'] = ServiceImageSerializer(instance.images, many=True, context = self.context).data
-            response['author'] = UserSerializer(instance.author, many=False, context = self.context).data
             response['tags'] = TagSerializer(instance.tags, many=True, context = self.context).data
             response['category'] = CategorySerializer(instance.category, many=False, context = self.context).data
             response['location'] = LocationSerializer(instance.location, many=False, context = self.context).data

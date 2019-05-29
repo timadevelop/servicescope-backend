@@ -42,7 +42,6 @@ if STRIPE_LIVE_MODE == 'True':
 else:
     STRIPE_LIVE_MODE = False
 
-print(STRIPE_LIVE_MODE, STRIPE_TEST_SECRET_KEY, STRIPE_WEBHOOK_ENDPOINT_SECRET)
 # print('db port {}'.format(os.environ.get('POSTGRES_PORT')))
 # DATABASE
 DB_CONFIG = {
