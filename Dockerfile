@@ -1,4 +1,5 @@
-FROM python:3
+FROM nikolaik/python-nodejs:latest
+
 
 ENV PYTHONUNBUFFERED 1
 
@@ -11,6 +12,8 @@ RUN pip install -r ../requirements.txt
 RUN pip install -r requirements.txt
 
 RUN pip install psycopg2-binary
+
+RUN npm install -g mjml
 
 ARG SAAS_ENV="development"
 

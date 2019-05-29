@@ -34,6 +34,7 @@ django-colorfield==0.1.15
 django-cors-headers==2.4.0
 django-filter==2.1.0
 django-import-export==1.2.0
+django-mjml==0.7.0
 django-money==0.14.4
 django-oauth-toolkit==1.2.0
 django-rest-auth==0.9.3

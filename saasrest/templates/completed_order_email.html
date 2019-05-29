@@ -1,0 +1,153 @@
+{% load mjml %}
+
+{% mjml %}
+<mjml>
+  <mj-head>
+    <mj-title>Discount Light</mj-title>
+    <mj-preview>Completed order #{{service_promotion.id}}.</mj-preview>
+    <mj-attributes>
+      <mj-all font-family="'Helvetica Neue', Helvetica, Arial, sans-serif"></mj-all>
+      <mj-text font-weight="400" font-size="16px" color="#000000" line-height="24px" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif"></mj-text>
+    </mj-attributes>
+    <mj-style inline="inline">
+      .body-section { -webkit-box-shadow: 1px 4px 11px 0px rgba(0, 0, 0, 0.15); -moz-box-shadow: 1px 4px 11px 0px rgba(0, 0, 0, 0.15); box-shadow: 1px 4px 11px 0px rgba(0, 0, 0, 0.15); }
+    </mj-style>
+    <mj-style inline="inline">
+      .text-link { color: #5e6ebf }
+    </mj-style>
+    <mj-style inline="inline">
+      .footer-link { color: #888888; margin-right: 10px; }
+    </mj-style>
+
+  </mj-head>
+  <mj-body background-color="#E7E7E7" width="600px">
+    <mj-section full-width="full-width" background-color="#040B4F" padding-bottom="0">
+      <mj-column width="100%">
+        <mj-image src="https://ci6.googleusercontent.com/proxy/o2cEoMPpSugaYPjzgxnUWSZOVRKAOQAtitRIvdrnEI_p7MR7fEbFJPWAa4dL8gdhjvbjUbWTz6Z6TKwySP_2AmHS5BBUDwQp6Z9EkwhrvDUHOV0ATjTNsv7yH7xFlJnajreIf01s=s0-d-e1-ft#http://i1.cmail19.com/ei/d/20/15C/FD3/061916/temp_import/csfinal/StripeLogoblue.png"
+          alt="" align="center" width="150px" />
+        <mj-text color="#ffffff" font-weight="bold" align="center" text-transform="uppercase" font-size="16px" letter-spacing="1px" padding-top="30px">
+          Completed Order Notification
+          <br/>
+        </mj-text>
+        <mj-text color="#17CBC4" align="center" font-size="13px" padding-top="0" font-weight="bold" text-transform="uppercase" letter-spacing="1px" line-height="20px">
+          Sofia, Bulgaria
+          <br/> Vasya levski 394
+        </mj-text>
+      </mj-column>
+    </mj-section>
+    <mj-section full-width="full-width" background-color="#040B4F" padding-bottom="0">
+      <mj-column width="100%" background-color="#1F2D78">
+        <mj-image src="https://i.imgur.com/8CncWWT.png" alt="Confirmed order image" align="center" width="150px" />
+        <mj-text color="#ffffff" align="center" font-size="22px" letter-spacing="1px" padding-top="10px">
+          Your Service Successfully <b>Boosted</b>
+          <br/>
+        </mj-text>
+      </mj-column>
+    </mj-section>
+    <mj-section background-color="#1f2e78">
+      <mj-column width="100%">
+        <mj-text color="#ffffff" align="center" font-size="12px" letter-spacing="1px" padding-top="0px">
+          Your order number us: <b>{{service_promotion.id}}</b>
+          <br/>
+        </mj-text>
+      </mj-column>
+    </mj-section>
+    <mj-wrapper background-color="#ffffff" padding-right="15px" padding-left="15px" padding-top="0" padding-bottom="0" css-class="body-section">
+      <mj-section padding-bottom="0">
+        <mj-column width="100%">
+          <mj-text color="#212b35" font-weight="bold" font-size="20px">
+            Completed service boosting order
+          </mj-text>
+          <mj-text color="#637381" font-size="15px">
+            Hi <b>{{service_promotion.author.first_name}}</b>,
+            <br/> This is just a quick email to say we've reveived your order.
+            <br/>
+            <br/> Your service is successfully boosted til {{service_promotion.end_datetime | date}}
+            <br/> you just completed order <b>{{ intent.metadata | get_item:"days" }}-day</b> boosting for service <b>{{service.title}}</b>
+          </mj-text>
+          <mj-text color="#637381" font-weight="bold" font-size="15px">
+            Here are your order details:
+          </mj-text>
+          <mj-table color="#637381">
+            <tr style="border-bottom:1px solid #ecedee;text-align:left;padding:15px 0;">
+              <th style="padding: 0 3px 0 0;">Order id</th>
+              <th style="padding: 0 0 0 3px;">Price</th>
+            </tr>
+            <tr>
+              <td style="padding: 0 3px 0 0;">{{service_promotion.id}}</td>
+              <td style="padding: 0 0 0 3px;">{% widthratio intent.amount 100 1 %} {{intent.currency}}</td>
+            </tr>
+          </mj-table>
+          <mj-table color="#637381">
+            <tr style="border-bottom:1px solid #ecedee;text-align:left;padding:15px 0;">
+              <th style="padding: 0 3px;">Service</th>
+              <th style="padding: 0 3px;">Plan</th>
+              <th style="padding: 0 3px;">Exp. Date</th>
+            </tr>
+            <tr>
+              <td style="padding: 0 3px;">{{service.id}}</td>
+              <td style="padding: 0 3px;">{{ intent.metadata | get_item:"plan" | title }}</td>
+              <td style="padding: 0 3px;">{{service_promotion.end_datetime}}</td>
+            </tr>
+          </mj-table>
+
+          <mj-text color="#637381" font-size="15px">
+            In the meantime, if you have any questions, send us an email at <a href="email:team@brainhub.co" style="color: #637381; text-decoration: underline;">team@brainhub.co</a> and we'll be happy to help.
+          </mj-text>
+        </mj-column>
+      </mj-section>
+
+      <mj-section padding-top="0">
+        <mj-column>
+          <mj-button background-color="#5e6ebf" align="right" color="#ffffff" font-size="17px" font-weight="bold" href="https://brainhub.co" width="100%">
+            Go to srvcs.co &#x2799;
+          </mj-button>
+        </mj-column>
+        <mj-column>
+          <mj-text font-size="15px" color="#637381" align="left" line-height="38px">
+            or <a href="https://brainhub.co" style="color: #637381; text-decoration: underline;">visit our website</a>
+          </mj-text>
+        </mj-column>
+      </mj-section>
+    </mj-wrapper>
+
+    <mj-wrapper full-width="full-width">
+      <mj-section>
+        <mj-column width="100%" padding="0">
+          <mj-social font-size="15px" icon-size="30px" mode="horizontal" padding="0" align="center">
+            <mj-social-element name="google" href="https://google.com/" background-color="#A1A0A0">
+            </mj-social-element>
+            <mj-social-element name="facebook" href="https://facebook.com/" background-color="#A1A0A0">
+            </mj-social-element>
+            <mj-social-element name="twitter" href="twitter.com" background-color="#A1A0A0">
+            </mj-social-element>
+            <mj-social-element name="instagram" href="instagram.com" background-color="#A1A0A0">
+            </mj-social-element>
+          </mj-social>
+          <mj-text color="#445566" font-size="11px" font-weight="bold" align="center">
+            Some text here
+          </mj-text>
+          <mj-text color="#445566" font-size="11px" align="center" line-height="16px">
+            You are receiving this email advertisement because you registered with COMPANY Accountants. (123 Main Street, Sofix, not TX 18701) and agreed to receive emails from us regarding new features, events and special offers.
+          </mj-text>
+          <mj-text color="#445566" font-size="11px" align="center" line-height="16px">
+            &copy; Company Accountants Inc., All Rights Reserved.
+          </mj-text>
+        </mj-column>
+      </mj-section>
+      <mj-section padding-top="0">
+        <mj-group>
+          <mj-column width="100%" padding-right="0">
+            <mj-text color="#445566" font-size="11px" align="center" line-height="16px" font-weight="bold">
+              <a class="footer-link" href="https://www.google.com">Privacy</a>
+              <a class="footer-link" href="https://www.google.com">Unsubscribe</a>
+            </mj-text>
+          </mj-column>
+        </mj-group>
+
+      </mj-section>
+    </mj-wrapper>
+
+  </mj-body>
+</mjml>
+{% endmjml %}

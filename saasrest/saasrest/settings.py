@@ -45,7 +45,6 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = 5242880
 
 INSTALLED_APPS = [
     'corsheaders',
-# django
     'sslserver',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -53,15 +52,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-# api
+    # api
     'rest_framework',
     'rest_framework.authtoken',
     'api',
-
+    # auth
     'oauth2_provider',
     'social_django',
     'rest_framework_social_oauth2',
-# auth
     'rest_auth',
     'django.contrib.sites',
     'allauth',
@@ -70,12 +68,15 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     # 'allauth.socialaccount.providers.facebook',
     # 'allauth.socialaccount.providers.twitter',
+    # tasks
     'celery',
     'colorfield',
     'djmoney',
     'import_export',
-# realtime
+    # realtime
     'channels',
+    # email templates
+    'mjml',
 ]
 
 # CELERY_TIMEZONE = 'UTC'
@@ -143,7 +144,7 @@ ROOT_URLCONF = 'saasrest.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': ['api'],
+        'DIRS': ['.'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -228,6 +229,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
 STATIC_URL = '/static/'
+STATICFILES_DIRS = (
+  os.path.join(BASE_DIR, 'static'),
+)
 MEDIA_URL = '/media/'
 MEDIA_ROOT=os.path.join(BASE_DIR, "media")
 

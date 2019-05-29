@@ -66,4 +66,3 @@ urlpatterns = [
     url(r'^saas_api/auth/registration/', include('rest_auth.registration.urls')),
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-
