@@ -121,6 +121,7 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     # ...
+    'django.middleware.locale.LocaleMiddleware'
 # )
 ]
 
@@ -144,7 +145,7 @@ ROOT_URLCONF = 'saasrest.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': ['.'],
+        'DIRS': [''],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -214,11 +215,12 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/2.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+# use Accept-Language Header (i.e. 'ru-ru', 'es-es')
+LANGUAGE_CODE = 'en-US'
 
 TIME_ZONE = 'Europe/Sofia'
 
-USE_I18N = False
+USE_I18N = True
 
 USE_L10N = False
 
