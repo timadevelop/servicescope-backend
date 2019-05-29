@@ -103,7 +103,7 @@
 </head>
 
 <body style="background-color:#E7E7E7;">
-  <div style="display:none;font-size:1px;color:#ffffff;line-height:1px;max-height:0px;max-width:0px;opacity:0;overflow:hidden;"> Pre-header Text </div>
+  <div style="display:none;font-size:1px;color:#ffffff;line-height:1px;max-height:0px;max-width:0px;opacity:0;overflow:hidden;"> Completed order #{{service_promotion.id}}. </div>
   <div style="background-color:#E7E7E7;">
     <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="background:#040B4F;background-color:#040B4F;width:100%;">
       <tbody>
@@ -146,7 +146,7 @@
                           </tr>
                           <tr>
                             <td align="center" style="font-size:0px;padding:10px 25px;padding-top:30px;word-break:break-word;">
-                              <div style="font-family:'Helvetica Neue', Helvetica, Arial, sans-serif;font-size:16px;font-weight:bold;letter-spacing:1px;line-height:24px;text-align:center;text-transform:uppercase;color:#ffffff;"> {{subject}} <br> </div>
+                              <div style="font-family:'Helvetica Neue', Helvetica, Arial, sans-serif;font-size:16px;font-weight:bold;letter-spacing:1px;line-height:24px;text-align:center;text-transform:uppercase;color:#ffffff;"> Completed Order Notification <br> </div>
                             </td>
                           </tr>
                           <tr>
@@ -227,7 +227,7 @@
                 <table border="0" cellpadding="0" cellspacing="0" role="presentation" style="vertical-align:top;" width="100%">
                   <tr>
                     <td align="center" style="font-size:0px;padding:10px 25px;padding-top:0px;word-break:break-word;">
-                      <div style="font-family:'Helvetica Neue', Helvetica, Arial, sans-serif;font-size:12px;font-weight:400;letter-spacing:1px;line-height:24px;text-align:center;color:#ffffff;"> Your order number us: <b>oseiu5i9oj0w9533y9i</b> <br> </div>
+                      <div style="font-family:'Helvetica Neue', Helvetica, Arial, sans-serif;font-size:12px;font-weight:400;letter-spacing:1px;line-height:24px;text-align:center;color:#ffffff;"> Your order number us: <b>{{service_promotion.id}}</b> <br> </div>
                     </td>
                   </tr>
                 </table>
@@ -297,8 +297,8 @@
                             </tr>
                             <tr>
                               <td align="left" style="font-size:0px;padding:10px 25px;word-break:break-word;">
-                                <div style="font-family:'Helvetica Neue', Helvetica, Arial, sans-serif;font-size:15px;font-weight:400;line-height:24px;text-align:left;color:#637381;"> Hi <b>{{user.first_name}}</b>, <br> This is just a quick email to say we've reveived your order. <br> <br> Your service is successfully boosted til {{date}} <br> you just completed order <b>7-day</b> boosting for service
-                                  <b>{{service.title}}</b> </div>
+                                <div style="font-family:'Helvetica Neue', Helvetica, Arial, sans-serif;font-size:15px;font-weight:400;line-height:24px;text-align:left;color:#637381;"> Hi <b>{{service_promotion.author.first_name}}</b>, <br> This is just a quick email to say we've reveived your order. <br> <br> Your service is successfully boosted til {{service_promotion.end_datetime | date}} <br> you
+                                  just completed order <b>{{ intent.metadata | get_item:"days" }}-day</b> boosting for service <b>{{service.title}}</b> </div>
                               </td>
                             </tr>
                             <tr>
@@ -314,8 +314,8 @@
                                     <th style="padding: 0 0 0 3px;">Price</th>
                                   </tr>
                                   <tr>
-                                    <td style="padding: 0 3px 0 0;">sdf5fio73e9wq5</td>
-                                    <td style="padding: 0 0 0 3px;">2.00 лв.</td>
+                                    <td style="padding: 0 3px 0 0;">{{service_promotion.id}}</td>
+                                    <td style="padding: 0 0 0 3px;">{% widthratio intent.amount 100 1 %} {{intent.currency}}</td>
                                   </tr>
                                 </table>
                               </td>
@@ -329,9 +329,9 @@
                                     <th style="padding: 0 3px;">Exp. Date</th>
                                   </tr>
                                   <tr>
-                                    <td style="padding: 0 3px;">97343345</td>
-                                    <td style="padding: 0 3px;">Pro</td>
-                                    <td style="padding: 0 3px;">10.09.2019</td>
+                                    <td style="padding: 0 3px;">{{service.id}}</td>
+                                    <td style="padding: 0 3px;">{{ intent.metadata | get_item:"plan" | title }}</td>
+                                    <td style="padding: 0 3px;">{{service_promotion.end_datetime}}</td>
                                   </tr>
                                 </table>
                               </td>

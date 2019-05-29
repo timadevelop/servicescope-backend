@@ -56,6 +56,15 @@ Email
 from django.template.loader import render_to_string
 from django.core.mail import send_mail
 
+from django.template.defaulttags import register
+...
+@register.filter
+def get_item(dictionary, key):
+    print('get_item')
+    print(dictionary, key)
+    print('_-----------------------------____')
+    return dictionary.get(key, 'None')
+
 """
 Views (TODO: split into files)
 """
@@ -809,6 +818,25 @@ class PaymentsViewSet(viewsets.ViewSet):
 
         return Response(intent)
 
+    def send_confirmation_email(self, service, service_promotion, intent):
+        msg_plain = render_to_string('templates/email.txt', {'service': service, 'service_promotion': service_promotion})
+        msg_html = render_to_string('templates/completed_order_email.html', {'service': service, 'service_promotion': service_promotion, 'intent': intent})
+
+        try:
+            send_mail(
+                'Completed order',
+                msg_plain,
+                settings.EMAIL_HOST_USER,
+                ['timadevelop@gmail.com'],
+                fail_silently=False,
+                html_message=msg_html
+            )
+        except:
+            return False
+
+        return True
+
+
     @action(detail=False, methods=['post'], url_path='send_email', permission_classes = [IsAuthenticated, ])
     def send_email(self, request):
         body = json.loads(request.body.decode())
@@ -903,7 +931,9 @@ class PaymentsViewSet(viewsets.ViewSet):
             return
 
         if reason == 'promote_service':
-            self.promote_service(intent)
+            service, service_promotion = self.promote_service(intent)
+            # Send email
+            self.send_confirmation_email(service, service_promotion, intent)
         elif reason == 'promote_post':
             # TODO
             pass
@@ -947,11 +977,13 @@ class PaymentsViewSet(viewsets.ViewSet):
         else:
             print('create new promotion')
             end_datetime = timezone.now() + timezone.timedelta(days=days)
-            models.ServicePromotion.objects.create(
+            service_promotion = models.ServicePromotion.objects.create(
                 author=user, service=service, \
                 stripe_payment_intents=[intent['id']], \
                 end_datetime=end_datetime)
             print('success')
+
+        return service, service_promotion
 
 
 class ConfigViewSet(viewsets.ViewSet):
