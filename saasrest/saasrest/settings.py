@@ -77,6 +77,8 @@ INSTALLED_APPS = [
     'channels',
     # email templates
     'mjml',
+    'debug_toolbar',
+    'django_filters',
 ]
 
 # CELERY_TIMEZONE = 'UTC'
@@ -108,6 +110,7 @@ SITE_ID = 1
 ACCOUNT_ADAPTER = 'api.adapters.CustomUserAccountAdapter'
 
 MIDDLEWARE = [
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -124,6 +127,17 @@ MIDDLEWARE = [
     'django.middleware.locale.LocaleMiddleware'
 # )
 ]
+
+INTERNAL_IPS = ['192.168.1.22', 'localhost', '127.0.0.1', "*"]
+
+def show_toolbar(request):
+    if request.is_ajax():
+        return False
+    return True
+
+DEBUG_TOOLBAR_CONFIG = {
+    'SHOW_TOOLBAR_CALLBACK': 'saasrest.settings.show_toolbar',
+}
 
 # TODO: check cookie age
 SESSION_COOKIE_AGE = 1209600
