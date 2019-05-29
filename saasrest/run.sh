@@ -1,6 +1,7 @@
 #!/bin/bash
 
 pip install -r requirements.txt
+python manage.py compilemessages -l bg
 python manage.py makemigrations api
 python manage.py makemigrations
 python manage.py migrate api

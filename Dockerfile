@@ -11,6 +11,9 @@ WORKDIR /usr/src/app/saasrest
 RUN pip install -r ../requirements.txt
 RUN pip install -r requirements.txt
 
+RUN apt-get update
+RUN apt-get install -y gettext libgettextpo-dev
+
 RUN pip install psycopg2-binary
 
 RUN npm install -g mjml
