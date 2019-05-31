@@ -23,7 +23,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 from .local_settings import SECRET_KEY
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 USE_X_FORWARDED_HOST = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
@@ -110,18 +110,28 @@ SITE_ID = 1
 ACCOUNT_ADAPTER = 'api.adapters.CustomUserAccountAdapter'
 
 MIDDLEWARE = [
+    # cache
     'django.middleware.cache.UpdateCacheMiddleware',
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
+    #
     'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.http.ConditionalGetMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    # session
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.middleware.locale.LocaleMiddleware',
+    # CORS
+    'corsheaders.middleware.CorsMiddleware',
+    # TODO
+    # django messages (info, warn, success)
+    # 'django.contrib.messages.middleware.MessageMiddleware',
+    # clickjacking
+    # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # //
+    # debug
+    # 'debug_toolbar.middleware.DebugToolbarMiddleware',
+    # cache
     'django.middleware.cache.FetchFromCacheMiddleware',
 ]
 
@@ -135,6 +145,23 @@ def show_toolbar(request):
 DEBUG_TOOLBAR_CONFIG = {
     'SHOW_TOOLBAR_CALLBACK': 'saasrest.settings.show_toolbar',
 }
+
+# DEBUG_TOOLBAR_PANELS = [
+#     'ddt_request_history.panels.request_history.RequestHistoryPanel',
+#     'debug_toolbar.panels.versions.VersionsPanel',
+#     'debug_toolbar.panels.timer.TimerPanel',
+#     'debug_toolbar.panels.settings.SettingsPanel',
+#     'debug_toolbar.panels.headers.HeadersPanel',
+#     'debug_toolbar.panels.request.RequestPanel',
+#     'debug_toolbar.panels.sql.SQLPanel',
+#     'debug_toolbar.panels.templates.TemplatesPanel',
+#     'debug_toolbar.panels.staticfiles.StaticFilesPanel',
+#     'debug_toolbar.panels.cache.CachePanel',
+#     'debug_toolbar.panels.signals.SignalsPanel',
+#     'debug_toolbar.panels.logging.LoggingPanel',
+#     'debug_toolbar.panels.redirects.RedirectsPanel',
+#     'debug_toolbar.panels.profiling.ProfilingPanel',
+# ]
 
 # TODO: check cookie age
 SESSION_COOKIE_AGE = 1209600
@@ -245,7 +272,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/2.1/topics/i18n/
 
-# use Accept-Language Header (i.e. 'ru-ru', 'es-es')
+# use Accept-Language Header (i.e. 'ru-ru', 'es-es', 'en-US', 'bg')
 LANGUAGE_CODE = 'en-US'
 
 TIME_ZONE = 'Europe/Sofia'

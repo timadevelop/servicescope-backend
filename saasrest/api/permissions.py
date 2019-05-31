@@ -19,7 +19,6 @@ class IsAdminUserOrReadOnly(permissions.IsAdminUser):
 
 class IsOwner(permissions.BasePermission):
     def has_permission(self, request, view):
-        print('is_owner1')
         return True
 
     """
@@ -27,7 +26,6 @@ class IsOwner(permissions.BasePermission):
     Assumes the model instance has an `owner` attribute.
     """
     def has_object_permission(self, request, view, obj):
-        print('is_owner')
         # Read permissions are allowed to any request,
         # so we'll always allow GET, HEAD or OPTIONS requests.
         if isinstance(obj, User):
