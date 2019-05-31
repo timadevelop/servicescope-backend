@@ -110,22 +110,19 @@ SITE_ID = 1
 ACCOUNT_ADAPTER = 'api.adapters.CustomUserAccountAdapter'
 
 MIDDLEWARE = [
+    'django.middleware.cache.UpdateCacheMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-# ]
-# MIDDLEWARE_CLASSES = (
-    # ...
+    'django.middleware.http.ConditionalGetMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
-    # ...
-    'django.middleware.locale.LocaleMiddleware'
-# )
+    'django.middleware.locale.LocaleMiddleware',
+    'django.middleware.cache.FetchFromCacheMiddleware',
 ]
 
 INTERNAL_IPS = ['192.168.1.22', 'localhost', '127.0.0.1', "*"]
@@ -207,6 +204,25 @@ DATABASES = {
     }
 }
 
+# Caching
+from .local_settings import MEMCACHED_LOCATION
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+        'LOCATION': MEMCACHED_LOCATION,
+    }
+}
+
+# Key in `CACHES` dict
+CACHE_MIDDLEWARE_ALIAS = 'default'
+
+# Additional prefix for cache keys
+CACHE_MIDDLEWARE_KEY_PREFIX = ''
+
+# Cache key TTL in seconds
+CACHE_MIDDLEWARE_SECONDS = 600
+
+
 # Password validation
 # https://docs.djangoproject.com/en/2.1/ref/settings/#auth-password-validators
 
@@ -236,7 +252,7 @@ TIME_ZONE = 'Europe/Sofia'
 
 USE_I18N = True
 
-USE_L10N = False
+USE_L10N = True
 
 USE_TZ = True
 

@@ -87,23 +87,18 @@ class VoteSerializer(serializers.HyperlinkedModelSerializer):
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
 
-    services_count = serializers.SerializerMethodField()
     def get_services_count(self, instance):
         return instance.services.count()
 
-    posts_count = serializers.SerializerMethodField()
     def get_posts_count(self, instance):
         return instance.posts.count()
 
-    income_reviews_count = serializers.SerializerMethodField()
     def get_income_reviews_count(self, instance):
         return instance.income_reviews.count()
 
-    offers_count = serializers.SerializerMethodField()
     def get_offers_count(self, instance):
         return instance.offers.count()
 
-    notifications_count = serializers.SerializerMethodField()
     def get_notifications_count(self, instance):
         return instance.notifications.filter(notified=False).count()
 
@@ -112,11 +107,21 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         # TODO
         fields = ('id', 'url', 'email', 'phone', 'bio', 'first_name', 'last_name', 'image', \
                   #'services', 'posts', 'offers'
-                  'services_count', 'posts_count', 'income_reviews_count', 'offers_count', \
-                  'date_joined', 'notifications_count', \
-                  )
+                  'date_joined',)
         # outcome_reviews, income_reviwes
         read_only_fields = ('id', 'url', )
+
+    def to_representation(self, instance):
+        response = super().to_representation(instance)
+        if (self.context['request']):
+            if not isinstance(self.instance, list):
+                  response['services_count'] = self.get_services_count(instance)
+                  response['posts_count'] = self.get_posts_count(instance)
+                  response['income_reviews_count'] = self.get_income_reviews_count(instance)
+                  response['offers_count'] = self.get_offers_count(instance)
+                  response['notifications_count'] = self.get_notifications_count(instance)
+
+        return response
 
 class PrivateUserSerializer(serializers.HyperlinkedModelSerializer):
 
@@ -186,20 +191,22 @@ class ServiceImageSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class ServiceSerializer(serializers.HyperlinkedModelSerializer):
-    images = ServiceImageSerializer(many=True, read_only=True)
+    images = ServiceImageSerializer(
+        many=True,
+        read_only=True)
 
     # likes = VoteSerializer(many=True, read_only=True)
     # dislikes = VoteSerializer(many=True, read_only=True)
 
     tags = serializers.SlugRelatedField(
         many=True,
-        queryset=Tag.objects.all(),
+        queryset=Tag.objects,
         slug_field='name'
     )
 
     category = serializers.SlugRelatedField(
         many=False,
-        queryset=Category.objects.all(),
+        queryset=Category.objects,
         slug_field='name'
     )
 
@@ -209,18 +216,26 @@ class ServiceSerializer(serializers.HyperlinkedModelSerializer):
         if not user or user.is_anonymous:
             return None
 
-        queryset = instance.votes.filter(user=user)
-        if queryset.exists():
-            vote = queryset.first()
-            return VoteSerializer(vote, many=False, context=self.context).data
+        try:
+            vote = instance.votes.get(user=user)
+            # vote = user.votes.get(object_id=instance)
+            if vote:
+                return VoteSerializer(vote, many=False, context=self.context).data
+        except:
+            return None
+
         return None
 
     class Meta:
         model = Service
         fields = ('id', 'url', 'author', 'title', 'description', 'price', 'price_currency', \
                   'contact_phone', 'contact_email', 'color', 'location', \
-                  'images', 'promotions', 'is_promoted', \
-                  'created_at', 'updated_at', 'tags', 'category', \
+                  'images', \
+                  'promoted_til',
+                  'is_promoted', \
+                  'created_at', 'updated_at', \
+                  'tags', 'category', \
+                  # 'promotions', \
                   # 'likes', 'dislikes', \
                   'score', 'current_user_vote', 'price_details')
         read_only_fields = ('id', 'url', 'created_at', 'updated_at', 'author', 'images', 'promotions',\
@@ -234,8 +249,7 @@ class ServiceSerializer(serializers.HyperlinkedModelSerializer):
         user = None
         request = self.context.get("request")
         if request and hasattr(request, "user"):
-            user = request.user
-            return user
+            return request.user
         return None
 
     def validate_author(self, value):
@@ -272,7 +286,17 @@ class ServiceSerializer(serializers.HyperlinkedModelSerializer):
 
             # response['images'] = ServiceImageSerializer(instance.images, many=True, context = self.context).data
             response['tags'] = TagSerializer(instance.tags, many=True, context = self.context).data
-            response['category'] = CategorySerializer(instance.category, many=False, context = self.context).data
+            # response['category'] = CategorySerializer(instance.category, many=False, context = self.context).data
+            response['location'] = LocationSerializer(instance.location, many=False, context = self.context).data
+        return response
+
+class ShortServiceSerializer(ServiceSerializer):
+    def to_representation(self, instance):
+        response = super().to_representation(instance)
+        if (self.context['request']):
+            # response['images'] = ServiceImageSerializer(instance.images, many=True, context = self.context).data
+            response['tags'] = TagSerializer(instance.tags, many=True, context = self.context).data
+            # response['category'] = CategorySerializer(instance.category, many=False, context = self.context).data
             response['location'] = LocationSerializer(instance.location, many=False, context = self.context).data
         return response
 
@@ -287,8 +311,8 @@ class ServicePromotionSerializer(serializers.HyperlinkedModelSerializer):
     def to_representation(self, instance):
         response = super().to_representation(instance)
         if (self.context['request']):
-            response['author'] = UserSerializer(instance.author, many=False, context = self.context).data
-            response['service'] = ServiceSerializer(instance.service, many=False, context = self.context).data
+            # response['author'] = UserSerializer(instance.author, many=False, context = self.context).data
+            response['service'] = ShortServiceSerializer(instance.service, many=False, context = self.context).data
         return response
 
 ## Post
@@ -567,7 +591,7 @@ class MessageSerializer(serializers.HyperlinkedModelSerializer):
         #     if not self.get_is_my_message(instance):
         #         response['author'] = UserSerializer(instance.author, many=False, context = self.context).data
         # else:
-        response['author'] = UserSerializer(instance.author, many=False, context = self.context).data
+        # response['author'] = UserSerializer(instance.author, many=False, context = self.context).data
         return response
 
     def group_name(self, instance):

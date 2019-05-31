@@ -255,13 +255,14 @@ class Service(models.Model):
 
     score = models.IntegerField(default=0)
     votes = GenericRelation(Vote)
-    @property
-    def likes(self):
-        return self.votes.filter(activity_type=Vote.UP_VOTE)
-
-    @property
-    def dislikes(self):
-        return self.votes.filter(activity_type=Vote.DOWN_VOTE)
+    promoted_til = models.DateTimeField(null=True, blank=True)
+    # @property
+    # def likes(self):
+    #     return self.votes.filter(activity_type=Vote.UP_VOTE)
+    #
+    # @property
+    # def dislikes(self):
+    #     return self.votes.filter(activity_type=Vote.DOWN_VOTE)
 
     # hints
     # Get the post object
@@ -273,7 +274,9 @@ class Service(models.Model):
 
     @property
     def is_promoted(self):
-        return self.promotions.filter(end_datetime__gte=now()).exists()
+        if self.promoted_til and self.promoted_til < now():
+            return True
+        return False
 
 class ServiceImage(models.Model):
     service = models.ForeignKey(Service, on_delete=models.CASCADE, null=False, related_name='images')

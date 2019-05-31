@@ -3,6 +3,8 @@ media
 api/migrations/
 celerybeat-schedule
 
+collected_static
+
 ### OSX ###
 .DS_Store
 .AppleDouble

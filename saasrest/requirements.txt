@@ -88,6 +88,7 @@ pynvim==0.3.2
 pyparsing==2.3.1
 python-engineio==2.3.2
 python-jose==3.0.1
+python-memcached==1.59
 python-social-auth==0.3.6
 python-socketio==2.0.0
 python-xlib==0.25

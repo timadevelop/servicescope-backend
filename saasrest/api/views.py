@@ -212,8 +212,8 @@ class ServiceViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.ServiceSerializer
     permission_classes = (IsOwnerOrReadOnly, )
     filter_backends = (filters.SearchFilter, DjangoFilterBackend, filters.OrderingFilter )
-    ordering_fields = ('price', 'created_at', 'score')
-    search_fields = ('title', 'description',)
+    # ordering_fields = ('price', 'created_at', 'score')
+    # search_fields = ('title', 'description',)
     # filter_fields = ('author', 'author__id', 'location', 'tags__contain')
     filter_class = ServiceFilter
 
@@ -983,6 +983,8 @@ class PaymentsViewSet(viewsets.ViewSet):
                 end_datetime=end_datetime)
             print('success')
 
+        service.promoted_til = service_promotion.end_datetime
+        service.save()
         return service, service_promotion
 
 
