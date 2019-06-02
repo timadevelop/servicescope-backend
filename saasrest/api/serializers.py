@@ -306,16 +306,35 @@ class ServiceSerializer(serializers.HyperlinkedModelSerializer):
             # response['category'] = CategorySerializer(instance.category, many=False, context = self.context).data
 
             response['tags'] = TagSerializer(instance.tags, many=True, context = self.context).data
-            response['location'] = cached_or_new('SERIALIZED_LOCATION_{}'.format(instance.id), LocationSerializer, instance, 'location', self.context)
+            response['location'] = cached_or_new('SERIALIZED_LOCATION_{}'.format(instance.location_id), LocationSerializer, instance, 'location', self.context)
             #response['location'] = LocationSerializer(instance.location, many=False, context = self.context).data
         return response
 
+"""
+TODO: rename
+
+flow:
+- try to get result from context
+- try to get from cache
+- serialize, set to cache (for next requests) and set to context (for current request)
+
+"""
 def cached_or_new(key, serializer_class, instance, object_property_name, context, many=False):
+    # try to get from context
+    context_result = context.get(key)
+    if context_result:
+        return context_result
+
+    # try to get from cache
     result = cache.get(key)
     if result is None:
+        # ok, lets serialize and save serialized thing in our cache
         obj = getattr(instance, object_property_name, False)
         result = serializer_class(obj, many=many, context = context).data
         cache.set(key, result)
+
+    # save in context for current request processing
+    context[key] = result
 
     return result
 
@@ -324,7 +343,7 @@ class ShortServiceSerializer(ServiceSerializer):
         response = super().to_representation(instance)
         if (self.context['request']):
             response['tags'] = TagSerializer(instance.tags, many=True, context = self.context).data
-            response['location'] = cached_or_new('SERIALIZED_LOCATION_{}'.format(instance.id), LocationSerializer, instance, 'location', self.context)
+            response['location'] = cached_or_new('SERIALIZED_LOCATION_{}'.format(instance.location_id), LocationSerializer, instance, 'location', self.context)
         return response
 
 class ServicePromotionSerializer(serializers.HyperlinkedModelSerializer):
