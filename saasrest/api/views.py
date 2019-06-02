@@ -314,7 +314,7 @@ class ServicePromotionViewSet(viewsets.ModelViewSet):
     """
     queryset = ServicePromotion.objects.all()
     serializer_class = serializers.ServicePromotionSerializer
-    permission_classes = (IsAuthenticated, IsOwnerOrReadOnly, )
+    permission_classes = (IsOwnerOrReadOnly, )
     filter_backends = (filters.SearchFilter, DjangoFilterBackend, )
     search_fields = ()
     filter_fields = ('author', 'author__id', 'service', 'service__id', 'transaction_id' )
@@ -369,13 +369,6 @@ class ServicePromotionViewSet(viewsets.ModelViewSet):
 
         serializer = self.serializer_class(queryset, many=True, context={'request': request})
         return Response(serializer.data)
-
-    def get_queryset(self):
-        user = self.request.user
-        if not user or user.is_anonymous:
-            return None
-        # todo: Q
-        return self.queryset.filter(author=user)
 
 class ServiceImageViewSet(viewsets.ModelViewSet):
     """
