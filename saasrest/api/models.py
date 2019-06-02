@@ -16,46 +16,22 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.postgres.fields import ArrayField
 
 from django.contrib.contenttypes.fields import GenericRelation, GenericForeignKey
-# except ImportError:
-#     from django.contrib.contenttypes.generic import GenericForeignKey
+#
+#
 
-# class VoteManager(models.Manager):
-#     def filter(self, *args, **kwargs):
-#         if 'content_object' in kwargs:
-#             content_object = kwargs.pop('content_object')
-#             content_type = ContentType.objects.get_for_model(content_object)
-#             kwargs.update({
-#                 'content_type': content_type,
-#                 'object_id': content_object.pk
-#             })
-#         return super(VoteManager, self).filter(*args, **kwargs)
+## Cache invalidating
+from django.core.cache import cache
+
+# @receiver(post_save)
+# def clear_the_cache(**kwargs):
+#     print(kwargs)
+#     print('|||||||||||||||||||||clearing cache!')
+#     cache.clear()
+
+
 #
 #
-# class Vote(models.Model):
-#     user = models.ForeignKey(User, on_delete=models.CASCADE)
-#     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-#     object_id = models.PositiveIntegerField()
-#     content_object = GenericForeignKey()
-#     create_at = models.DateTimeField(auto_now_add=True)
-#
-#     vote = models.NullBooleanField()
-#     objects = VoteManager()
-#
-#     class Meta:
-#         unique_together = ('user', 'content_type', 'object_id')
-#
-#     @classmethod
-#     def votes_for(cls, model, instance=None):
-#
-#         ct = ContentType.objects.get_for_model(model)
-#         kwargs = {
-#             "content_type": ct
-#         }
-#         if instance is not None:
-#             kwargs["object_id"] = instance.pk
-#
-#         return cls.objects.filter(**kwargs)
-#
+
 class UserManager(BaseUserManager):
 
     use_in_migrations = True
@@ -169,7 +145,7 @@ class Vote(models.Model):
         (DOWN_VOTE, 'Down Vote'),
     )
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE, null=False)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=False, related_name='votes')
     activity_type = models.CharField(max_length=1, choices=ACTIVITY_TYPES)
     date = models.DateTimeField(auto_now_add=True)
 
@@ -219,6 +195,8 @@ class District(models.Model):
     region = models.TextField(max_length=5, blank=False, null=False)
 
 
+from django.utils.functional import cached_property
+
 class Location(models.Model):
     ekatte = models.TextField(max_length=5, blank=False, null=False)
     t_v_m = models.TextField(max_length=5, blank=False, null=False)
@@ -230,7 +208,6 @@ class Location(models.Model):
     kind = models.PositiveSmallIntegerField(blank=False, null=False)
     category = models.PositiveSmallIntegerField(blank=False, null=False)
     altitude = models.PositiveSmallIntegerField(blank=False, null=False)
-
 
 class Service(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='services')

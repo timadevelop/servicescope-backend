@@ -21,6 +21,8 @@ DATETIME_FORMAT = REST_FRAMEWORK['DATETIME_FORMAT']
 from rest_auth.registration.serializers import RegisterSerializer
 
 from .consumers import notify_user
+from django.core.cache import cache
+
 """
 ! RULE : we do not serialize nested User, cuz User serializes user's role.
 ! RULE 2 : anymodel_set field inside other object should contain only url's to objects, not serialized objects
@@ -153,12 +155,13 @@ class LocationSerializer(serializers.HyperlinkedModelSerializer):
     def to_representation(self, instance):
         response = super().to_representation(instance)
         if (self.context['request']):
-            # response['images'] = ServiceImageSerializer(instance.images, many=True, context = self.context).data
-            # try:
-            district = District.objects.get(oblast=instance.oblast)
-            response['district'] = DistrictSerializer(district, many=False, context = self.context).data
-            # except:
-            #     pass
+            district_data = cache.get('SERIALIZED_DISTRICT_{}'.format(instance.oblast))
+            if district_data is None:
+                district = District.objects.get(oblast=instance.oblast)
+                district_data = DistrictSerializer(district, many=False, context = self.context).data
+                cache.set('SERIALIZED_DISTRICT_{}'.format(instance.oblast), district_data)
+
+            response['district'] = district_data
         return response
 
 
@@ -190,6 +193,8 @@ class ServiceImageSerializer(serializers.HyperlinkedModelSerializer):
         return request.build_absolute_uri(imageurl)
 
 
+from django.contrib.admin.options import get_content_type_for_model
+
 class ServiceSerializer(serializers.HyperlinkedModelSerializer):
     images = ServiceImageSerializer(
         many=True,
@@ -216,13 +221,26 @@ class ServiceSerializer(serializers.HyperlinkedModelSerializer):
         if not user or user.is_anonymous:
             return None
 
-        try:
-            vote = instance.votes.get(user=user)
-            # vote = user.votes.get(object_id=instance)
+        if not isinstance(self.instance, list):
+            # just one instance
+            try:
+                vote = instance.votes.get(user__id=user.id)
+                if vote:
+                    return VoteSerializer(vote, many=False, context=self.context).data
+            except:
+                return None
+        else:
+            # we are processing a list (it's better to reduce some sql queries)
+            user_instances_votes = self.context.get('user_instances_votes', None)
+            if user_instances_votes is None:
+                ct = get_content_type_for_model(instance)
+                l = list(user.votes.filter(content_type=ct, object_id__in=[i.pk for i in self.instance]))
+                self.context["user_instances_votes"] = { v.object_id: v for v in l}
+                user_instances_votes = self.context["user_instances_votes"]
+
+            vote = user_instances_votes.get(instance.id, None)
             if vote:
                 return VoteSerializer(vote, many=False, context=self.context).data
-        except:
-            return None
 
         return None
 
@@ -285,19 +303,28 @@ class ServiceSerializer(serializers.HyperlinkedModelSerializer):
                 response['author'] = UserSerializer(instance.author, many=False, context = self.context).data
 
             # response['images'] = ServiceImageSerializer(instance.images, many=True, context = self.context).data
-            response['tags'] = TagSerializer(instance.tags, many=True, context = self.context).data
             # response['category'] = CategorySerializer(instance.category, many=False, context = self.context).data
-            response['location'] = LocationSerializer(instance.location, many=False, context = self.context).data
+
+            response['tags'] = TagSerializer(instance.tags, many=True, context = self.context).data
+            response['location'] = cached_or_new('SERIALIZED_LOCATION_{}'.format(instance.id), LocationSerializer, instance, 'location', self.context)
+            #response['location'] = LocationSerializer(instance.location, many=False, context = self.context).data
         return response
+
+def cached_or_new(key, serializer_class, instance, object_property_name, context, many=False):
+    result = cache.get(key)
+    if result is None:
+        obj = getattr(instance, object_property_name, False)
+        result = serializer_class(obj, many=many, context = context).data
+        cache.set(key, result)
+
+    return result
 
 class ShortServiceSerializer(ServiceSerializer):
     def to_representation(self, instance):
         response = super().to_representation(instance)
         if (self.context['request']):
-            # response['images'] = ServiceImageSerializer(instance.images, many=True, context = self.context).data
             response['tags'] = TagSerializer(instance.tags, many=True, context = self.context).data
-            # response['category'] = CategorySerializer(instance.category, many=False, context = self.context).data
-            response['location'] = LocationSerializer(instance.location, many=False, context = self.context).data
+            response['location'] = cached_or_new('SERIALIZED_LOCATION_{}'.format(instance.id), LocationSerializer, instance, 'location', self.context)
         return response
 
 class ServicePromotionSerializer(serializers.HyperlinkedModelSerializer):

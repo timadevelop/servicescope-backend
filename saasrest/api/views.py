@@ -29,6 +29,14 @@ from django.conf import settings
 import json
 
 """
+Cache
+"""
+from django.utils.decorators import method_decorator
+from django.views.decorators.vary import vary_on_cookie
+from django.views.decorators.cache import cache_page
+
+
+"""
 Channels
 """
 from asgiref.sync import async_to_sync
@@ -71,25 +79,29 @@ Views (TODO: split into files)
 class UserViewSet(viewsets.ModelViewSet):
     """
     """
-    queryset = User.objects.all().order_by('-date_joined')
+    queryset = User.objects.order_by('-date_joined')
     serializer_class = serializers.UserSerializer
     permission_classes = (IsOwnerOrReadOnly, )
 
     @action(detail=False, methods=['get'])
     def me(self, request):
-        user = User.objects.get(pk=request.user.pk)
-        serializer = self.get_serializer(instance=user, many=False)
+        serializer = self.get_serializer(instance=request.user, many=False)
         return Response(serializer.data)
 
 class LocationViewSet(viewsets.ModelViewSet):
     """
     """
-    queryset = Location.objects.all().order_by('kind')
+    queryset = Location.objects.order_by('kind')
     serializer_class = serializers.LocationSerializer
     permission_classes = (IsAdminUserOrReadOnly, )
     filter_backends = (filters.SearchFilter, DjangoFilterBackend, )
     search_fields = ('name',)
     filter_fields = ()
+
+    @method_decorator(cache_page(60*60*24*10))
+    def dispatch(self, *args, **kwargs):
+        return super(self.__class__, self).dispatch(*args, **kwargs)
+
 
     # create only for employee & customer.
     def perform_create(self, serializer):
@@ -115,13 +127,18 @@ class LocationViewSet(viewsets.ModelViewSet):
 class DistrictViewSet(viewsets.ModelViewSet):
     """
     """
-    queryset = District.objects.all()
+    queryset = District.objects.order_by('-id')
     serializer_class = serializers.DistrictSerializer
     permission_classes = (IsAuthenticated, IsAdminUserOrReadOnly, )
     filter_backends = (filters.SearchFilter, DjangoFilterBackend, )
     search_fields = ('name',)
     filter_fields = ()
     lookup_field = 'oblast'
+
+
+    @method_decorator(cache_page(60*60*24*10))
+    def dispatch(self, *args, **kwargs):
+        return super(self.__class__, self).dispatch(*args, **kwargs)
 
     # create only for employee & customer.
     def perform_create(self, serializer):
@@ -134,11 +151,15 @@ class DistrictViewSet(viewsets.ModelViewSet):
 class TagViewSet(viewsets.ModelViewSet):
     """
     """
-    queryset = Tag.objects.all().order_by('-name')
+    queryset = Tag.objects.order_by('-name')
     serializer_class = serializers.TagSerializer
     permission_classes = (IsAuthenticatedOrReadOnly, )
     filter_backends = (filters.SearchFilter, DjangoFilterBackend, )
     search_fields = ('name', )
+
+    @method_decorator(cache_page(60*1))
+    def dispatch(self, *args, **kwargs):
+        return super(self.__class__, self).dispatch(*args, **kwargs)
 
     def perform_create(self, serializer):
         if self.request.user:
@@ -156,10 +177,31 @@ class TagViewSet(viewsets.ModelViewSet):
         serializer = self.serializer_class(tag, many=False, context={'request': request})
         return Response(serializer.data)
 
-class CategoryViewSet(TagViewSet):
-    queryset = Category.objects.all().order_by('-name')
+class CategoryViewSet(viewsets.ModelViewSet):
+    queryset = Category.objects.order_by('-name')
     serializer_class = serializers.CategorySerializer
+    permission_classes = (IsAuthenticatedOrReadOnly, )
+    filter_backends = (filters.SearchFilter, DjangoFilterBackend, )
+    search_fields = ('name', )
 
+    @method_decorator(cache_page(60*1))
+    def dispatch(self, *args, **kwargs):
+        return super(self.__class__, self).dispatch(*args, **kwargs)
+
+    def perform_create(self, serializer):
+        if self.request.user:
+            serializer.save()
+        else:
+            raise PermissionDenied()
+
+    @action(detail=False, methods=['get'], url_path='name/(?P<category_name>[^/]+)')
+    def get_category_by_name(self, request, category_name):
+        try:
+            category = self.queryset.get(name=category_name)
+        except ObjectDoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        serializer = self.serializer_class(category, many=False, context={'request': request})
 
 class ServiceFilter(django_filters.FilterSet):
 
@@ -177,14 +219,14 @@ class ServiceFilter(django_filters.FilterSet):
     # `to_field_name` is crucial here
     # `conjoined=True` makes that, the more tags, the more narrow the search
     tags = django_filters.ModelMultipleChoiceFilter(
-        queryset=Tag.objects.all(),
+        queryset=Tag.objects,
         to_field_name='name',
         conjoined=True,
         method='filter_tags'
     )
 
     category = django_filters.ModelMultipleChoiceFilter(
-        queryset=Category.objects.all(),
+        queryset=Category.objects,
         to_field_name='name',
         conjoined=True,
         method='filter_category'
@@ -208,14 +250,22 @@ class ServiceFilter(django_filters.FilterSet):
 class ServiceViewSet(viewsets.ModelViewSet):
     """
     """
-    queryset = Service.objects.prefetch_related('tags').prefetch_related('images').select_related('category').select_related('location').order_by('-created_at')
+    queryset = Service.objects.filter(Q(promoted_til__gt=timezone.now()) | Q(promoted_til=None)).prefetch_related('tags').prefetch_related('images').select_related('category').select_related('location').order_by('-created_at')
     serializer_class = serializers.ServiceSerializer
     permission_classes = (IsOwnerOrReadOnly, )
     filter_backends = (filters.SearchFilter, DjangoFilterBackend, filters.OrderingFilter )
-    # ordering_fields = ('price', 'created_at', 'score')
-    # search_fields = ('title', 'description',)
-    # filter_fields = ('author', 'author__id', 'location', 'tags__contain')
+    ordering_fields = ('price', 'created_at', 'score')
+    search_fields = ('title', 'description',)
+    filter_fields = ('author', 'author__id', 'location', 'tags__contain')
     filter_class = ServiceFilter
+
+
+    # one minute cache
+    # @method_decorator(cache_page(60*1))
+    # @method_decorator(vary_on_cookie)
+    # def dispatch(self, *args, **kwargs):
+    #     return super(self.__class__, self).dispatch(*args, **kwargs)
+    #
 
     # create only for employee & customer.
     def perform_create(self, serializer):
@@ -269,6 +319,11 @@ class ServicePromotionViewSet(viewsets.ModelViewSet):
     search_fields = ()
     filter_fields = ('author', 'author__id', 'service', 'service__id', 'transaction_id' )
 
+    # @method_decorator(cache_page(60*1))
+    # @method_decorator(vary_on_cookie)
+    # def dispatch(self, *args, **kwargs):
+    #     return super(self.__class__, self).dispatch(*args, **kwargs)
+
     def perform_create(self, serializer):
         if self.request.user:
             serializer.save(author=self.request.user)
@@ -305,7 +360,7 @@ class ServicePromotionViewSet(viewsets.ModelViewSet):
         return queryset.order_by('?')
 
     def list(self, request):
-        queryset = self.filter_promotion_queryset(self.queryset, request)
+        queryset = self.filter_promotion_queryset(self.get_queryset(), request)
 
         page = self.paginate_queryset(queryset)
         if page is not None:
@@ -335,7 +390,7 @@ class OfferViewSet(viewsets.ModelViewSet):
     (request from employee to business, from employee to customer,
      from customer to business to connect them)
     """
-    queryset = Offer.objects.all().order_by('-updated_at')
+    queryset = Offer.objects.order_by('-updated_at')
     serializer_class = serializers.OfferSerializer
     permission_classes = (IsOwnerOrReadOnly, )
     filter_backends = (filters.SearchFilter, DjangoFilterBackend)
@@ -641,7 +696,7 @@ class OfferViewSet(viewsets.ModelViewSet):
 class NotificationViewSet(viewsets.ModelViewSet):
     """
     """
-    queryset = Notification.objects.all()
+    queryset = Notification.objects
     serializer_class = serializers.NotificationSerializer
     permission_classes = (IsAuthenticated, IsOwnerOrReadOnly, )
     filter_backends = (filters.SearchFilter, DjangoFilterBackend, )
@@ -655,7 +710,7 @@ class NotificationViewSet(viewsets.ModelViewSet):
 class ReviewViewSet(viewsets.ModelViewSet):
     """
     """
-    queryset = Review.objects.all()
+    queryset = Review.objects
     serializer_class = serializers.ReviewSerializer
     permission_classes = (IsAuthenticated, IsOwnerOrReadOnly, )
     filter_backends = (filters.SearchFilter, DjangoFilterBackend, )
@@ -674,7 +729,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 class VoteViewSet(viewsets.ModelViewSet):
     """
     """
-    queryset = Vote.objects.all()
+    queryset = Vote.objects
     serializer_class = serializers.VoteSerializer
     permission_classes = (IsOwnerOrReadOnly, )
 
@@ -686,7 +741,7 @@ Messages
 class MessageImageViewSet(viewsets.ModelViewSet):
     """
     """
-    queryset = models.MessageImage.objects.all()
+    queryset = models.MessageImage.objects
     serializer_class = serializers.MessageImageSerializer
     permission_classes = (IsAuthenticated, IsOwner, )
 
@@ -700,7 +755,7 @@ class MessageImageViewSet(viewsets.ModelViewSet):
 class MessageViewSet(viewsets.ModelViewSet):
     """
     """
-    queryset = models.Message.objects.all()
+    queryset = models.Message.objects
     serializer_class = serializers.MessageSerializer
     permission_classes = (IsAuthenticated, IsOwner, )
     filter_backends = (filters.SearchFilter, DjangoFilterBackend, filters.OrderingFilter )
@@ -730,7 +785,7 @@ class MessageViewSet(viewsets.ModelViewSet):
 class ConversationViewSet(viewsets.ModelViewSet):
     """
     """
-    queryset = models.Conversation.objects.all()
+    queryset = models.Conversation.objects
     serializer_class = serializers.ConversationSerializer
     permission_classes = (IsAuthenticated, IsOwner, )
     filter_backends = (filters.SearchFilter, DjangoFilterBackend, filters.OrderingFilter )
@@ -761,7 +816,7 @@ class ConversationViewSet(viewsets.ModelViewSet):
 class FeedbackViewSet(viewsets.ModelViewSet):
     """
     """
-    queryset = models.Feedback.objects.all()
+    queryset = models.Feedback.objects
     serializer_class = serializers.FeedbackSerializer
     permission_classes = (IsAuthenticated, IsOwnerOrReadOnly, )
     filter_backends = (filters.SearchFilter, DjangoFilterBackend, )
