@@ -41,13 +41,12 @@ class Service(models.Model):
     score = models.IntegerField(default=0)
     votes = GenericRelation(Vote)
     promoted_til = models.DateTimeField(null=True, blank=True)
-    # @property
-    # def likes(self):
-    #     return self.votes.filter(activity_type=Vote.UP_VOTE)
-    #
-    # @property
-    # def dislikes(self):
-    #     return self.votes.filter(activity_type=Vote.DOWN_VOTE)
+    
+    def likes(self):
+        return self.votes.filter(activity_type=Vote.UP_VOTE)
+    
+    def dislikes(self):
+        return self.votes.filter(activity_type=Vote.DOWN_VOTE)
 
     # hints
     # Get the post object
