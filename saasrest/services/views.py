@@ -18,6 +18,8 @@ from .permissions import IsOwnerOrReadOnly
 from .serializers import (ServiceImageSerializer, ServicePromotionSerializer,
                           ServiceSerializer)
 
+import random
+
 
 class ServiceFilter(django_rest_filters.FilterSet):
     """Custom filter for services"""
@@ -151,7 +153,7 @@ class ServicePromotionViewSet(viewsets.ModelViewSet):
     Services Promotions
     TODO permissions
     """
-    queryset = ServicePromotion.objects.all()
+    queryset = ServicePromotion.objects
     serializer_class = ServicePromotionSerializer
     permission_classes = (IsOwnerOrReadOnly, )
     filter_backends = (filters.SearchFilter,
@@ -182,7 +184,8 @@ class ServicePromotionViewSet(viewsets.ModelViewSet):
         tags = request.GET.getlist('tags')
         #
         if author_id:
-            queryset = queryset.filter(service__author__id=author_id)
+            queryset = queryset.filter(service__author_id=author_id)
+
         if category:
             # filter service category
             # Always change queryset
@@ -194,27 +197,38 @@ class ServicePromotionViewSet(viewsets.ModelViewSet):
             tmp_queryset = queryset.filter(service__tags__name__in=tags)
             if tmp_queryset.exists() or not category:
                 queryset = tmp_queryset
+
         if query:
             # filter service title
             # do not change queryset if there are no services with similar title
             tmp_queryset = queryset.filter(service__title__contains=query)
-            if tmp_queryset.exists() or (not tags and not category) or (not category and not tags):
+            if tmp_queryset.exists() or (not tags and not category):
                 queryset = tmp_queryset
-        return queryset.order_by('?')
+
+        return queryset.distinct()
 
     def list(self, request):
         """Custom list processing"""
-        queryset = self.filter_promotion_queryset(self.get_queryset(), request)
+        queryset = self.filter_promotion_queryset(self.queryset, request)
+        # .order_by('?')
 
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.serializer_class(
-                page, many=True, context={'request': request})
-            return self.get_paginated_response(serializer.data)
+        valid_id_list = list(queryset.values_list('id', flat=True))
+        # print(valid_id_list)
+        random_id_list = random.sample(
+            valid_id_list, min(len(valid_id_list), 5))
+        queryset = self.queryset.filter(id__in=random_id_list)
 
         serializer = self.serializer_class(
             queryset, many=True, context={'request': request})
-        return Response(serializer.data)
+        
+        return Response({
+            'next': None,
+            'previous': None,
+            'count': 5,
+            'pages': 1,
+            'page': 1,
+            'results': serializer.data
+        })
 
 
 class ServiceImageViewSet(viewsets.ModelViewSet):
