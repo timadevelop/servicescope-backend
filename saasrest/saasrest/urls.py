@@ -13,57 +13,66 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from django.conf import settings
+from django.conf.urls import include, url
+from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path
-
-from django.conf.urls import url, include
 from rest_framework import routers
-from api import views
-from api import models
 
-
-from django.conf.urls.static import static
-from django.conf import settings
-
+import authentication.urls
+import categories.urls
+import feedback.urls
+import locations.urls
+import messaging.urls
+import notifications.urls
+import payments.urls
+import public_configs.urls
+import services.urls
+import tags.urls
+import votes.urls
 #
 # routers
 #
 router = routers.DefaultRouter()
-router.register(r'users', views.UserViewSet)
-router.register(r'locations', views.LocationViewSet)
-router.register(r'districts', views.DistrictViewSet)
-router.register(r'tags', views.TagViewSet)
-router.register(r'categories', views.CategoryViewSet)
-router.register(r'services', views.ServiceViewSet)
-router.register(r'service-promotions', views.ServicePromotionViewSet)
-router.register(r'service-images', views.ServiceImageViewSet)
-router.register(r'votes', views.VoteViewSet)
+# router.register(r'votes', views.VoteViewSet)
 
-router.register(r'feedback', views.FeedbackViewSet)
+# router.register(r'feedback', views.FeedbackViewSet)
 
-router.register(r'offers', views.OfferViewSet)
+# router.register(r'offers', views.OfferViewSet)
 
-router.register(r'notifications', views.NotificationViewSet)
-router.register(r'reviews', views.ReviewViewSet)
+# router.register(r'notifications', views.NotificationViewSet)
+# router.register(r'reviews', views.ReviewViewSet)
 
-router.register(r'conversations', views.ConversationViewSet)
-router.register(r'messages', views.MessageViewSet)
-router.register(r'message-images', views.MessageImageViewSet)
-# payments (stripe)
-router.register(r'payments', views.PaymentsViewSet, basename='payments')
-# config
-router.register(r'config', views.ConfigViewSet, basename='config')
 
-#
+# # payments (stripe)
+# router.register(r'payments', views.PaymentsViewSet, basename='payments')
+# # config
+# router.register(r'config', views.ConfigViewSet, basename='config')
+
+
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browsable API.
 urlpatterns = [
-    path('saas_api/admin/', admin.site.urls),
-    url(r'^saas_api/auth/', include('rest_framework_social_oauth2.urls')),
-    url(r'^saas_api/', include(router.urls)),
-
-    # url(r'^rest-auth/', include('rest_auth.urls')),
-    url(r'^saas_api/auth/registration/', include('rest_auth.registration.urls')),
+    url(r'^saas_api/', include([
+        path('admin/', admin.site.urls),
+        url(r'auth/', include('rest_framework_social_oauth2.urls')),
+        # url(r'', include(router.urls)),
+        url(r'', include(authentication.urls)),
+        url(r'', include(categories.urls)),
+        url(r'', include(locations.urls)),
+        url(r'', include(feedback.urls)),
+        url(r'', include(messaging.urls)),
+        url(r'', include(notifications.urls)),
+        url(r'', include(payments.urls)),
+        url(r'', include(public_configs.urls)),
+        url(r'', include(services.urls)),
+        url(r'', include(tags.urls)),
+        url(r'', include(votes.urls)),
+        # url(r'^rest-auth/', include('rest_auth.urls')),
+        url(r'auth/registration/',
+            include('rest_auth.registration.urls')),
+    ]))
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

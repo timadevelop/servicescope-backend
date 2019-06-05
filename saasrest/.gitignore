@@ -1,6 +1,6 @@
 # Created by https://www.gitignore.io
 media
-api/migrations/
+migrations
 celerybeat-schedule
 
 collected_static

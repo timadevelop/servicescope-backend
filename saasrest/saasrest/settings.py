@@ -55,7 +55,19 @@ INSTALLED_APPS = [
     # api
     'rest_framework',
     'rest_framework.authtoken',
-    'api',
+    'saas_core',
+    'authentication',
+    'categories',
+    'locations',
+    'feedback',
+    'messaging',
+    'notifications',
+    'payments',
+    'public_configs',
+    'services',
+    'tags',
+    'votes',
+    # 'api',
     # auth
     'oauth2_provider',
     'social_django',
@@ -97,17 +109,17 @@ ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_USER_EMAIL_FIELD = 'email'
 ACCOUNT_LOGOUT_ON_GET = True
 
-AUTH_USER_MODEL = 'api.User'
+AUTH_USER_MODEL = 'authentication.User'
 
 REST_AUTH_SERIALIZERS = {
-    "USER_DETAILS_SERIALIZER": "api.serializers.CustomUserDetailsSerializer",
+    "USER_DETAILS_SERIALIZER": "authentication.serializers.CustomUserDetailsSerializer",
 }
 REST_AUTH_REGISTER_SERIALIZERS = {
-    "REGISTER_SERIALIZER": "api.serializers.CustomRegisterSerializer",
+    "REGISTER_SERIALIZER": "authentication.serializers.CustomRegisterSerializer",
 }
 SITE_ID = 1
 
-ACCOUNT_ADAPTER = 'api.adapters.CustomUserAccountAdapter'
+ACCOUNT_ADAPTER = 'authentication.adapters.CustomUserAccountAdapter'
 
 MIDDLEWARE = [
     # cache
@@ -199,7 +211,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'saasrest.wsgi.application'
-ASGI_APPLICATION = 'api.routing.application'
+ASGI_APPLICATION = 'saas_core.routing.application'
 
 
 from .local_settings import REDIS_HOSTS
@@ -312,7 +324,7 @@ REST_FRAMEWORK = {
         'oauth2_provider.contrib.rest_framework.OAuth2Authentication',  # django-oauth-toolkit >= 1.0.0
         'rest_framework_social_oauth2.authentication.SocialAuthentication',
     ),
-    'DEFAULT_PAGINATION_CLASS': 'api.paginations.MyPagination',#'rest_framework.pagination.LimitOffsetPagination',
+    'DEFAULT_PAGINATION_CLASS': 'saas_core.paginations.MyPagination',#'rest_framework.pagination.LimitOffsetPagination',
     'PAGINATE_BY': 10,                 # Default to 10
     'PAGINATE_BY_PARAM': 'page_size',  # Allow client to override, using `?page_size=xxx`.
     'MAX_PAGINATE_BY': 100,             # Maximum limit allowed when using `?page_size=xxx`
