@@ -341,6 +341,10 @@ AUTHENTICATION_BACKENDS = (
     # Google OAuth2
     'social.backends.google.GoogleOAuth2',
 
+    # Facebook OAuth2
+    'social_core.backends.facebook.FacebookAppOAuth2',
+    'social_core.backends.facebook.FacebookOAuth2',
+
     # django-rest-framework-social-oauth2
     'rest_framework_social_oauth2.backends.DjangoOAuth2',
     # Django
@@ -354,6 +358,17 @@ SOCIAL_AUTH_GOOGLE_PROFILE_EXTRA_PARAMS = {
     'fields': 'email,name,first_name,last_name'
 }
 
+
+from .local_settings import FACEBOOK_APP_ID, FACEBOOK_APP_SECRET
+# Facebook configuration
+SOCIAL_AUTH_FACEBOOK_KEY = FACEBOOK_APP_ID
+SOCIAL_AUTH_FACEBOOK_SECRET = FACEBOOK_APP_SECRET
+
+# Define SOCIAL_AUTH_FACEBOOK_SCOPE to get extra permissions from facebook. Email is not sent by default, to get it, you must request the email permission:
+SOCIAL_AUTH_FACEBOOK_SCOPE = ['email']
+SOCIAL_AUTH_FACEBOOK_PROFILE_EXTRA_PARAMS = {
+    'fields': 'id, name, email, first_name, last_name'
+}
 
 
 ## Stripe

@@ -19,6 +19,7 @@ class ConfigViewSet(viewsets.ViewSet):
             'API_CLIENT_SECRET': local_settings.API_CLIENT_SECRET,
             'STRIPE_PUBLIC_KEY': local_settings.STRIPE_TEST_PUBLIC_KEY,
             'GOOGLE_CLIENT_ID': local_settings.GOOGLE_CLIENT_ID,
+            'FACEBOOK_APP_ID': local_settings.FACEBOOK_APP_ID,
         }
 
         return Response(resp)
