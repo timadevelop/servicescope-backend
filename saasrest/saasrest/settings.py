@@ -349,9 +349,9 @@ AUTHENTICATION_BACKENDS = (
 
 
 from .local_settings import SOCIAL_AUTH_GOOGLE_OAUTH2_KEY, SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET
-SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = ['email',]
+SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = ['email']
 SOCIAL_AUTH_GOOGLE_PROFILE_EXTRA_PARAMS = {
-    'fields': 'email'
+    'fields': 'email,name,first_name,last_name'
 }
 
 
