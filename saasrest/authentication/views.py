@@ -10,7 +10,7 @@ from rest_framework.response import Response
 from saas_core.permissions import IsOwnerOrReadOnly
 
 from .models import User
-from .serializers import UserSerializer
+from .serializers import UserSerializer, PrivateUserSerializer
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -23,7 +23,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'])
     def me(self, request):
-        serializer = self.get_serializer(instance=request.user, many=False)
+        serializer = PrivateUserSerializer(instance=request.user, many=False, context={'request': request})
         return Response(serializer.data)
 
 

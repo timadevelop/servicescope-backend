@@ -13,6 +13,8 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from rest_auth.registration.views import VerifyEmailView, RegisterView
+from allauth.account.views import email_verification_sent, confirm_email as allauthemailconfirmation
 from django.conf import settings
 from django.conf.urls import include, url
 from django.conf.urls.static import static
@@ -53,6 +55,15 @@ router = routers.DefaultRouter()
 
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browsable API.
+
+
+# urlpatterns = [
+# path('', include('rest_auth.urls')),
+# path('login/', LoginView.as_view(), name='account_login'),
+# path('registration/', include('rest_auth.registration.urls')),
+# path('registration/', RegisterView.as_view(), name='account_signup'),
+
+
 urlpatterns = [
     url(r'^saas_api/', include([
         path('admin/', admin.site.urls),
@@ -72,6 +83,10 @@ urlpatterns = [
         # url(r'^rest-auth/', include('rest_auth.urls')),
         url(r'auth/registration/',
             include('rest_auth.registration.urls')),
+        url(r'^auth/account-confirm-email/(?P<key>[-:\w]+)/$', allauthemailconfirmation,
+            name='account_confirm_email'),
+        url(r'^auth/account-confirm-email/', email_verification_sent,
+            name='account_email_verification_sent'),
     ]))
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

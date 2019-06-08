@@ -1,5 +1,13 @@
-from django.db import models
+from allauth.account.models import EmailAddress
+from allauth.account.utils import send_email_confirmation
 from django.contrib.auth.models import AbstractUser, BaseUserManager
+from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.http import HttpRequest
+from social_django.models import UserSocialAuth
+
+import saasrest.local_settings
 
 # Create your models here.
 
@@ -105,6 +113,10 @@ class User(AbstractUser):
         # TODO
         # return self.date_joined < timezone.now() and self.is_active
 
+    @property
+    def is_verified_email(self):
+        return EmailAddress.objects.filter(user=self, verified=True).exists()
+
 
 """
 Receiver for user payments?
@@ -123,3 +135,18 @@ Receiver for user payments?
 #         elif instance.role == 'admin':
 #             return None
 #
+
+
+@receiver(post_save, sender=UserSocialAuth)
+def create_user_role(sender, instance, created, **kwargs):
+    if created:
+        user = instance.user
+        email, email_created = EmailAddress.objects.get_or_create(
+            user=user, email=user.email)
+        if email_created:
+            email.primary = True
+            email.save()
+            request = HttpRequest()
+            request.META['SERVER_NAME'] = saasrest.local_settings.API_HOST
+            request.META['SERVER_PORT'] = saasrest.local_settings.API_PORT
+            email.send_confirmation(request, signup=True)

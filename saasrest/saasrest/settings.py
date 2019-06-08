@@ -10,6 +10,16 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.1/ref/settings/
 """
 
+from .local_settings import EMAIL_HOST_PASSWORD, EMAIL_HOST_USER
+from .local_settings import STRIPE_LIVE_MODE, STRIPE_LIVE_PUBLIC_KEY, STRIPE_LIVE_SECRET_KEY, \
+    STRIPE_TEST_PUBLIC_KEY, STRIPE_TEST_SECRET_KEY, STRIPE_WEBHOOK_ENDPOINT_SECRET
+from .local_settings import FACEBOOK_APP_ID, FACEBOOK_APP_SECRET
+from .local_settings import SOCIAL_AUTH_GOOGLE_OAUTH2_KEY, SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET
+from .local_settings import MEMCACHED_LOCATION
+from .local_settings import DB_CONFIG
+from .local_settings import REDIS_HOSTS
+from .local_settings import CELERY_BROKER_URL
+from .local_settings import SECRET_KEY
 import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -20,7 +30,6 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-from .local_settings import SECRET_KEY
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -96,13 +105,26 @@ INSTALLED_APPS = [
 # CELERY_TIMEZONE = 'UTC'
 CELERY_ENABLE_UTC = True
 CELERY_TIMEZONE = 'Europe/Sofia'
-from .local_settings import CELERY_BROKER_URL
 
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
 
 
-ACCOUNT_EMAIL_VERIFICATION = 'none'
+ACCOUNT_EMAIL_VERIFICATION = True
+ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
+
+SOCIAL_AUTH_FORCE_EMAIL_VALIDATION = True
+SOCIALACCOUNT_EMAIL_VERIFICATION = 'mandatory'
+ACCOUNT_AUTHENTICATION_METHOD = 'email'
+ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
+
+SOCIALACCOUNT_QUERY_EMAIL = True
+SOCIALACCOUNT_EMAIL_REQUIRED = True
+
+ACCOUNT_CONFIRM_EMAIL_ON_GET=True
+ACCOUNT_EMAIL_CONFIRMATION_ANONYMOUS_REDIRECT_URL="https://google.com/"
+ACCOUNT_EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL="https://facebook.com/"
+
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_USERNAME_REQUIRED = False
@@ -148,10 +170,12 @@ MIDDLEWARE = [
 
 INTERNAL_IPS = ['192.168.1.22', 'localhost', '127.0.0.1', "*"]
 
+
 def show_toolbar(request):
     if request.is_ajax():
         return False
     return True
+
 
 DEBUG_TOOLBAR_CONFIG = {
     'SHOW_TOOLBAR_CALLBACK': 'saasrest.settings.show_toolbar',
@@ -194,7 +218,7 @@ ROOT_URLCONF = 'saasrest.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [''],
+        'DIRS': ['', os.path.join(BASE_DIR, 'templates'), os.path.join(BASE_DIR, 'templates', 'allauth')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -214,8 +238,6 @@ WSGI_APPLICATION = 'saasrest.wsgi.application'
 ASGI_APPLICATION = 'saas_core.routing.application'
 
 
-from .local_settings import REDIS_HOSTS
-
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
@@ -227,7 +249,6 @@ CHANNEL_LAYERS = {
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
 
-from .local_settings import DB_CONFIG
 
 DATABASES = {
     'default': {
@@ -243,7 +264,6 @@ DATABASES = {
 }
 
 # Caching
-from .local_settings import MEMCACHED_LOCATION
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
@@ -305,14 +325,14 @@ LOCALE_PATHS = (
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, "collected_static")
 STATICFILES_DIRS = (
-  os.path.join(BASE_DIR, 'static'),
+    os.path.join(BASE_DIR, 'static'),
 )
 MEDIA_URL = '/media/'
-MEDIA_ROOT=os.path.join(BASE_DIR, "media")
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 
 OAUTH2_PROVIDER = {
-    'ACCESS_TOKEN_EXPIRE_SECONDS': 60 * 60 * 24 * 180, # 15552000 # 180 days
+    'ACCESS_TOKEN_EXPIRE_SECONDS': 60 * 60 * 24 * 180,  # 15552000 # 180 days
     # 'OAUTH_SINGLE_ACCESS_TOKEN': True,
     'OAUTH_DELETE_EXPIRED': True
 }
@@ -321,13 +341,17 @@ REST_FRAMEWORK = {
     # 'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.IsAuthenticatedOrReadOnly',),
     'DEFAULT_AUTHENTICATION_CLASSES': (
         # 'oauth2_provider.ext.rest_framework.OAuth2Authentication',  # django-oauth-toolkit < 1.0.0
-        'oauth2_provider.contrib.rest_framework.OAuth2Authentication',  # django-oauth-toolkit >= 1.0.0
+        # django-oauth-toolkit >= 1.0.0
+        'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
         'rest_framework_social_oauth2.authentication.SocialAuthentication',
     ),
-    'DEFAULT_PAGINATION_CLASS': 'saas_core.paginations.MyPagination',#'rest_framework.pagination.LimitOffsetPagination',
+    # 'rest_framework.pagination.LimitOffsetPagination',
+    'DEFAULT_PAGINATION_CLASS': 'saas_core.paginations.MyPagination',
     'PAGINATE_BY': 10,                 # Default to 10
-    'PAGINATE_BY_PARAM': 'page_size',  # Allow client to override, using `?page_size=xxx`.
-    'MAX_PAGINATE_BY': 100,             # Maximum limit allowed when using `?page_size=xxx`
+    # Allow client to override, using `?page_size=xxx`.
+    'PAGINATE_BY_PARAM': 'page_size',
+    # Maximum limit allowed when using `?page_size=xxx`
+    'MAX_PAGINATE_BY': 100,
     'DEFAULT_FILTER_BACKENDS': ('django_filters.rest_framework.DjangoFilterBackend',),
     'DATETIME_FORMAT': "%Y-%m-%dT%H:%M:%S%z",
     'DATETIME_INPUT_FORMATS': ["%Y-%m-%dT%H:%M:%S%z"]
@@ -352,32 +376,28 @@ AUTHENTICATION_BACKENDS = (
 )
 
 
-from .local_settings import SOCIAL_AUTH_GOOGLE_OAUTH2_KEY, SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET
 SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = ['email']
 SOCIAL_AUTH_GOOGLE_PROFILE_EXTRA_PARAMS = {
     'fields': 'email,name,first_name,last_name'
 }
 
-
-from .local_settings import FACEBOOK_APP_ID, FACEBOOK_APP_SECRET
 # Facebook configuration
 SOCIAL_AUTH_FACEBOOK_KEY = FACEBOOK_APP_ID
 SOCIAL_AUTH_FACEBOOK_SECRET = FACEBOOK_APP_SECRET
 
-# Define SOCIAL_AUTH_FACEBOOK_SCOPE to get extra permissions from facebook. Email is not sent by default, to get it, you must request the email permission:
+# Define SOCIAL_AUTH_FACEBOOK_SCOPE to get extra permissions from facebook.
+# Email is not sent by default, to get it, you must request the email permission:
 SOCIAL_AUTH_FACEBOOK_SCOPE = ['email']
 SOCIAL_AUTH_FACEBOOK_PROFILE_EXTRA_PARAMS = {
     'fields': 'id, name, email, first_name, last_name'
 }
 
 
-## Stripe
-from .local_settings import STRIPE_LIVE_MODE, STRIPE_LIVE_PUBLIC_KEY, STRIPE_LIVE_SECRET_KEY, \
-                            STRIPE_TEST_PUBLIC_KEY, STRIPE_TEST_SECRET_KEY, STRIPE_WEBHOOK_ENDPOINT_SECRET
+# Stripe
 
 
-## Email sending
+# Email sending
 EMAIL_USE_TLS = True
 EMAIL_HOST = 'smtp.zoho.com'
 EMAIL_PORT = 587
-from .local_settings import EMAIL_HOST_PASSWORD, EMAIL_HOST_USER
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER

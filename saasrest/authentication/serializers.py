@@ -15,6 +15,7 @@ from .models import User
 # from datetime import datetime
 # from saasrest.settings import REST_FRAMEWORK
 
+
 class CustomRegisterSerializer(RegisterSerializer):
     """
     User serializer on registration process
@@ -55,6 +56,7 @@ class CustomRegisterSerializer(RegisterSerializer):
     def update(self, instance, validated_data):
         return super().update(instance, validated_data)
 
+
 class CustomUserDetailsSerializer(serializers.ModelSerializer):
     """
     wat
@@ -63,7 +65,6 @@ class CustomUserDetailsSerializer(serializers.ModelSerializer):
         model = User
         fields = ('email')
         read_only_fields = ('email',)
-
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
@@ -90,10 +91,7 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = User
         # TODO
-        fields = ('id', 'url', 'email', 'phone', 'bio', 'first_name', 'last_name', 'image', \
-                  #'services', 'posts', 'offers'
-                  'date_joined',)
-        # outcome_reviews, income_reviwes
+        fields = ('id', 'url', 'email', 'phone', 'bio', 'first_name', 'last_name', 'image', 'date_joined', )
         read_only_fields = ('id', 'url', )
 
     def to_representation(self, instance):
@@ -103,7 +101,7 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
                 response['services_count'] = self.get_services_count(instance)
                 response['posts_count'] = self.get_posts_count(instance)
                 # response['income_reviews_count'] = self.get_income_reviews_count(
-                    # instance)
+                # instance)
                 # response['offers_count'] = self.get_offers_count(instance)
                 response['notifications_count'] = self.get_notifications_count(
                     instance)
@@ -119,9 +117,6 @@ class PrivateUserSerializer(serializers.HyperlinkedModelSerializer):
         model = User
         # TODO
         fields = ('id', 'url', 'email', 'phone', 'bio', 'first_name', 'last_name',
-                  'service_promotions', 'post_promotions', 'services',
-                #   'posts',
-                  'offers',
-                  'outcome_reviews', 'income_reviews')
+                  'service_promotions', 'services', 'is_verified_email',)
         # outcome_reviews, income_reviwes
         read_only_fields = ('id', 'url', )
