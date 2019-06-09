@@ -4,6 +4,7 @@ import authentication.serializers
 
 from .models import Conversation, Message, MessageImage
 
+from django.utils.translation import ugettext as _
 
 class ConversationSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
@@ -36,12 +37,12 @@ class ConversationSerializer(serializers.HyperlinkedModelSerializer):
         """Validate users field"""
         request = self.context.get("request")
         if not request or not hasattr(request, "user"):
-            raise serializers.ValidationError("Login please")
+            raise serializers.ValidationError(_("Login please"))
 
         user = request.user
 
         if len(value) != 2:
-            raise serializers.ValidationError("2 Users required")
+            raise serializers.ValidationError(_("2 Users required"))
 
         users = value
         request_user_is_in_users = False
@@ -58,7 +59,7 @@ class ConversationSerializer(serializers.HyperlinkedModelSerializer):
             q = q.filter(users=u)
 
         if q.exists():
-            raise serializers.ValidationError("Conversation exists")
+            raise serializers.ValidationError(_("Conversation exists"))
 
         return value
 
@@ -100,14 +101,14 @@ class MessageSerializer(serializers.HyperlinkedModelSerializer):
 
         is_in_conversation = value.users.all().filter(id=user.id).exists()
         if not is_in_conversation:
-            raise serializers.ValidationError("You're not in conversation")
+            raise serializers.ValidationError(_("You're not in conversation"))
 
         return value
 
     def validate_author(self, value):
         user = self.get_current_user()
         if user.id != value.id:
-            raise serializers.ValidationError("Request user must be author")
+            raise serializers.ValidationError(_("Request user must be author"))
 
         return value
 

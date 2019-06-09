@@ -10,6 +10,7 @@ from tags.serializers import TagSerializer
 from votes.serializers import VoteSerializer
 
 from .models import Service, ServiceImage, ServicePromotion
+from django.utils.translation import ugettext as _
 
 
 class ServiceImageSerializer(serializers.HyperlinkedModelSerializer):
@@ -115,13 +116,12 @@ class ServiceSerializer(serializers.HyperlinkedModelSerializer):
         """Validate author field"""
         request = self.context.get("request")
         if not request or not hasattr(request, "user"):
-            raise serializers.ValidationError("Login please")
+            raise serializers.ValidationError(_("Login please"))
 
         user = request.user
 
         if user != value:
-            raise serializers.ValidationError(
-                "You can not create services for another user")
+            raise serializers.ValidationError(_("You can not create services for another user"))
 
         return value
 

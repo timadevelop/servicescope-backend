@@ -21,6 +21,8 @@ from .serializers import (ServiceImageSerializer, ServicePromotionSerializer,
 
 import random
 
+from django.utils.translation import ugettext as _
+
 
 class ServiceFilter(django_rest_filters.FilterSet):
     """Custom filter for services"""
@@ -131,7 +133,7 @@ class ServiceViewSet(viewsets.ModelViewSet):
         if self.request.user:
             current_service = self.get_object()
             if current_service.votes.filter(user=self.request.user).exists():
-                return Response({'detail': 'Already voted'}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'detail': _("Already voted.")}, status=status.HTTP_400_BAD_REQUEST)
             vote = current_service.votes.create(
                 activity_type=votetype, user=request.user)
             serializer = VoteSerializer(
