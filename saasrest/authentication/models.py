@@ -129,6 +129,7 @@ class User(AbstractUser):
                 user=self, email=self.__original_email)
             email.email = self.email
             email.primary = True
+            email.verified = False
             email.save()
             request = HttpRequest()
             request.META['SERVER_NAME'] = saasrest.local_settings.API_HOST
@@ -147,6 +148,7 @@ def on_user_created(sender, instance, created, **kwargs):
             user=user, email=user.email)
         if email_created:
             email.primary = True
+            email.verified = False
             email.save()
             request = HttpRequest()
             request.META['SERVER_NAME'] = saasrest.local_settings.API_HOST
