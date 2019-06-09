@@ -181,6 +181,7 @@ class ServicePromotionViewSet(viewsets.ModelViewSet):
         category = request.GET.get('category')
         query = request.GET.get('search')
         author_id = request.GET.get('author_id')
+        location_id = request.GET.get('location_id')
         tags = request.GET.getlist('tags')
         #
         if author_id:
@@ -189,7 +190,8 @@ class ServicePromotionViewSet(viewsets.ModelViewSet):
         if category:
             # filter service category
             # Always change queryset
-            queryset = queryset.filter(service__category__name__iexact=category)
+            queryset = queryset.filter(
+                service__category__name__iexact=category)
 
         if tags:
             # at least one tag from tags
@@ -204,6 +206,11 @@ class ServicePromotionViewSet(viewsets.ModelViewSet):
             tmp_queryset = queryset.filter(
                 Q(service__title__icontains=query) | Q(service__description__icontains=query) | Q(service__tags__name__iexact=query))
             if tmp_queryset.exists() or (not tags and not category):
+                queryset = tmp_queryset
+
+        if location_id:
+            tmp_queryset = queryset.filter(service__location_id=location_id)
+            if tmp_queryset.exists():
                 queryset = tmp_queryset
 
         return queryset.distinct()
