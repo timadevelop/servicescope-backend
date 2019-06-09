@@ -91,7 +91,7 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = User
         # TODO
-        fields = ('id', 'url', 'email', 'phone', 'bio', 'first_name', 'last_name', 'image', 'date_joined', )
+        fields = ('id', 'url', 'bio', 'first_name', 'last_name', 'image', 'date_joined', )
         read_only_fields = ('id', 'url', )
 
     def to_representation(self, instance):
