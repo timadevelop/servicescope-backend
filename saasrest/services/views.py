@@ -189,7 +189,7 @@ class ServicePromotionViewSet(viewsets.ModelViewSet):
         if category:
             # filter service category
             # Always change queryset
-            queryset = queryset.filter(service__category__name=category)
+            queryset = queryset.filter(service__category__name__iexact=category)
 
         if tags:
             # at least one tag from tags
@@ -201,7 +201,8 @@ class ServicePromotionViewSet(viewsets.ModelViewSet):
         if query:
             # filter service title
             # do not change queryset if there are no services with similar title
-            tmp_queryset = queryset.filter(service__title__contains=query)
+            tmp_queryset = queryset.filter(
+                Q(service__title__icontains=query) | Q(service__description__icontains=query) | Q(service__tags__name__iexact=query))
             if tmp_queryset.exists() or (not tags and not category):
                 queryset = tmp_queryset
 
@@ -220,7 +221,7 @@ class ServicePromotionViewSet(viewsets.ModelViewSet):
 
         serializer = self.serializer_class(
             queryset, many=True, context={'request': request})
-        
+
         return Response({
             'next': None,
             'previous': None,
