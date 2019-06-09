@@ -124,11 +124,7 @@ class User(AbstractUser):
         self.__original_email = self.email
 
     def save(self, force_insert=False, force_update=False, *args, **kwargs):
-        print('save')
         if self.pk is not None and self.email != self.__original_email:
-            print('email changed')
-            # email changed
-            # email = EmailAddress.objects.filter(user=self)
             email, email_created = EmailAddress.objects.get_or_create(
                 user=self, email=self.__original_email)
             email.email = self.email
@@ -138,32 +134,13 @@ class User(AbstractUser):
             request.META['SERVER_NAME'] = saasrest.local_settings.API_HOST
             request.META['SERVER_PORT'] = saasrest.local_settings.API_PORT
             email.send_confirmation(request, signup=True)
-            print('sent email')
         super(User, self).save(force_insert, force_update, *args, **kwargs)
         self.__original_email = self.email
 
 
-"""
-Receiver for user payments?
-# TODO:
-"""
-# @receiver(post_save, sender=User)
-# def create_user_role(sender, instance, created, **kwargs):
-#     if created:
-#         print('creating role {}'.format(instance.role))
-#         if instance.role == 'employee':
-#             Employee.objects.create(user=instance, uid=instance.uid)
-#         elif instance.role == 'business':
-#             Business.objects.create(user=instance, uid=instance.uid)
-#         elif instance.role == 'customer':
-#             Customer.objects.create(user=instance, first_name=instance.first_name, last_name=instance.last_name, uid=instance.uid)
-#         elif instance.role == 'admin':
-#             return None
-#
-
 
 @receiver(post_save, sender=UserSocialAuth)
-def create_user_role(sender, instance, created, **kwargs):
+def on_user_created(sender, instance, created, **kwargs):
     if created:
         user = instance.user
         email, email_created = EmailAddress.objects.get_or_create(
