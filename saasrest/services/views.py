@@ -15,6 +15,7 @@ from votes.serializers import VoteSerializer
 
 from .models import Service, ServiceImage, ServicePromotion
 from .permissions import IsOwnerOrReadOnly
+from saas_core.permissions import IsAuthenticatedAndVerified
 from .serializers import (ServiceImageSerializer, ServicePromotionSerializer,
                           ServiceSerializer)
 
@@ -139,11 +140,11 @@ class ServiceViewSet(viewsets.ModelViewSet):
         else:
             raise PermissionDenied()
 
-    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated, ])
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticatedAndVerified, ])
     def upvote(self, request, pk=None):
         return self.vote(request, pk, Vote.UP_VOTE)
 
-    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated, ])
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticatedAndVerified, ])
     def downvote(self, request, pk=None):
         return self.vote(request, pk, Vote.DOWN_VOTE)
 

@@ -15,6 +15,16 @@ class IsAdminUserOrReadOnly(permissions.IsAdminUser):
         return request.method in permissions.SAFE_METHODS or is_admin
 
 
+class IsAuthenticatedAndVerified(permissions.IsAuthenticated):
+    """Is authenticated and verified"""
+    def has_permission(self, request, view):
+        is_authenticated = super().has_permission(request, view)
+        return is_authenticated and request.user.is_verified_email
+
+    def has_object_permission(self, request, view, obj):
+        is_authenticated = super().has_object_permission(request, view, obj)
+        return is_authenticated and request.user.is_verified_email
+
 class IsOwner(permissions.BasePermission):
     def has_permission(self, request, view):
         return True
