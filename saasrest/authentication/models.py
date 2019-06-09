@@ -117,6 +117,31 @@ class User(AbstractUser):
     def is_verified_email(self):
         return EmailAddress.objects.filter(user=self, verified=True).exists()
 
+    __original_email = None
+
+    def __init__(self, *args, **kwargs):
+        super(User, self).__init__(*args, **kwargs)
+        self.__original_email = self.email
+
+    def save(self, force_insert=False, force_update=False, *args, **kwargs):
+        print('save')
+        if self.pk is not None and self.email != self.__original_email:
+            print('email changed')
+            # email changed
+            # email = EmailAddress.objects.filter(user=self)
+            email, email_created = EmailAddress.objects.get_or_create(
+                user=self, email=self.__original_email)
+            email.email = self.email
+            email.primary = True
+            email.save()
+            request = HttpRequest()
+            request.META['SERVER_NAME'] = saasrest.local_settings.API_HOST
+            request.META['SERVER_PORT'] = saasrest.local_settings.API_PORT
+            email.send_confirmation(request, signup=True)
+            print('sent email')
+        super(User, self).save(force_insert, force_update, *args, **kwargs)
+        self.__original_email = self.email
+
 
 """
 Receiver for user payments?
