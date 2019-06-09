@@ -117,6 +117,6 @@ class PrivateUserSerializer(serializers.HyperlinkedModelSerializer):
         model = User
         # TODO
         fields = ('id', 'url', 'email', 'phone', 'bio', 'first_name', 'last_name',
-                  'service_promotions', 'services', 'is_verified_email',)
+                  'service_promotions', 'services', 'is_verified_email', 'image')
         # outcome_reviews, income_reviwes
         read_only_fields = ('id', 'url', )
