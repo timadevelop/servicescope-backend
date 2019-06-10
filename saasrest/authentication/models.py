@@ -115,6 +115,8 @@ class User(AbstractUser):
 
     @property
     def is_verified_email(self):
+        if self.is_staff:
+            return True
         return EmailAddress.objects.filter(user=self, verified=True).exists()
 
     __original_email = None
