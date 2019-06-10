@@ -22,8 +22,8 @@ class LocationViewSet(viewsets.ModelViewSet):
     serializer_class = LocationSerializer
     permission_classes = (IsAdminUserOrReadOnly, )
     filter_backends = (filters.SearchFilter, DjangoFilterBackend, )
-    search_fields = ('name',)
-    filter_fields = ()
+    search_fields = ('name', 'ekatte', )
+    filter_fields = ('ekatte',)
 
     @method_decorator(cache_page(60*60*24*10))
     def dispatch(self, request, *args, **kwargs):
@@ -51,11 +51,47 @@ class LocationViewSet(viewsets.ModelViewSet):
                                      fuzzy=1.0)
             # isNameRequired=True)
             # name_startsWith=[geo_query],
-        except:
+        except Location.DoesNotExists:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         result = [r.json for r in resp]
         return Response(result)
+
+    @action(detail=False, methods=['get'], url_path='ekatte/(?P<ekatte>[^/]+)')
+    def get_by_ekatte(self, request, ekatte):
+        # TODO: cache
+        try:
+            l = Location.objects.get(ekatte=ekatte)
+            if l:
+                serializer = LocationSerializer(
+                    l, many=False, context={'request': request})
+                return Response(serializer.data)
+            else:
+                return Response(status=status.HTTP_404_NOT_FOUND)
+        except:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+    @action(detail=False, methods=['get'], url_path='major')
+    def get_major_cities(self, request):
+        try:
+            districts_ekatte = District.objects.values_list('ekatte')
+            print(districts_ekatte)
+            l = Location.objects.filter(ekatte__in=districts_ekatte)
+            if l:
+                serializer = LocationSerializer(
+                    l, many=True, context={'request': request})
+                return Response({
+                    'next': None,
+                    'previous': None,
+                    'count': 5,
+                    'pages': 1,
+                    'page': 1,
+                    'results': serializer.data
+                })
+            else:
+                return Response(status=status.HTTP_404_NOT_FOUND)
+        except:
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
 
 class DistrictViewSet(viewsets.ModelViewSet):
