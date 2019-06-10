@@ -21,9 +21,25 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     permission_classes = (IsOwnerOrReadOnly, )
 
+    def get_serializer(self, *args, **kwargs):
+        """
+        Return the serializer instance that should be used for validating and
+        deserializing input, and for serializing output.
+        """
+        context = self.get_serializer_context()
+        kwargs['context'] = context
+        # if isinstance(args[0], list):
+        #     serializer_class = self.get_serializer_class()
+        if isinstance(args[0], User) and context['request'].user and context['request'].user.id == args[0].id:
+            serializer_class = PrivateUserSerializer
+        else:
+            serializer_class = self.get_serializer_class()
+        return serializer_class(*args, **kwargs)
+
     @action(detail=False, methods=['get'])
     def me(self, request):
-        serializer = PrivateUserSerializer(instance=request.user, many=False, context={'request': request})
+        serializer = PrivateUserSerializer(
+            instance=request.user, many=False, context={'request': request})
         return Response(serializer.data)
 
 

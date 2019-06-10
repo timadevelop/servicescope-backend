@@ -75,7 +75,6 @@ class LocationViewSet(viewsets.ModelViewSet):
     def get_major_cities(self, request):
         try:
             districts_ekatte = District.objects.values_list('ekatte')
-            print(districts_ekatte)
             l = Location.objects.filter(ekatte__in=districts_ekatte)
             if l:
                 serializer = LocationSerializer(
