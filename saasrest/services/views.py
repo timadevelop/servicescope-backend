@@ -186,6 +186,9 @@ class ServicePromotionViewSet(viewsets.ModelViewSet):
         author_id = request.GET.get('author_id')
         location_id = request.GET.get('location_id')
         tags = request.GET.getlist('tags')
+
+        queryset = queryset.filter(service__promoted_til__gte=timezone.now())
+
         #
         if author_id:
             queryset = queryset.filter(service__author_id=author_id)
