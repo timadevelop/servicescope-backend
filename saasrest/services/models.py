@@ -78,8 +78,7 @@ class ServicePromotion(models.Model):
         Service, on_delete=models.SET_NULL, null=True, blank=True, related_name='promotions')
 
     end_datetime = models.DateTimeField(blank=False, null=False)
-    transaction_id = models.CharField(max_length=110)
-
+    
     stripe_payment_intents = ArrayField(models.CharField(max_length=110))
 
     created_at = models.DateTimeField(auto_now_add=True)
