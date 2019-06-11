@@ -47,6 +47,13 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
         except:
             return None
 
+    @database_sync_to_async
+    def remove_conversation_notifications(self, conversation_id):
+        # try:
+        result = Notification.objects.filter(conversation_id=conversation_id, recipient_id=self.user.id).delete()
+        # except:
+        #     return None
+
     async def connect(self):
         self.user = self.scope["user"]
 
@@ -100,6 +107,7 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
                 },
             }
             await self.notify_using_channel_layer(content)
+            await self.remove_conversation_notifications(self.conversation.id)
 
     async def receive_json(self, content, **kwargs):
         """

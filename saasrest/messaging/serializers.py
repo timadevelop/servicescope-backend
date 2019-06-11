@@ -7,9 +7,13 @@ from .models import Conversation, Message, MessageImage
 from django.utils.translation import ugettext as _
 
 class ConversationSerializer(serializers.HyperlinkedModelSerializer):
+
+    notifications_count = serializers.SerializerMethodField()
+    last_msg = serializers.SerializerMethodField()
+
     class Meta:
         model = Conversation
-        fields = ('id', 'url', 'title', 'users', 'created_at', 'updated_at')
+        fields = ('id', 'url', 'title', 'users', 'created_at', 'last_msg', 'updated_at', 'notifications_count', )
         required_fields = ('users', 'title')
         extra_kwargs = {field: {'required': True} for field in required_fields}
 
@@ -23,6 +27,19 @@ class ConversationSerializer(serializers.HyperlinkedModelSerializer):
                 many=True,
                 context=self.context).data
         return response
+
+    def get_notifications_count(self, instance):
+        user = self.get_current_user()
+        if not user:
+            return 0
+        return instance.notifications.filter(recipient=user).count()
+
+    def get_last_msg(self, instance):
+        try:
+            msg = instance.messages.last()
+            return msg.text
+        except:
+            return instance.title
 
     def get_current_user(self):
         """Gets Current user from request"""
