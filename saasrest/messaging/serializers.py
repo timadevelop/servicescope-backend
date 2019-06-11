@@ -37,7 +37,7 @@ class ConversationSerializer(serializers.HyperlinkedModelSerializer):
     def get_last_msg(self, instance):
         try:
             msg = instance.messages.last()
-            return msg.text
+            return msg.get_text()
         except:
             return instance.title
 

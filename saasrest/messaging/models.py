@@ -3,6 +3,7 @@ from django.db import models
 
 from authentication.models import User
 
+from django.utils.translation import ugettext as _
 
 class Conversation(models.Model):
     """Conversation"""
@@ -22,7 +23,7 @@ class Message(models.Model):
         null=False,
         on_delete=models.CASCADE,
         related_name='messages')
-    
+
     conversation = models.ForeignKey(
         Conversation,
         null=False,
@@ -34,6 +35,14 @@ class Message(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def get_text(self):
+        # TODO: rm null
+        if not self.text or self.text == 'null':
+            return "{} {}".format(self.author.first_name, _("sent you attachment"))
+        else:
+            print(self.text)
+            return self.text
 
 
 class MessageImage(models.Model):

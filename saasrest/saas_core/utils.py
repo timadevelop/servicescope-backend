@@ -8,6 +8,8 @@ from django.urls import resolve
 from notifications.models import Notification
 from django.core.cache import cache
 
+from django.utils.translation import ugettext as _
+
 
 @database_sync_to_async
 def does_notification_exists(user, conversation, notified):
@@ -18,7 +20,6 @@ def does_notification_exists(user, conversation, notified):
 def create_notification(recipient, conversation, title, text, redirect_url):
     return Notification.objects.create(recipient=recipient, conversation=conversation,
                                        title=title, text=text, redirect_url=redirect_url)
-
 
 async def broadcast_message(msg, serializer_data):
     group_name = 'chat_%s' % msg.conversation.id
@@ -46,7 +47,7 @@ async def broadcast_message(msg, serializer_data):
                 'recipient_id': user.id,
                 'conversation_id': msg.conversation.id,
                 'title': "New Message from {}".format(msg.author.first_name),
-                'text': msg.text,
+                'text': msg.get_text(),
                 'type': 'info',
                 'redirect_url': "/messages/c/{}".format(msg.conversation.id)
             }
