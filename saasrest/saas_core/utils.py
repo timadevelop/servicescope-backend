@@ -10,8 +10,8 @@ from django.core.cache import cache
 
 
 @database_sync_to_async
-def get_notifications(user, conversation, notified):
-    return Notification.objects.filter(recipient=user).filter(conversation=conversation).filter(notified=notified)
+def does_notification_exists(user, conversation, notified):
+    return Notification.objects.filter(recipient=user, conversation_id=conversation.id, notified=notified).exists()
 
 
 @database_sync_to_async
@@ -33,20 +33,30 @@ async def broadcast_message(msg, serializer_data):
     })
     # create notification if user if offlie
     for user in msg.conversation.users.exclude(id=msg.author.id).all():
-        if user.online < 1:
-            q = await get_notifications(user, msg.conversation, False)
-            if not q.exists():
-                await create_notification(recipient=user, conversation=msg.conversation,
-                                          title="New Message",
-                                          text="New message from {}".format(
-                                              msg.author),
-                                          redirect_url="/messages/c/{}".format(msg.conversation.id))
-        else:
+        # if user.online < 1:
+        exists = await does_notification_exists(user, msg.conversation, False)
+        if not exists:
             n = await create_notification(recipient=user, conversation=msg.conversation,
                                           title="New Message from {}".format(
                                               msg.author.first_name),
                                           text="{}".format(msg.text),
                                           redirect_url="/messages/c/{}".format(msg.conversation.id))
+        else:
+            s_data = {
+                'recipient_id': user.id,
+                'conversation_id': msg.conversation.id,
+                'title': "New Message from {}".format(msg.author.first_name),
+                'text': msg.text,
+                'type': 'info',
+                'redirect_url': "/messages/c/{}".format(msg.conversation.id)
+            }
+            await notify_user(user.id, s_data)
+        # else:
+        #     n = await create_notification(recipient=user, conversation=msg.conversation,
+        #                                   title="New Message from {}".format(
+        #                                       msg.author.first_name),
+        #                                   text="{}".format(msg.text),
+        #                                   redirect_url="/messages/c/{}".format(msg.conversation.id))
             # s = serializers.NotificationSerializer(n, many=False, context={'request': None})
             # await notify_user(user.id, s.data)
 
