@@ -85,13 +85,11 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
     # def get_offers_count(self, instance):
     #     return instance.offers.count()
 
-    def get_notifications_count(self, instance):
-        return instance.notifications.filter(notified=False).count()
-
     class Meta:
         model = User
         # TODO
-        fields = ('id', 'url', 'bio', 'first_name', 'last_name', 'image', 'date_joined', 'last_active', )
+        fields = ('id', 'url', 'bio', 'first_name', 'last_name',
+                  'image', 'date_joined', 'last_active', )
         read_only_fields = ('id', 'url', )
 
     def to_representation(self, instance):
@@ -103,8 +101,6 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
                 # response['income_reviews_count'] = self.get_income_reviews_count(
                 # instance)
                 # response['offers_count'] = self.get_offers_count(instance)
-                response['notifications_count'] = self.get_notifications_count(
-                    instance)
 
         return response
 
@@ -113,10 +109,16 @@ class PrivateUserSerializer(serializers.HyperlinkedModelSerializer):
     """
     User serializer with private info
     """
+    notifications_count = serializers.SerializerMethodField()
+
+    def get_notifications_count(self, instance):
+        r = instance.notifications.count()
+        return r
+
     class Meta:
         model = User
         # TODO
-        fields = ('id', 'url', 'email', 'phone', 'bio', 'first_name', 'last_name',
+        fields = ('id', 'url', 'email', 'phone', 'bio', 'first_name', 'last_name', 'notifications_count',
                   'service_promotions', 'services', 'is_verified_email', 'image', 'last_active', )
         # outcome_reviews, income_reviwes
         read_only_fields = ('id', 'url', )
