@@ -5,6 +5,7 @@ from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.http import HttpRequest
+from django.utils import timezone
 from social_django.models import UserSocialAuth
 
 import saasrest.local_settings
@@ -86,6 +87,8 @@ class User(AbstractUser):
 
     # additional fields
     online = models.PositiveIntegerField(default=0)
+    last_active = models.DateTimeField(default=timezone.now)
+
 
     bio = models.TextField(max_length=500, blank=True, null=True)
     phone = models.TextField(max_length=100, blank=True, null=True)

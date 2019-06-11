@@ -3,6 +3,7 @@ from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from channels.layers import get_channel_layer
 from messaging.models import Conversation
 from notifications.models import Notification
+from django.utils import timezone
 
 
 class ChatConsumer(AsyncJsonWebsocketConsumer):
@@ -12,10 +13,10 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
     user_room_group = None
 
     @database_sync_to_async
-    def change_user_online_status(self, n):
+    def change_user_online_status(self):
         if self.user:
-            self.user.online = self.user.online + n
-            self.user.save(update_fields=['online'])
+            self.user.last_active = timezone.now()
+            self.user.save(update_fields=['last_active'])
 
     @database_sync_to_async
     def get_conversation(self, id):
@@ -77,7 +78,7 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
                     "type": "connected",
                     "payload": None
                 })
-                await self.change_user_online_status(1)
+                await self.change_user_online_status()
             except:
                 await self.close()
 
@@ -155,7 +156,7 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
             await self.set_notification_notified(notification_id)
 
     async def disconnect(self, close_code):
-        await self.change_user_online_status(-1)
+        await self.change_user_online_status()
         await self.leave_group()
 
     async def leave_group(self):
