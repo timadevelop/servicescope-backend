@@ -35,7 +35,7 @@ class TokenAuthMiddleware:
 TokenAuthMiddlewareStack = lambda inner: TokenAuthMiddleware(AuthMiddlewareStack(inner))
 
 websocket_urlpatterns = [
-    url(r'^ws/global/$', ChatConsumer),
+    url(r'^saas_ws/global/$', ChatConsumer),
 ]
 
 application = ProtocolTypeRouter({

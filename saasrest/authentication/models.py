@@ -138,7 +138,7 @@ class User(AbstractUser):
             email.save()
             request = HttpRequest()
             request.META['SERVER_NAME'] = saasrest.local_settings.API_HOST
-            request.META['SERVER_PORT'] = saasrest.local_settings.API_PORT
+            request.META['SERVER_PORT'] = 80
             email.send_confirmation(request, signup=True)
         super(User, self).save(force_insert, force_update, *args, **kwargs)
         self.__original_email = self.email
@@ -157,5 +157,5 @@ def on_user_created(sender, instance, created, **kwargs):
             email.save()
             request = HttpRequest()
             request.META['SERVER_NAME'] = saasrest.local_settings.API_HOST
-            request.META['SERVER_PORT'] = saasrest.local_settings.API_PORT
+            request.META['SERVER_PORT'] = 80
             email.send_confirmation(request, signup=True)

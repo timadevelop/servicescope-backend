@@ -1,6 +1,7 @@
 import os
 
 API_HOST = os.environ.get('SAAS_API_HOST')
+print(API_HOST)
 API_PORT = os.environ.get('SAAS_API_PORT')
 
 # google
