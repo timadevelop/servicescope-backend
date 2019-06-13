@@ -70,7 +70,7 @@ class PaymentsViewSet(viewsets.ViewSet):
                 'Completed order',
                 msg_plain,
                 settings.EMAIL_HOST_USER,
-                ['timadevelop@gmail.com'],
+                [service_promotion.author.email],
                 fail_silently=False,
                 html_message=msg_html
             )
