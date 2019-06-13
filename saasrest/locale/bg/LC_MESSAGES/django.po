@@ -78,9 +78,6 @@ msgid ""
 "To confirm this is correct, go to %(activate_url)s\n"
 msgstr ""
 
-#~ msgid "Not found."
-#~ msgstr "Няма нищо бэ"
-
 #: authentication.py:73
 msgid "Invalid basic header. No credentials provided."
 msgstr ""
