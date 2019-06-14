@@ -74,11 +74,11 @@ class CouponViewSet(viewsets.ReadOnlyModelViewSet):
 
             coupon.redeem()
             # Send email
-            d = {'days': coupon.days, 'plan': 'Coupon'}
-            send_confirmation_email(
-                service, service_promotion, {'metadata': d})
+            # d = {'days': coupon.days, 'plan': 'Coupon'}
+            # send_confirmation_email(
+            #     service, service_promotion, {'metadata': d})
 
-            return Response(status=status.HTTP_200_OK)
+            return Response({'promoted_til': service_promotion.end_datetime}, status=status.HTTP_200_OK)
 
         elif reason == 'promote_post':
             # TODO
