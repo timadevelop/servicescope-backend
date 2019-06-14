@@ -1,7 +1,7 @@
 {
 	"_type": "export",
 	"__export_format": 3,
-	"__export_date": "2019-06-14T12:58:05.782Z",
+	"__export_date": "2019-06-14T15:19:12.230Z",
 	"__export_source": "insomnia.desktop.app:v6.3.2",
 	"resources": [
 		{
@@ -3647,6 +3647,38 @@
 			"settingSendCookies": true,
 			"settingStoreCookies": true,
 			"url": "{{ base_api_url  }}/coupons/688316ec-6e2c-4fe4-b418-6f92315fd662/redeem/",
+			"_type": "request"
+		},
+		{
+			"_id": "req_2bbe346ba8ba4b2ebac10f0cf818517f",
+			"authentication": {
+				"token": "{{ access_token  }}",
+				"type": "bearer"
+			},
+			"body": {},
+			"created": 1560525503067,
+			"description": "",
+			"headers": [
+				{
+					"id": "pair_fa0ad16e9f5f4016a257c17080880a1e",
+					"name": "",
+					"value": ""
+				}
+			],
+			"isPrivate": false,
+			"metaSortKey": -1554742706964.4036,
+			"method": "GET",
+			"modified": 1560525511570,
+			"name": "/coupons/:id (Copy)",
+			"parameters": [],
+			"parentId": "fld_bbea9abd3d214c6cbd51d65526e52f47",
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingMaxTimelineDataSize": 1000,
+			"settingRebuildPath": true,
+			"settingSendCookies": true,
+			"settingStoreCookies": true,
+			"url": "{{ base_api_url  }}/coupons/3db30827-631f-4ae7-bada-08899ca1eb6c/",
 			"_type": "request"
 		}
 	]

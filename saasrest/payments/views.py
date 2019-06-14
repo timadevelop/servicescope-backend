@@ -2,6 +2,7 @@
 import json
 
 from django.conf import settings
+from django.db.models import Q
 from django.core.exceptions import PermissionDenied
 from django.template.defaulttags import register
 from django.utils.translation import ugettext as _
@@ -39,7 +40,11 @@ class CouponViewSet(viewsets.ReadOnlyModelViewSet):
     # filter_fields = ()
 
     def get_queryset(self):
-        return self.queryset.filter(user=self.request.user)
+        return self.queryset.filter(Q(user=self.request.user) | Q(user=None))
+
+    def list(self, request, *args, **kwargs):
+        self.queryset = self.queryset.filter(user=self.request.user)
+        return super().list(request, *args, **kwargs)
 
     @action(detail=True, methods=['post'], url_path='redeem')
     def redeem(self, request, pk=None):
