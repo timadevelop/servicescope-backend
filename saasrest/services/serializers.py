@@ -139,9 +139,9 @@ class ServiceSerializer(serializers.HyperlinkedModelSerializer):
             img = ServiceImage.objects.create(service=service, image=img)
         return service
 
-    def to_representation(self, instance):
+    def to_representation(self, instance, override=True):
         response = super().to_representation(instance)
-        if self.context['request']:
+        if self.context['request'] and override:
             if not isinstance(self.instance, list):
                 response['author'] = UserSerializer(
                     instance.author, many=False, context=self.context).data
@@ -166,7 +166,7 @@ class ShortServiceSerializer(ServiceSerializer):
     """Short service image serializer"""
 
     def to_representation(self, instance):
-        response = super().to_representation(instance)
+        response = super().to_representation(instance, False)
         if self.context['request']:
             response['tags'] = TagSerializer(
                 instance.tags, many=True, context=self.context).data
