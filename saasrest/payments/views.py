@@ -2,10 +2,9 @@
 import json
 
 from django.conf import settings
-from django.core.mail import send_mail
+from django.core.exceptions import PermissionDenied
 from django.template.defaulttags import register
-from django.template.loader import render_to_string
-from django.utils import timezone
+from django.utils.translation import ugettext as _
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
@@ -13,18 +12,79 @@ from rest_framework.response import Response
 
 # pylint: disable=fixme, import-error
 import stripe
-
-from authentication.models import User
 from saas_core.utils import fix_django_headers
-from services.models import Service, ServicePromotion
 
+from .models import Coupon
+from .serializers import CouponSerializer
+from .utils import promote_service, send_confirmation_email
 
+"""Filter for email template"""
 @register.filter
 def get_item(dictionary, key):
     # print('get_item')
     # print(dictionary, key)
     # print('_-----------------------------____')
     return dictionary.get(key, 'None')
+
+
+class CouponViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    Coupons viewset
+    """
+    queryset = Coupon.objects.all()
+    serializer_class = CouponSerializer
+    permission_classes = ()
+    # filter_backends = (filters.SearchFilter, DjangoFilterBackend, )
+    # search_fields = ()
+    # filter_fields = ()
+
+    def get_queryset(self):
+        return self.queryset.filter(user=self.request.user)
+
+    @action(detail=True, methods=['post'], url_path='redeem')
+    def redeem(self, request, pk=None):
+        """Redeem coupon"""
+        coupon = self.get_object()
+        if not coupon:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        if not coupon.valid:
+            return Response({'detail': _("Coupon is not valid")}, status=status.HTTP_400_BAD_REQUEST)
+
+        payload = json.loads(request.body)
+        reason = payload.get('reason')
+        print(reason)
+        if self.request.user:
+            user_id = self.request.user.id
+        else:
+            raise PermissionDenied()
+
+        if coupon.user and coupon.user.id != user_id:
+            raise PermissionDenied()
+
+
+        if reason == 'promote_service':
+            model_id = payload.get('model_id', None)
+            if not model_id:
+                return Response({'detail': _("Provide service id")}, status=status.HTTP_400_BAD_REQUEST)
+            model_id = int(model_id)
+
+            service, service_promotion = promote_service(
+                user_id, model_id, coupon.days, 'Coupon')
+
+            coupon.redeem()
+            # Send email
+            d = {'days': coupon.days, 'plan': 'Coupon'}
+            send_confirmation_email(
+                service, service_promotion, {'metadata': d})
+
+            return Response(status=status.HTTP_200_OK)
+
+        elif reason == 'promote_post':
+            # TODO
+            pass
+
+        return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
 class PaymentsViewSet(viewsets.ViewSet):
@@ -53,60 +113,6 @@ class PaymentsViewSet(viewsets.ViewSet):
         )
 
         return Response(intent)
-
-    def send_confirmation_email(self, service, service_promotion, intent):
-        """Sends payment confirmation email"""
-
-        msg_plain = render_to_string(
-            'templates/email.txt',
-            {'service': service, 'service_promotion': service_promotion})
-
-        msg_html = render_to_string(
-            'templates/completed_order_email.html',
-            {'service': service, 'service_promotion': service_promotion, 'intent': intent})
-
-        try:
-            send_mail(
-                'Completed order',
-                msg_plain,
-                settings.EMAIL_HOST_USER,
-                [service_promotion.author.email],
-                fail_silently=False,
-                html_message=msg_html
-            )
-        except:
-            return False
-
-        return True
-
-    @action(
-        detail=False,
-        methods=['post'],
-        url_path='send_email',
-        permission_classes=[IsAuthenticated, ])
-    def send_email(self, request):
-        """Test Endpoint for email sending"""
-        body = json.loads(request.body.decode())
-        amount = body.get('amount', None)
-        currency = body.get('currency', None)
-        metadata = body.get('metadata', None)
-
-        msg_plain = render_to_string('templates/email.txt', {'text': 'waaat'})
-        msg_html = render_to_string(
-            'templates/email_1.html', {'text': 'superduper'})
-        try:
-            send_mail(
-                'Subject here',
-                msg_plain,
-                settings.EMAIL_HOST_USER,
-                ['recipient@gmail.com'],
-                fail_silently=False,
-                html_message=msg_html
-            )
-        except:
-            return Response({'success': 'false'})
-
-        return Response({'success': 'true'})
 
     @action(
         detail=False,
@@ -187,58 +193,15 @@ class PaymentsViewSet(viewsets.ViewSet):
             return
 
         if reason == 'promote_service':
-            service, service_promotion = self.promote_service(intent)
+            metadata = intent['metadata']
+            user_id = int(metadata.get('user_id', None))
+            model_id = int(metadata.get('model_id', None))
+            days = int(metadata.get('days', None))
+
+            service, service_promotion = promote_service(
+                user_id, model_id, days, intent['id'])
             # Send email
-            self.send_confirmation_email(service, service_promotion, intent)
+            send_confirmation_email(service, service_promotion, intent)
         elif reason == 'promote_post':
             # TODO
             pass
-
-    def promote_service(self, intent):
-        """Promotes service using intent"""
-        metadata = intent['metadata']
-
-        print('promoting service...')
-        user_id = int(metadata.get('user_id', None))
-        # model = metadata.get('model', None)
-        model_id = int(metadata.get('model_id', None))
-        # plan = metadata.get('plan', None)
-        days = int(metadata.get('days', None))
-
-        user = None
-        if user_id:
-            try:
-                user = User.objects.get(id=user_id)
-            except Exception as e:
-                print('error getting user', e)
-
-        try:
-            service = Service.objects.get(id=model_id)
-        except:
-            print('error getting service')
-            return
-
-        if not service:
-            return
-
-        if service.promotions.exists():
-            print('update old promotion')
-            service_promotion = service.promotions.first()
-            # add days
-            service_promotion.end_datetime = service_promotion.end_datetime + \
-                timezone.timedelta(days=days)
-            service_promotion.stripe_payment_intents.append(intent['id'])
-            service_promotion.save()
-            print('success')
-        else:
-            print('create new promotion')
-            end_datetime = timezone.now() + timezone.timedelta(days=days)
-            service_promotion = ServicePromotion.objects.create(
-                author=user, service=service,
-                stripe_payment_intents=[intent['id']],
-                end_datetime=end_datetime)
-            print('success')
-
-        service.promoted_til = service_promotion.end_datetime
-        service.save()
-        return service, service_promotion

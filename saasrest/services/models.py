@@ -12,6 +12,7 @@ from locations.models import Location
 from tags.models import Tag
 from votes.models import Vote
 
+from django.utils import timezone
 
 class Service(models.Model):
     """Service model"""
@@ -61,6 +62,33 @@ class Service(models.Model):
         if self.promoted_til and self.promoted_til > now():
             return True
         return False
+
+
+    def promote(self, user, intent_id, days):
+        if self.promotions.exists():
+            print('update old promotion')
+            service_promotion = self.promotions.first()
+            # add days
+            service_promotion.end_datetime = service_promotion.end_datetime + \
+                timezone.timedelta(days=days)
+            
+            if intent_id:
+                service_promotion.stripe_payment_intents.append(intent_id)
+            service_promotion.save()
+            print('success')
+        else:
+            print('create new promotion')
+            end_datetime = timezone.now() + timezone.timedelta(days=days)
+            service_promotion = ServicePromotion.objects.create(
+                author=user, service=self,
+                stripe_payment_intents=[intent_id],
+                end_datetime=end_datetime)
+            print('success')
+
+        self.promoted_til = service_promotion.end_datetime
+        self.save()
+
+        return service_promotion
 
 
 class ServiceImage(models.Model):

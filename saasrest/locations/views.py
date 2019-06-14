@@ -51,7 +51,7 @@ class LocationViewSet(viewsets.ModelViewSet):
                                      fuzzy=1.0)
             # isNameRequired=True)
             # name_startsWith=[geo_query],
-        except Location.DoesNotExists:
+        except Location.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         result = [r.json for r in resp]
