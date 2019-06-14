@@ -189,37 +189,34 @@ class ServicePromotionViewSet(viewsets.ModelViewSet):
 
         queryset = queryset.filter(service__promoted_til__gte=timezone.now())
 
-        #
+        condition = Q()
+
         if author_id:
-            queryset = queryset.filter(service__author_id=author_id)
+            condition.add(Q(service__author_id=author_id), Q.AND)
 
         if category:
             # filter service category
             # Always change queryset
-            queryset = queryset.filter(
-                service__category__name__iexact=category)
+            condition.add(Q(service__category__name__iexact=category), Q.AND)
 
         if tags:
             # at least one tag from tags
             # do not change queryset if there are no services with tags
-            tmp_queryset = queryset.filter(service__tags__name__in=tags)
-            if tmp_queryset.exists() or not category:
-                queryset = tmp_queryset
+            condition.add(Q(service__tags__name__in=tags), Q.OR)
 
         if query:
             # filter service title
             # do not change queryset if there are no services with similar title
-            tmp_queryset = queryset.filter(
-                Q(service__title__icontains=query) | Q(service__description__icontains=query) | Q(service__tags__name__iexact=query))
-            if tmp_queryset.exists() or (not tags and not category):
-                queryset = tmp_queryset
+            condition.add(Q(service__title__icontains=query), Q.OR)
+            condition.add(Q(service__description__icontains=query), Q.OR)
+            condition.add(Q(service__tags__name__iexact=query), Q.OR)
 
         if location_id:
-            tmp_queryset = queryset.filter(service__location_id=location_id)
-            if tmp_queryset.exists():
-                queryset = tmp_queryset
+            condition.add(Q(service__location_id=location_id), Q.OR)
 
-        return queryset.distinct()
+        # print(condition)
+
+        return queryset.filter(condition).distinct()
 
     def list(self, request):
         """Custom list processing"""
