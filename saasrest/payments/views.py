@@ -17,9 +17,11 @@ from saas_core.utils import fix_django_headers
 
 from .models import Coupon
 from .serializers import CouponSerializer
-from .utils import promote_service, send_confirmation_email
+from .utils import promote_service, send_confirmation_email, is_valid_payment_intent
 
 """Filter for email template"""
+
+
 @register.filter
 def get_item(dictionary, key):
     # print('get_item')
@@ -67,7 +69,6 @@ class CouponViewSet(viewsets.ReadOnlyModelViewSet):
         if coupon.user and coupon.user.id != user_id:
             raise PermissionDenied()
 
-
         if reason == 'promote_service':
             model_id = payload.get('model_id', None)
             if not model_id:
@@ -107,8 +108,25 @@ class PaymentsViewSet(viewsets.ViewSet):
         amount = body.get('amount', None)
         currency = body.get('currency', None)
         metadata = body.get('metadata', None)
-        if not amount or not currency:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+        plan = metadata.get('plan')
+        days = metadata.get('days')
+        reason = metadata.get('reason')
+
+        if not plan or not days or not reason or not amount or not currency or not metadata:
+            return Response({'detail': _("Request data is not complete")}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            plan = plan.lower()
+            reason = reason.lower()
+            currency = currency.lower()
+        except:
+            return Response({'detail': _("Wrong plan, reason or currency")}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not is_valid_payment_intent(plan, days, amount, currency, reason):
+            return Response({'detail': _("Invalid request: plan, days, amount, currency and reason.")}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            print('valid')
 
         stripe.api_key = settings.STRIPE_TEST_SECRET_KEY
         intent = stripe.PaymentIntent.create(
@@ -132,8 +150,24 @@ class PaymentsViewSet(viewsets.ViewSet):
         currency = body.get('currency', None)
         metadata = body.get('metadata', None)
 
-        if not intent_id:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+        plan = metadata.get('plan')
+        days = metadata.get('days')
+        reason = metadata.get('reason')
+
+        if not intent_id or not plan or not days or not reason or not amount or not currency or not metadata:
+            return Response({'detail': _("Request data is not complete")}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            plan = plan.lower()
+            reason = reason.lower()
+            currency = currency.lower()
+        except:
+            return Response({'detail': _("Wrong plan, reason or currency")}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not is_valid_payment_intent(plan, days, amount, currency, reason):
+            return Response({'detail': _("Invalid request: plan, days, amount, currency and reason.")}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            print('valid')
 
         stripe.api_key = settings.STRIPE_TEST_SECRET_KEY
         intent = stripe.PaymentIntent.modify(

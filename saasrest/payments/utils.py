@@ -5,6 +5,41 @@ from django.template.loader import render_to_string
 from authentication.models import User
 from services.models import Service
 
+PROMOTION_REASONS = [
+    "promote_service",
+    # "promote_post"
+]
+
+SERVICE_PROMOTIONS_PLANS = {
+    "pro": {
+        'days': 7,
+        'amount': 403,
+        'currency': 'bgn'
+    },
+    "basic": {
+        'days': 3,
+        'amount': 274,
+        'currency': 'bgn'
+    }
+}
+
+
+def is_valid_payment_intent(plan, days, amount, currency, reason):
+    plan_details = SERVICE_PROMOTIONS_PLANS.get(plan, None)
+    if not plan_details:
+        return False
+
+    if days != plan_details.get('days'):
+        return False
+
+    if amount != plan_details.get('amount') or currency != plan_details.get('currency'):
+        return False
+
+    if reason not in PROMOTION_REASONS:
+        return False
+
+    return True
+
 
 def promote_service(user_id, service_id, days, intent_id):
     """Promotes service"""
