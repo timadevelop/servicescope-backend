@@ -33,6 +33,7 @@ import public_configs.urls
 import services.urls
 import tags.urls
 import votes.urls
+import feed.urls
 #
 # routers
 #
@@ -80,6 +81,7 @@ urlpatterns = [
         url(r'', include(services.urls)),
         url(r'', include(tags.urls)),
         url(r'', include(votes.urls)),
+        url(r'', include(feed.urls)),
         # url(r'^rest-auth/', include('rest_auth.urls')),
         url(r'auth/registration/',
             include('rest_auth.registration.urls')),

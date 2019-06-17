@@ -76,6 +76,7 @@ INSTALLED_APPS = [
     'services',
     'tags',
     'votes',
+    'feed',
     # 'api',
     # auth
     'oauth2_provider',
