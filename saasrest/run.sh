@@ -14,6 +14,7 @@ python manage.py makemigrations public_configs
 python manage.py makemigrations services
 python manage.py makemigrations tags
 python manage.py makemigrations votes
+python manage.py makemigrations feed
 python manage.py makemigrations
 
 python manage.py migrate
