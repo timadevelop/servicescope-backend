@@ -31,7 +31,7 @@ class FeedPostFilter(django_rest_filters.FilterSet):
     """Custom filter for feed_posts"""
     class Meta:
         model = FeedPost
-        fields = ['text', 'tags', ]
+        fields = ['text', 'tags', 'author_id' ]
 
     text = django_rest_filters.CharFilter()
 
@@ -70,7 +70,7 @@ class FeedPostViewSet(viewsets.ModelViewSet):
                        filters.OrderingFilter)
     ordering_fields = ('price', 'created_at', 'score')
     search_fields = ('text',)
-    filter_fields = ('author', 'author__id', 'tags__contain')
+    # filter_fields = ('author', 'author_id', 'tags__contain')
     filter_class = FeedPostFilter
 
     def perform_create(self, serializer):
