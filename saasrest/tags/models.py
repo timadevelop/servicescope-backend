@@ -11,15 +11,18 @@ TAG_COLORS = ['#40407a', '#706fd3', '#34ace0', '#227093',
 def random_color():
     return random.choice(TAG_COLORS)
 
+
+class LowerTextField(models.TextField):
+
+    def get_prep_value(self, value):
+        return str(value).lower()
+
+
 class Tag(models.Model):
     """Tag model"""
-    name = models.TextField(max_length=20, blank=False,
-                            null=False, unique=True)
+    name = LowerTextField(max_length=20, blank=False,
+                                 null=False, unique=True)
     color = ColorField(max_length=10, default=random_color)
 
     def __str__(self):
         return 'Tag[id: {id}, name: {name}]'.format(id=self.id, name=self.name)
-
-    def save(self, *args, **kwargs):
-        self.name = self.name.lower()
-        return super(Tag, self).save(*args, **kwargs)

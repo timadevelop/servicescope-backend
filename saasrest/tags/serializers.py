@@ -7,8 +7,8 @@ class TagSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Tag
         fields = ('name', 'color')
-        read_only_fields = ()
-        required_fields = ('name',)
+        read_only_fields = ('color', )
+        required_fields = ('name', )
         extra_kwargs = {field: {'required': True} for field in required_fields}
 
     def validate_name(self, value):
