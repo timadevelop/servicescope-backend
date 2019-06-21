@@ -40,7 +40,7 @@ async def broadcast_message(msg, serializer_data):
             n = await create_notification(recipient=user, conversation=msg.conversation,
                                           title="New Message from {}".format(
                                               msg.author.first_name),
-                                          text="{}".format(msg.text),
+                                          text="{}".format(msg.get_text()),
                                           redirect_url="/messages/c/{}".format(msg.conversation.id))
         else:
             s_data = {
