@@ -1,9 +1,10 @@
+from django.utils import timezone
+
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from channels.layers import get_channel_layer
 from messaging.models import Conversation
 from notifications.models import Notification
-from django.utils import timezone
 
 
 class ChatConsumer(AsyncJsonWebsocketConsumer):
@@ -13,10 +14,13 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
     user_room_group = None
 
     @database_sync_to_async
-    def change_user_online_status(self):
+    def change_user_online_status(self, is_online):
         if self.user:
-            self.user.last_active = timezone.now()
-            self.user.save(update_fields=['last_active'])
+            self.user.set_online_status(is_online)
+            if not is_online:
+                # update last_active
+                self.user.last_active = timezone.now()
+                self.user.save(update_fields=['last_active'])
 
     @database_sync_to_async
     def get_conversation(self, id):
@@ -51,7 +55,8 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
     @database_sync_to_async
     def remove_conversation_notifications(self, conversation_id):
         # try:
-        result = Notification.objects.filter(conversation_id=conversation_id, recipient_id=self.user.id).delete()
+        result = Notification.objects.filter(
+            conversation_id=conversation_id, recipient_id=self.user.id).delete()
         # except:
         #     return None
 
@@ -78,7 +83,7 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
                     "type": "connected",
                     "payload": None
                 })
-                await self.change_user_online_status()
+                await self.change_user_online_status(True)
             except:
                 await self.close()
 
@@ -156,7 +161,7 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
             await self.set_notification_notified(notification_id)
 
     async def disconnect(self, close_code):
-        await self.change_user_online_status()
+        await self.change_user_online_status(False)
         await self.leave_group()
 
     async def leave_group(self):

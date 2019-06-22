@@ -10,7 +10,8 @@ from social_django.models import UserSocialAuth
 
 import saasrest.local_settings
 
-# Create your models here.
+
+from django.core.cache import cache
 
 
 class UserManager(BaseUserManager):
@@ -86,7 +87,6 @@ class User(AbstractUser):
     objects = UserManager()
 
     # additional fields
-    online = models.PositiveIntegerField(default=0)
     last_active = models.DateTimeField(default=timezone.now)
 
 
@@ -115,6 +115,23 @@ class User(AbstractUser):
         return True
         # TODO
         # return self.date_joined < timezone.now() and self.is_active
+
+    def get_online_status_cache_key(self):
+        return 'IS_ONLINE_USER_{}'.format(self.id)
+
+    def set_online_status(self, is_online):
+        key = self.get_online_status_cache_key()
+        if is_online:
+            if not cache.has_key(key):
+                cache.set(key, True)
+        else:
+            cache.delete(key)
+
+    @property
+    def is_online(self):
+        cache_value = cache.get(self.get_online_status_cache_key())
+        return cache_value == True
+
 
     @property
     def is_verified_email(self):

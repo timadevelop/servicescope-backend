@@ -34,7 +34,7 @@ async def broadcast_message(msg, serializer_data):
     })
     # create notification if user if offlie
     for user in msg.conversation.users.exclude(id=msg.author.id).all():
-        # if user.online < 1:
+        # if user.is_online:
         exists = await does_notification_exists(user, msg.conversation, False)
         if not exists:
             n = await create_notification(recipient=user, conversation=msg.conversation,
