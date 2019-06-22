@@ -29,7 +29,7 @@ class ServiceFilter(django_rest_filters.FilterSet):
     class Meta:
         model = Service
         fields = ['title', 'description', 'tags', 'category',
-                  'location__id', 'price', 'author__id']
+                  'location_id', 'price', 'author_id']
 
     price = django_rest_filters.RangeFilter()
     # default for CharFilter is to have exact lookup_type
@@ -85,7 +85,6 @@ class ServiceViewSet(viewsets.ModelViewSet):
                        filters.OrderingFilter)
     ordering_fields = ('price', 'created_at', 'score')
     search_fields = ('title', 'description',)
-    filter_fields = ('author', 'author__id', 'location', 'tags__contain')
     filter_class = ServiceFilter
 
     # one minute cache
@@ -95,11 +94,6 @@ class ServiceViewSet(viewsets.ModelViewSet):
     #     return super(self.__class__, self).dispatch(*args, **kwargs)
     #
 
-    # create only for employee & customer.
-
-    # def get_queryset(self):
-    #     print(self.request.)
-    #     return super().get_queryset()
     def list(self, request, *args, **kwargs):
         """Custom list processing"""
         self.queryset = self.get_queryset().filter(
