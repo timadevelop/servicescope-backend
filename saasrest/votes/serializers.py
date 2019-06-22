@@ -8,3 +8,4 @@ class VoteSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Vote
         fields = ('id', 'url', 'user', 'activity_type', 'date')
+        read_only_fields = fields

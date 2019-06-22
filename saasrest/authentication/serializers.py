@@ -67,6 +67,31 @@ class CustomUserDetailsSerializer(serializers.ModelSerializer):
         read_only_fields = ('email',)
 
 
+def serialize_simple_user(user, many=False, context=None):
+    print('serialize_simple_user')
+    request = context.get('request')
+
+    def serialize(user):
+        return {
+            'id': user.id,
+            'url': request.build_absolute_uri(user.get_absolute_url()),
+            'bio': user.bio,
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'image': request.build_absolute_uri(user.image.url) if request else None,
+            'date_joined': user.date_joined.isoformat(),
+            'last_active': user.last_active.isoformat(),
+            'is_online': user.is_online
+        }
+    if many:
+        print('Many EOF_serialize_simple_user')
+        return map(serialize, user.all())
+    print('One EOF_serialize_simple_user')
+    r = serialize(user)
+    print(r)
+    return serialize(user)
+
+
 class UserSerializer(serializers.HyperlinkedModelSerializer):
     """
     Main user serializer
@@ -89,8 +114,8 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         model = User
         # TODO
         fields = ('id', 'url', 'bio', 'first_name', 'last_name',
-                  'image', 'date_joined', 'last_active', 'is_online' )
-        read_only_fields = ('id', 'url', )
+                  'image', 'date_joined', 'last_active', 'is_online')
+        read_only_fields = fields
 
     def to_representation(self, instance):
         response = super().to_representation(instance)
@@ -121,4 +146,5 @@ class PrivateUserSerializer(serializers.HyperlinkedModelSerializer):
         fields = ('id', 'url', 'email', 'phone', 'bio', 'first_name', 'last_name', 'notifications_count',
                   'service_promotions', 'services', 'is_verified_email', 'image', 'last_active', 'is_online')
         # outcome_reviews, income_reviwes
-        read_only_fields = ('id', 'url', )
+        read_only_fields = ('id', 'url', 'is_online', 'last_active', 'is_verified_email',
+                            'services', 'service_promotions', 'notifications_count',)

@@ -13,3 +13,14 @@ class TagSerializer(serializers.HyperlinkedModelSerializer):
 
     def validate_name(self, value):
         return value.lower()
+
+def serialize_tag(tags, many=False):
+    def serialize(tag):
+        return {
+            'name': tag.name,
+            'color': tag.color
+        }
+    if many:
+        return map(serialize, tags.all())
+    
+    return serialize(tags)

@@ -1,12 +1,12 @@
 from django.contrib.admin.options import get_content_type_for_model
 from rest_framework import serializers
 
-from authentication.serializers import UserSerializer
+from authentication.serializers import serialize_simple_user
 from categories.models import Category
 from locations.serializers import LocationSerializer
 from saas_core.utils import cached_or_new
 from tags.models import Tag
-from tags.serializers import TagSerializer
+from tags.serializers import serialize_tag
 from votes.serializers import VoteSerializer
 
 from .models import Service, ServiceImage, ServicePromotion
@@ -18,15 +18,9 @@ class ServiceImageSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = ServiceImage
         fields = ('service', 'image', )
-        read_only_fields = ()
+        read_only_fields = fields
         required_fields = ('service', 'image', )
         extra_kwargs = {field: {'required': True} for field in required_fields}
-
-    def get_image(self, data):
-        """TODO"""
-        request = self.context.get('request')
-        imageurl = data.image.url
-        return request.build_absolute_uri(imageurl)
 
 
 class ServiceSerializer(serializers.HyperlinkedModelSerializer):
@@ -121,7 +115,8 @@ class ServiceSerializer(serializers.HyperlinkedModelSerializer):
         user = request.user
 
         if user != value:
-            raise serializers.ValidationError(_("You can not create services for another user"))
+            raise serializers.ValidationError(
+                _("You can not create services for another user"))
 
         return value
 
@@ -143,22 +138,13 @@ class ServiceSerializer(serializers.HyperlinkedModelSerializer):
         response = super().to_representation(instance)
         if self.context['request'] and override:
             if not isinstance(self.instance, list):
-                response['author'] = UserSerializer(
-                    instance.author, many=False, context=self.context).data
+                response['author'] = serialize_simple_user(
+                    instance.author, many=False, context=self.context)
 
-            # response['images'] = ServiceImageSerializer(
-            # instance.images, many=True, context = self.context).data
-
-            # response['category'] = CategorySerializer(
-            # instance.category, many=False, context = self.context).data
-
-            response['tags'] = TagSerializer(
-                instance.tags, many=True, context=self.context).data
+            response['tags'] = serialize_tag(instance.tags, many=True)
             response['location'] = cached_or_new('SERIALIZED_LOCATION_{}'.format(
                 instance.location_id), LocationSerializer, instance, 'location', self.context)
 
-            # response['location'] = LocationSerializer(
-            # instance.location, many=False, context = self.context).data
         return response
 
 
@@ -168,8 +154,7 @@ class ShortServiceSerializer(ServiceSerializer):
     def to_representation(self, instance):
         response = super().to_representation(instance, False)
         if self.context['request']:
-            response['tags'] = TagSerializer(
-                instance.tags, many=True, context=self.context).data
+            response['tags'] = serialize_tag(instance.tags, many=True)
             response['location'] = cached_or_new('SERIALIZED_LOCATION_{}'.format(
                 instance.location_id), LocationSerializer, instance, 'location', self.context)
         return response
@@ -181,15 +166,14 @@ class ServicePromotionSerializer(serializers.HyperlinkedModelSerializer):
         model = ServicePromotion
         fields = ('id', 'url', 'author', 'service', 'end_datetime', 'stripe_payment_intents',
                   'created_at', 'updated_at', 'is_valid', )
-        read_only_fields = ('id', 'url', 'service', 'end_datetime', 'stripe_payment_intents', )
+        read_only_fields = ('id', 'url', 'service',
+                            'end_datetime', 'stripe_payment_intents', )
         required_fields = ()
         extra_kwargs = {field: {'required': True} for field in required_fields}
 
     def to_representation(self, instance):
         response = super().to_representation(instance)
         if self.context['request']:
-            # response['author'] = UserSerializer(instance.author,
-            # many=False, context = self.context).data
             response['service'] = ShortServiceSerializer(
                 instance.service, many=False, context=self.context).data
         return response

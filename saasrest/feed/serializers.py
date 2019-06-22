@@ -2,9 +2,9 @@ from django.contrib.admin.options import get_content_type_for_model
 from django.utils.translation import ugettext as _
 from rest_framework import serializers
 
-from authentication.serializers import UserSerializer
+from authentication.serializers import serialize_simple_user
 from tags.models import Tag
-from tags.serializers import TagSerializer
+from tags.serializers import serialize_tag
 from votes.serializers import VoteSerializer
 
 from .models import FeedPost, FeedPostImage
@@ -125,10 +125,8 @@ class FeedPostSerializer(serializers.HyperlinkedModelSerializer):
         response = super().to_representation(instance)
         if self.context['request'] and override:
             # if not isinstance(self.instance, list):
-            response['author'] = UserSerializer(
-                instance.author, many=False, context=self.context).data
+            response['author'] = serialize_simple_user(instance.author, many=False, context=self.context)
 
-            response['tags'] = TagSerializer(
-                instance.tags, many=True, context=self.context).data
+            response['tags'] = serialize_tag(instance.tags, many=True)
 
         return response

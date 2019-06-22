@@ -22,10 +22,7 @@ class ConversationSerializer(serializers.HyperlinkedModelSerializer):
         user = self.get_current_user()
         if (self.context['request']) and user:
             users = instance.users.exclude(id=user.id)
-            response['users'] = authentication.serializers.UserSerializer(
-                users,
-                many=True,
-                context=self.context).data
+            response['users'] = authentication.serializers.serialize_simple_user(users, many=True, context=self.context)
         return response
 
     def get_notifications_count(self, instance):
@@ -161,16 +158,6 @@ class MessageSerializer(serializers.HyperlinkedModelSerializer):
             user = request.user
             return user
         return None
-
-    def to_representation(self, instance):
-        response = super().to_representation(instance)
-        # TODO
-        # if (self.context['request']):
-        #     if not self.get_is_my_message(instance):
-        #         response['author'] = UserSerializer(instance.author, many=False, context = self.context).data
-        # else:
-        # response['author'] = UserSerializer(instance.author, many=False, context = self.context).data
-        return response
 
     def group_name(self, instance):
         """returns conversation group name"""

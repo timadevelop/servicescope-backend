@@ -1,18 +1,17 @@
-from allauth.account.models import EmailAddress
-from allauth.account.utils import send_email_confirmation
 from django.contrib.auth.models import AbstractUser, BaseUserManager
+from django.core.cache import cache
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.http import HttpRequest
 from django.utils import timezone
-from social_django.models import UserSocialAuth
 
 import saasrest.local_settings
+from allauth.account.models import EmailAddress
+from allauth.account.utils import send_email_confirmation
+from social_django.models import UserSocialAuth
 
-
-from django.core.cache import cache
-
+from django.urls import reverse
 
 class UserManager(BaseUserManager):
     """
@@ -89,7 +88,6 @@ class User(AbstractUser):
     # additional fields
     last_active = models.DateTimeField(default=timezone.now)
 
-
     bio = models.TextField(max_length=500, blank=True, null=True)
     phone = models.TextField(max_length=100, blank=True, null=True)
 
@@ -101,20 +99,11 @@ class User(AbstractUser):
 
     image = models.ImageField(upload_to=upload_to, blank=True)
 
-    # stripe_id = models.CharField(max_length=250, blank=True)
-    # plan = models.CharField(max_length=50)
-
-    def __str__(self):              # __unicode__ on Python 2
+    def __str__(self):
         return 'User {} ({})'.format(self.first_name, self.email)
 
-    # def get_absolute_url(self):
-    #     return reverse('users', args=[str(self.id)])
-
-    @property
-    def is_demo(self):
-        return True
-        # TODO
-        # return self.date_joined < timezone.now() and self.is_active
+    def get_absolute_url(self):
+        return reverse('user-detail', args=[str(self.id)])
 
     def get_online_status_cache_key(self):
         return 'IS_ONLINE_USER_{}'.format(self.id)
@@ -131,7 +120,6 @@ class User(AbstractUser):
     def is_online(self):
         cache_value = cache.get(self.get_online_status_cache_key())
         return cache_value == True
-
 
     @property
     def is_verified_email(self):
@@ -159,7 +147,6 @@ class User(AbstractUser):
             email.send_confirmation(request, signup=True)
         super(User, self).save(force_insert, force_update, *args, **kwargs)
         self.__original_email = self.email
-
 
 
 @receiver(post_save, sender=UserSocialAuth)

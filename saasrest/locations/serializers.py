@@ -8,8 +8,11 @@ class DistrictSerializer(serializers.HyperlinkedModelSerializer):
     """Location Serializer"""
     class Meta:
         model = District
-        fields = ('id', 'url', 'oblast', 'ekatte', 'name', 'region', )
-        read_only_fields = ()
+        fields = ('id', 'url', 'name', 'oblast',
+                  # 'ekatte',
+                  # 'region',
+                  )
+        read_only_fields = fields
         lookup_field = 'oblast'
         extra_kwargs = {
             'url': {'lookup_field': 'oblast'}
@@ -20,9 +23,12 @@ class LocationSerializer(serializers.HyperlinkedModelSerializer):
     """Location Serializer"""
     class Meta:
         model = Location
-        fields = ('id', 'url', 'ekatte', 't_v_m', 'name', 'oblast',
-                  'obstina', 'kmetstvo', 'kind', 'category', 'altitude')
-        read_only_fields = ()
+        fields = ('id', 'url',
+                  't_v_m', 'name',
+                  #   'oblast', 'ekatte',
+                  #   'obstina', 'kmetstvo', 'kind', 'category', 'altitude'
+                  )
+        read_only_fields = fields
 
     def to_representation(self, instance):
         response = super().to_representation(instance)
