@@ -30,7 +30,7 @@ class UserViewSet(viewsets.ModelViewSet):
         kwargs['context'] = context
         # if isinstance(args[0], list):
         #     serializer_class = self.get_serializer_class()
-        if isinstance(args[0], User) and context['request'].user and context['request'].user.id == args[0].id:
+        if len(args) > 0 and isinstance(args[0], User) and context['request'].user and context['request'].user.id == args[0].id:
             serializer_class = PrivateUserSerializer
         else:
             serializer_class = self.get_serializer_class()
