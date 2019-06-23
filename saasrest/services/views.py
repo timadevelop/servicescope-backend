@@ -28,13 +28,13 @@ class ServiceFilter(django_rest_filters.FilterSet):
     """Custom filter for services"""
     class Meta:
         model = Service
-        fields = ['title', 'description', 'tags', 'category',
+        fields = ['tags', 'category',
                   'location_id', 'price', 'author_id']
 
     price = django_rest_filters.RangeFilter()
     # default for CharFilter is to have exact lookup_type
-    title = django_rest_filters.CharFilter()
-    description = django_rest_filters.CharFilter()
+    # title = django_rest_filters.CharFilter()
+    # description = django_rest_filters.CharFilter()
 
     # tricky part - how to filter by related field?
     # but not by its foreign key (default)
@@ -56,7 +56,7 @@ class ServiceFilter(django_rest_filters.FilterSet):
 
     def filter_tags(self, queryset, name, tags):
         if tags:
-            q = queryset.distinct().filter(tags__in=tags)
+            q = queryset.filter(tags__in=tags)
             return q
         else:
             return queryset
@@ -96,7 +96,7 @@ class ServiceViewSet(viewsets.ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         """Custom list processing"""
-        self.queryset = self.get_queryset().filter(
+        self.queryset = self.queryset.filter(
             Q(promoted_til__lt=timezone.now()) | Q(promoted_til=None))
         return super().list(request, *args, **kwargs)
 

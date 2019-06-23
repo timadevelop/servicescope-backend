@@ -180,6 +180,7 @@ def show_toolbar(request):
 
 DEBUG_TOOLBAR_CONFIG = {
     'SHOW_TOOLBAR_CALLBACK': 'saasrest.settings.show_toolbar',
+    'RESULTS_STORE_SIZE': 30,
 }
 
 DEBUG_TOOLBAR_PANELS = [
