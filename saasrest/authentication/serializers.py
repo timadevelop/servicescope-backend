@@ -68,7 +68,6 @@ class CustomUserDetailsSerializer(serializers.ModelSerializer):
 
 
 def serialize_simple_user(user, many=False, context=None):
-    print('serialize_simple_user')
     request = context.get('request')
 
     def serialize(user):
@@ -84,11 +83,7 @@ def serialize_simple_user(user, many=False, context=None):
             'is_online': user.is_online
         }
     if many:
-        print('Many EOF_serialize_simple_user')
         return map(serialize, user.all())
-    print('One EOF_serialize_simple_user')
-    r = serialize(user)
-    print(r)
     return serialize(user)
 
 
