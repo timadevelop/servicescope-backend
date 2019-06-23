@@ -2,7 +2,7 @@
 from django.core.cache import cache
 from rest_framework import serializers
 
-from .models import Tag
+from .models import Tag, get_serialized_tag_cache_key
 
 
 class TagSerializer(serializers.HyperlinkedModelSerializer):
@@ -16,11 +16,6 @@ class TagSerializer(serializers.HyperlinkedModelSerializer):
 
     def validate_name(self, value):
         return value.lower()
-
-
-def get_serialized_tag_cache_key(tag_id):
-    """Cache key for serialized tag"""
-    return 'TAGS_SERIALIZED_TAG_{}'.format(tag_id)
 
 
 def serialize_tag(tags, tag_id=None, many=False):

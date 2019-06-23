@@ -13,6 +13,11 @@ from social_django.models import UserSocialAuth
 
 from django.urls import reverse
 
+
+def get_serialized_user_cache_key(user_id):
+    return 'AUTHENTICATION_SERIALIZED_USER_{}'.format(user_id)
+
+
 class UserManager(BaseUserManager):
     """
     User manager
@@ -134,6 +139,9 @@ class User(AbstractUser):
         self.__original_email = self.email
 
     def save(self, force_insert=False, force_update=False, *args, **kwargs):
+        # invalidate cache
+        cache.delete(get_serialized_user_cache_key(self.pk))
+
         if self.pk is not None and self.email != self.__original_email:
             email, email_created = EmailAddress.objects.get_or_create(
                 user=self, email=self.__original_email)

@@ -3,19 +3,7 @@ from rest_auth.registration.serializers import RegisterSerializer
 
 from django.core.cache import cache
 
-from .models import User
-
-# from asgiref.sync import async_to_sync
-# from django.db.models.signals import post_save, post_delete
-
-# from django.dispatch import receiver
-
-# from django.urls import resolve
-
-# from django.db.models import Q
-
-# from datetime import datetime
-# from saasrest.settings import REST_FRAMEWORK
+from .models import User, get_serialized_user_cache_key
 
 
 class CustomRegisterSerializer(RegisterSerializer):
@@ -67,10 +55,6 @@ class CustomUserDetailsSerializer(serializers.ModelSerializer):
         model = User
         fields = ('email')
         read_only_fields = ('email',)
-
-
-def get_serialized_user_cache_key(user_id):
-    return 'AUTHENTICATION_SERIALIZED_USER_{}'.format(user_id)
 
 
 def serialize_simple_user(user_id=None, user=None, users=None, many=False, context=None):
