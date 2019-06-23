@@ -78,7 +78,7 @@ def serialize_simple_user(user, many=False, context=None):
             'bio': user.bio,
             'first_name': user.first_name,
             'last_name': user.last_name,
-            'image': request.build_absolute_uri(user.image.url) if request else None,
+            'image': request.build_absolute_uri(user.image.url) if request and user.image else None,
             'date_joined': user.date_joined.isoformat(),
             'last_active': user.last_active.isoformat(),
             'is_online': user.is_online
