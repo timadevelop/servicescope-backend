@@ -140,7 +140,7 @@ class ServiceSerializer(serializers.HyperlinkedModelSerializer):
             if not isinstance(self.instance, list):
                 response['author'] = serialize_simple_user(user_id=instance.author_id, many=False, context=self.context)
 
-            response['tags'] = serialize_tag(instance.tags, many=True)
+            response['tags'] = serialize_tag(tags=instance.tags, many=True)
             response['location'] = cached_or_new('SERIALIZED_LOCATION_{}'.format(
                 instance.location_id), LocationSerializer, instance, 'location', self.context)
 
@@ -153,7 +153,7 @@ class ShortServiceSerializer(ServiceSerializer):
     def to_representation(self, instance):
         response = super().to_representation(instance, False)
         if self.context['request']:
-            response['tags'] = serialize_tag(instance.tags, many=True)
+            response['tags'] = serialize_tag(tags=instance.tags, many=True)
             response['location'] = cached_or_new('SERIALIZED_LOCATION_{}'.format(
                 instance.location_id), LocationSerializer, instance, 'location', self.context)
         return response

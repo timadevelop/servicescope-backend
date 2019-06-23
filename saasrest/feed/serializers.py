@@ -127,6 +127,6 @@ class FeedPostSerializer(serializers.HyperlinkedModelSerializer):
             # if not isinstance(self.instance, list):
             response['author'] = serialize_simple_user(user_id=instance.author_id, many=False, context=self.context)
 
-            response['tags'] = serialize_tag(instance.tags, many=True)
+            response['tags'] = serialize_tag(tags=instance.tags, many=True)
 
         return response

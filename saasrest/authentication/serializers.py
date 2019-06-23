@@ -93,6 +93,7 @@ def serialize_simple_user(user_id=None, user=None, users=None, many=False, conte
         cache.set(get_serialized_user_cache_key(user.id), result)
         return result
     if user_id:
+        # TODO
         serialized_user = cache.get(get_serialized_user_cache_key(user_id))
         if serialized_user:
             return serialized_user
