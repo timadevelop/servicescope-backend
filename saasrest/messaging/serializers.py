@@ -22,7 +22,7 @@ class ConversationSerializer(serializers.HyperlinkedModelSerializer):
         user = self.get_current_user()
         if (self.context['request']) and user:
             users = instance.users.exclude(id=user.id)
-            response['users'] = authentication.serializers.serialize_simple_user(users, many=True, context=self.context)
+            response['users'] = authentication.serializers.serialize_simple_user(users=users, many=True, context=self.context)
         return response
 
     def get_notifications_count(self, instance):

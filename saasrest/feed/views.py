@@ -31,9 +31,7 @@ class FeedPostFilter(django_rest_filters.FilterSet):
     """Custom filter for feed_posts"""
     class Meta:
         model = FeedPost
-        fields = ['text', 'tags', 'author_id' ]
-
-    text = django_rest_filters.CharFilter()
+        fields = ['tags', 'author_id' ]
 
     # tricky part - how to filter by related field?
     # but not by its foreign key (default)

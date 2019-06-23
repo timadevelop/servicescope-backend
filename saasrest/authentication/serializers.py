@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from rest_auth.registration.serializers import RegisterSerializer
 
+from django.core.cache import cache
+
 from .models import User
 
 # from asgiref.sync import async_to_sync
@@ -67,11 +69,17 @@ class CustomUserDetailsSerializer(serializers.ModelSerializer):
         read_only_fields = ('email',)
 
 
-def serialize_simple_user(user, many=False, context=None):
+def get_serialized_user_cache_key(user_id):
+    return 'AUTHENTICATION_SERIALIZED_USER_{}'.format(user_id)
+
+
+def serialize_simple_user(user_id=None, user=None, users=None, many=False, context=None):
     request = context.get('request')
 
     def serialize(user):
-        return {
+        if not user:
+            return None
+        result = {
             'id': user.id,
             'url': request.build_absolute_uri(user.get_absolute_url()),
             'bio': user.bio,
@@ -82,9 +90,25 @@ def serialize_simple_user(user, many=False, context=None):
             'last_active': user.last_active.isoformat(),
             'is_online': user.is_online
         }
-    if many:
-        return map(serialize, user.all())
-    return serialize(user)
+        cache.set(get_serialized_user_cache_key(user.id), result)
+        return result
+    if user_id:
+        serialized_user = cache.get(get_serialized_user_cache_key(user_id))
+        if serialized_user:
+            return serialized_user
+        else:
+            if not user:
+                try:
+                    user = User.objects.get(pk=user_id)
+                except User.DoesNotExist:
+                    return None
+            return serialize(user)
+    elif many:
+        if users is None:
+            return None
+        return map(serialize, users.all())
+    else:
+        return serialize(user)
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):

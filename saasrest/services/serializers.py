@@ -138,8 +138,7 @@ class ServiceSerializer(serializers.HyperlinkedModelSerializer):
         response = super().to_representation(instance)
         if self.context['request'] and override:
             if not isinstance(self.instance, list):
-                response['author'] = serialize_simple_user(
-                    instance.author, many=False, context=self.context)
+                response['author'] = serialize_simple_user(user_id=instance.author_id, many=False, context=self.context)
 
             response['tags'] = serialize_tag(instance.tags, many=True)
             response['location'] = cached_or_new('SERIALIZED_LOCATION_{}'.format(
