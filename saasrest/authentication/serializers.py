@@ -57,43 +57,60 @@ class CustomUserDetailsSerializer(serializers.ModelSerializer):
         read_only_fields = ('email',)
 
 
-def serialize_simple_user(user_id=None, user=None, users=None, many=False, context=None):
-    request = context.get('request')
 
-    def serialize(user):
-        if not user:
-            return None
-        result = {
-            'id': user.id,
-            'url': request.build_absolute_uri(user.get_absolute_url()),
-            'bio': user.bio,
-            'first_name': user.first_name,
-            'last_name': user.last_name,
-            'image': request.build_absolute_uri(user.image.url) if request and user.image else None,
-            'date_joined': user.date_joined.isoformat(),
-            'last_active': user.last_active.isoformat(),
-            'is_online': user.is_online
-        }
-        cache.set(get_serialized_user_cache_key(user.id), result)
-        return result
+def serialize_user_instance(user, context):
+    request = context.get('request')
+    if not user:
+        return None
+    result = {
+        'id': user.id,
+        'url': request.build_absolute_uri(user.get_absolute_url()),
+        'bio': user.bio,
+        'first_name': user.first_name,
+        'last_name': user.last_name,
+        'image': request.build_absolute_uri(user.image.url) if request and user.image else None,
+        'date_joined': user.date_joined.isoformat(),
+        'last_active': user.last_active.isoformat(),
+        'is_online': user.is_online
+    }
+    return result
+
+def get_user(user_id):
+    try:
+        return User.objects.get(pk=user_id)
+    except User.DoesNotExist:
+        return None
+
+def serialize_simple_user(user_id=None, user=None, users=None, many=False, context=None):
     if user_id:
-        # TODO
-        serialized_user = cache.get(get_serialized_user_cache_key(user_id))
-        if serialized_user:
-            return serialized_user
-        else:
+        key = get_serialized_user_cache_key(user_id)
+
+        # get from context
+        serialized_user = context.get(key)
+        if not serialized_user:
+            # get from cache
+            serialized_user = cache.get(key)
+
+        if not serialized_user:
+            # serialize
             if not user:
-                try:
-                    user = User.objects.get(pk=user_id)
-                except User.DoesNotExist:
-                    return None
-            return serialize(user)
+                user = get_user(user_id)
+            serialized_user = serialize_user_instance(user, context)
+
+        if serialized_user:
+            # save
+            if not cache.has_key(key):
+                cache.set(key, serialized_user)
+            if key not in context:
+                context[key] = serialized_user
+
+        return serialized_user
     elif many:
         if users is None:
             return None
-        return map(serialize, users.all())
+        return map(serialize_user_instance, users.all())
     else:
-        return serialize(user)
+        return serialize_user_instance(user, context)
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
