@@ -5,12 +5,23 @@ from colorfield.fields import ColorField
 
 import random
 
-TAG_COLORS = ['#40407a', '#706fd3', '#34ace0', '#227093',
-              '#218c74', '#ff5252', '#b33939', '#ff793f', '#ffb142', '#D6A2E8']
+
+TAG_COLORS = [
+    '#ef6c57',
+    '#8fbbaf',
+    '#7ed3b2',
+    '#caabd8',
+    '#87a8d0',
+    '#b9ceeb',
+    '#f7d3ba',
+    '#dfd3c3',
+    '#c7b198',
+]
 
 
 def random_color():
     return random.choice(TAG_COLORS)
+
 
 class LowerTextField(models.TextField):
 
