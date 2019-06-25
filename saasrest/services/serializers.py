@@ -6,7 +6,6 @@ from categories.models import Category
 from locations.serializers import LocationSerializer
 from saas_core.utils import cached_or_new
 from tags.models import Tag
-from tags.serializers import serialize_tag
 from votes.serializers import VoteSerializer
 
 from .models import Service, ServiceImage, ServicePromotion
@@ -154,7 +153,7 @@ class ShortServiceSerializer(ServiceSerializer):
     def to_representation(self, instance):
         response = super().to_representation(instance, False)
         if self.context['request']:
-            response['tags'] = serialize_tag(tags=instance.tags, many=True)
+            response['tags'] = [{'name': tag.name, 'color': tag.color} for tag in instance.tags.all()]
             response['location'] = cached_or_new('SERIALIZED_LOCATION_{}'.format(
                 instance.location_id), LocationSerializer, instance, 'location', self.context)
         return response

@@ -4,7 +4,6 @@ from rest_framework import serializers
 
 from authentication.serializers import serialize_simple_user
 from tags.models import Tag
-from tags.serializers import serialize_tag
 from votes.serializers import VoteSerializer
 
 from .models import FeedPost, FeedPostImage
