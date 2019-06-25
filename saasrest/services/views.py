@@ -21,6 +21,10 @@ from .serializers import (ServiceImageSerializer, ServicePromotionSerializer,
 
 import random
 
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
+from django.views.decorators.vary import vary_on_cookie
+
 from django.utils.translation import ugettext as _
 
 
@@ -92,7 +96,6 @@ class ServiceViewSet(viewsets.ModelViewSet):
     # @method_decorator(vary_on_cookie)
     # def dispatch(self, *args, **kwargs):
     #     return super(self.__class__, self).dispatch(*args, **kwargs)
-    #
 
     def list(self, request, *args, **kwargs):
         """
@@ -162,6 +165,7 @@ class ServicePromotionViewSet(viewsets.ReadOnlyModelViewSet):
     filter_fields = ('author', 'author__id', 'service',
                      'service__id', 'transaction_id')
 
+    # one minute cache
     # @method_decorator(cache_page(60*1))
     # @method_decorator(vary_on_cookie)
     # def dispatch(self, *args, **kwargs):
