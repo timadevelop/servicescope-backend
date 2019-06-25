@@ -87,15 +87,18 @@ def serialize_simple_user(user_id=None, user=None, users=None, many=False, conte
 
         # get from context
         serialized_user = context.get(key)
-        if not serialized_user:
-            # get from cache
-            serialized_user = cache.get(key)
+        if serialized_user:
+            return serialized_user
+        
+        serialized_user = cache.get(key)
+        if serialized_user:
+            context[key] = serialized_user
+            return serialized_user
 
-        if not serialized_user:
-            # serialize
-            if not user:
-                user = get_user(user_id)
-            serialized_user = serialize_user_instance(user, context)
+        # serialize
+        if not user:
+            user = get_user(user_id)
+        serialized_user = serialize_user_instance(user, context)
 
         if serialized_user:
             # save
