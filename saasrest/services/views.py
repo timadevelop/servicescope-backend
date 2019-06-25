@@ -95,8 +95,11 @@ class ServiceViewSet(viewsets.ModelViewSet):
     #
 
     def list(self, request, *args, **kwargs):
-        """Custom list processing"""
-        self.queryset = self.queryset.filter(
+        """
+        Custom list processing, exclude promoted services
+        (use service-promotion view instead)
+        """
+        self.queryset = self.get_queryset().filter(
             Q(promoted_til__lt=timezone.now()) | Q(promoted_til=None))
         return super().list(request, *args, **kwargs)
 

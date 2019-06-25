@@ -13,6 +13,7 @@ from tags.models import Tag
 from votes.models import Vote
 
 from django.utils import timezone
+from django.urls import reverse
 
 class Service(models.Model):
     """Service model"""
@@ -62,6 +63,9 @@ class Service(models.Model):
         if self.promoted_til and self.promoted_til > now():
             return True
         return False
+
+    def get_absolute_url(self):
+        return reverse('service-detail', args=[str(self.id)])
 
 
     def promote(self, user, intent_id, days):
