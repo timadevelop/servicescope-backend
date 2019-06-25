@@ -148,7 +148,7 @@ class ServiceViewSet(viewsets.ModelViewSet):
         return self.vote(request, pk, Vote.DOWN_VOTE)
 
 
-class ServicePromotionViewSet(viewsets.ModelViewSet):
+class ServicePromotionViewSet(viewsets.ReadOnlyModelViewSet):
     """
     Services Promotions
     TODO permissions
@@ -168,10 +168,10 @@ class ServicePromotionViewSet(viewsets.ModelViewSet):
     #     return super(self.__class__, self).dispatch(*args, **kwargs)
 
     def perform_create(self, serializer):
-        if self.request.user:
-            serializer.save(author=self.request.user)
-        else:
-            raise PermissionDenied()
+        # if self.request.user:
+        #     serializer.save(author=self.request.user)
+        # else:
+        raise PermissionDenied()
 
     def filter_promotion_queryset(self, queryset, request):
         """
