@@ -6,6 +6,8 @@ from authentication.models import User
 from tags.models import Tag
 from votes.models import Vote
 
+from saas_core.images_compression import compress_image
+
 class FeedPost(models.Model):
     """FeedPost model"""
     author = models.ForeignKey(
@@ -39,3 +41,9 @@ class FeedPostImage(models.Model):
     feed_post = models.ForeignKey(
         FeedPost, on_delete=models.CASCADE, null=False, related_name='images')
     image = models.ImageField(upload_to='images/feed_posts/%Y/%m/%d')
+
+    def save(self, *args, **kwargs):
+        """Compress on save"""
+        if not self.id:
+            self.image = compress_image(self.image)
+        super().save(*args, **kwargs)

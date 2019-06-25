@@ -5,6 +5,8 @@ from authentication.models import User
 
 from django.utils.translation import ugettext as _
 
+from saas_core.images_compression import compress_image
+
 class Conversation(models.Model):
     """Conversation"""
     title = models.TextField(max_length=30, blank=False)
@@ -52,3 +54,9 @@ class MessageImage(models.Model):
                                 null=False,
                                 related_name='images')
     image = models.ImageField(upload_to='images/messages/%Y/%m/%d')
+
+    def save(self, *args, **kwargs):
+        """Compress on save"""
+        if not self.id:
+            self.image = compress_image(self.image)
+        super().save(*args, **kwargs)

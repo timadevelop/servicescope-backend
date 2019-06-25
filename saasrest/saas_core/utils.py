@@ -21,6 +21,7 @@ def create_notification(recipient, conversation, title, text, redirect_url):
     return Notification.objects.create(recipient=recipient, conversation=conversation,
                                        title=title, text=text, redirect_url=redirect_url)
 
+
 async def broadcast_message(msg, serializer_data):
     group_name = 'chat_%s' % msg.conversation.id
     channel_layer = get_channel_layer()

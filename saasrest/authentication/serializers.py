@@ -82,6 +82,8 @@ def get_user(user_id):
         return None
 
 def serialize_simple_user(user_id=None, user=None, users=None, many=False, context=None):
+    def serialize(user):
+        return serialize_user_instance(user, context)
     if user_id:
         key = get_serialized_user_cache_key(user_id)
 
@@ -111,7 +113,7 @@ def serialize_simple_user(user_id=None, user=None, users=None, many=False, conte
     elif many:
         if users is None:
             return None
-        return map(serialize_user_instance, users.all())
+        return map(serialize, users.all())
     else:
         return serialize_user_instance(user, context)
 

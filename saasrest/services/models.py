@@ -15,6 +15,9 @@ from votes.models import Vote
 from django.utils import timezone
 from django.urls import reverse
 
+from saas_core.images_compression import compress_image
+
+
 class Service(models.Model):
     """Service model"""
     author = models.ForeignKey(
@@ -43,10 +46,10 @@ class Service(models.Model):
     score = models.IntegerField(default=0)
     votes = GenericRelation(Vote)
     promoted_til = models.DateTimeField(null=True, blank=True)
-    
+
     def likes(self):
         return self.votes.filter(activity_type=Vote.UP_VOTE)
-    
+
     def dislikes(self):
         return self.votes.filter(activity_type=Vote.DOWN_VOTE)
 
@@ -67,7 +70,6 @@ class Service(models.Model):
     def get_absolute_url(self):
         return reverse('service-detail', args=[str(self.id)])
 
-
     def promote(self, user, intent_id, days):
         if self.promotions.exists():
             print('update old promotion')
@@ -75,7 +77,7 @@ class Service(models.Model):
             # add days
             service_promotion.end_datetime = service_promotion.end_datetime + \
                 timezone.timedelta(days=days)
-            
+
             if intent_id:
                 service_promotion.stripe_payment_intents.append(intent_id)
             service_promotion.save()
@@ -101,6 +103,12 @@ class ServiceImage(models.Model):
         Service, on_delete=models.CASCADE, null=False, related_name='images')
     image = models.ImageField(upload_to='images/services/%Y/%m/%d')
 
+    def save(self, *args, **kwargs):
+        """Compress on save"""
+        if not self.id:
+            self.image = compress_image(self.image)
+        super().save(*args, **kwargs)
+
 
 class ServicePromotion(models.Model):
     """Service promotion"""
@@ -110,7 +118,7 @@ class ServicePromotion(models.Model):
         Service, on_delete=models.SET_NULL, null=True, blank=True, related_name='promotions')
 
     end_datetime = models.DateTimeField(blank=False, null=False)
-    
+
     stripe_payment_intents = ArrayField(models.CharField(max_length=110))
 
     created_at = models.DateTimeField(auto_now_add=True)
