@@ -162,12 +162,12 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     # clickjacking
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    # //
-    # debug
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
     # cache
     # 'django.middleware.cache.FetchFromCacheMiddleware',
 ]
+
+if DEBUG:
+    MIDDLEWARE += ['debug_toolbar.middleware.DebugToolbarMiddleware']
 
 INTERNAL_IPS = ['192.168.1.22', 'localhost', '127.0.0.1', "*"]
 
