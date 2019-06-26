@@ -237,7 +237,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'saasrest.wsgi.application'
-ASGI_APPLICATION = 'saas_core.routing.application'
+ASGI_APPLICATION = 'saasrest.asgi.application'
 
 
 CHANNEL_LAYERS = {
