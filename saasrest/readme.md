@@ -24,3 +24,7 @@ For google auth:
 ## Celery workers:
 
 - `~/.local/bin/celery -A saasrest worker -B --loglevel=info`
+
+###
+
+- collect static on prod
