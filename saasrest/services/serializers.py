@@ -1,15 +1,16 @@
 from django.contrib.admin.options import get_content_type_for_model
+from django.utils.translation import ugettext as _
 from rest_framework import serializers
 
 from authentication.serializers import serialize_simple_user
 from categories.models import Category
 from locations.serializers import LocationSerializer
+from saas_core.serializers import CreatableSlugRelatedField
 from saas_core.utils import cached_or_new
 from tags.models import Tag
 from votes.serializers import VoteSerializer
 
 from .models import Service, ServiceImage, ServicePromotion
-from django.utils.translation import ugettext as _
 
 
 class ServiceImageSerializer(serializers.HyperlinkedModelSerializer):
@@ -31,7 +32,7 @@ class ServiceSerializer(serializers.HyperlinkedModelSerializer):
     # likes = VoteSerializer(many=True, read_only=True)
     # dislikes = VoteSerializer(many=True, read_only=True)
 
-    tags = serializers.SlugRelatedField(
+    tags = CreatableSlugRelatedField(
         many=True,
         queryset=Tag.objects,
         slug_field='name'

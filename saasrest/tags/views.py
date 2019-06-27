@@ -25,9 +25,9 @@ class TagViewSet(viewsets.ModelViewSet):
                        django_rest_filters.DjangoFilterBackend, )
     search_fields = ('name', )
 
-    @method_decorator(cache_page(60*1))
-    def dispatch(self, request, *args, **kwargs):
-        return super(TagViewSet, self).dispatch(request, *args, **kwargs)
+    # @method_decorator(cache_page(60*1))
+    # def dispatch(self, request, *args, **kwargs):
+    #     return super(TagViewSet, self).dispatch(request, *args, **kwargs)
 
     def perform_create(self, serializer):
         if self.request.user:

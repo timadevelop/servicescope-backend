@@ -3,6 +3,7 @@ from django.utils.translation import ugettext as _
 from rest_framework import serializers
 
 from authentication.serializers import serialize_simple_user
+from saas_core.serializers import CreatableSlugRelatedField
 from tags.models import Tag
 from votes.serializers import VoteSerializer
 
@@ -34,7 +35,7 @@ class FeedPostSerializer(serializers.HyperlinkedModelSerializer):
     # likes = VoteSerializer(many=True, read_only=True)
     # dislikes = VoteSerializer(many=True, read_only=True)
 
-    tags = serializers.SlugRelatedField(
+    tags = CreatableSlugRelatedField(
         many=True,
         queryset=Tag.objects,
         slug_field='name'
