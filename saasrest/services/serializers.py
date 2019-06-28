@@ -131,7 +131,6 @@ class ServiceSerializer(serializers.HyperlinkedModelSerializer):
         service = super().update(instance, validated_data)
         image_data = self.context.get('view').request.FILES
         for img in image_data.values():
-            print('image: ', img)
             img = ServiceImage.objects.create(service=service, image=img)
         return service
 

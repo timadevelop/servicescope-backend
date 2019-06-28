@@ -1,12 +1,14 @@
 """Feed models"""
 from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
+from django.db.models.signals import post_delete
+from django.dispatch import receiver
 
 from authentication.models import User
+from saas_core.images_compression import compress_image
 from tags.models import Tag
 from votes.models import Vote
 
-from saas_core.images_compression import compress_image
 
 class FeedPost(models.Model):
     """FeedPost model"""
@@ -47,3 +49,7 @@ class FeedPostImage(models.Model):
         if not self.id:
             self.image = compress_image(self.image)
         super().save(*args, **kwargs)
+
+@receiver(post_delete, sender=FeedPostImage)
+def submission_delete(sender, instance, **kwargs):
+    instance.image.delete(False)
