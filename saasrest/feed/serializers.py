@@ -14,8 +14,8 @@ class FeedPostImageSerializer(serializers.HyperlinkedModelSerializer):
     """FeedPost image serializer"""
     class Meta:
         model = FeedPostImage
-        fields = ('feed_post', 'image', )
-        read_only_fields = ()
+        fields = ('id', 'feed_post', 'image', )
+        read_only_fields = fields
         required_fields = ('feed_post', 'image', )
         extra_kwargs = {field: {'required': True} for field in required_fields}
 

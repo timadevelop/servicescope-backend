@@ -17,7 +17,7 @@ class ServiceImageSerializer(serializers.HyperlinkedModelSerializer):
     """Service image serializer"""
     class Meta:
         model = ServiceImage
-        fields = ('service', 'image', )
+        fields = ('id', 'url', 'service', 'image', )
         read_only_fields = fields
         required_fields = ('service', 'image', )
         extra_kwargs = {field: {'required': True} for field in required_fields}
@@ -131,6 +131,7 @@ class ServiceSerializer(serializers.HyperlinkedModelSerializer):
         service = super().update(instance, validated_data)
         image_data = self.context.get('view').request.FILES
         for img in image_data.values():
+            print('image: ', img)
             img = ServiceImage.objects.create(service=service, image=img)
         return service
 

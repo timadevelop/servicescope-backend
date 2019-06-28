@@ -2,6 +2,10 @@ from colorfield.fields import ColorField
 from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.postgres.fields import ArrayField, JSONField
 from django.db import models
+from django.db.models.signals import post_delete
+from django.dispatch import receiver
+from django.urls import reverse
+from django.utils import timezone
 from django.utils.timezone import now
 
 from authentication.models import User
@@ -9,13 +13,9 @@ from categories.models import Category
 # pylint: disable=fixme, import-error
 from djmoney.models.fields import MoneyField
 from locations.models import Location
+from saas_core.images_compression import compress_image
 from tags.models import Tag
 from votes.models import Vote
-
-from django.utils import timezone
-from django.urls import reverse
-
-from saas_core.images_compression import compress_image
 
 
 class Service(models.Model):
@@ -109,6 +109,9 @@ class ServiceImage(models.Model):
             self.image = compress_image(self.image)
         super().save(*args, **kwargs)
 
+@receiver(post_delete, sender=ServiceImage)
+def submission_delete(sender, instance, **kwargs):
+    instance.image.delete(False)
 
 class ServicePromotion(models.Model):
     """Service promotion"""
