@@ -52,5 +52,6 @@ def change_obj_score(sender, instance, using, **kwargs):
     Object required to have likes & dislikes properties
     """
     obj = instance.content_object
-    obj.score = obj.likes().count() - obj.dislikes().count()
-    obj.save(update_fields=['score'])
+    if obj:
+        obj.score = obj.likes().count() - obj.dislikes().count()
+        obj.save(update_fields=['score'])
