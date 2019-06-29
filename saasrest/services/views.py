@@ -221,14 +221,13 @@ class ServicePromotionViewSet(viewsets.ReadOnlyModelViewSet):
 
     def list(self, request):
         """Custom list processing"""
-        queryset = self.filter_promotion_queryset(self.queryset, request)
-        # .order_by('?')
+        queryset = self.filter_promotion_queryset(self.queryset, request).order_by('?')
 
-        valid_id_list = list(queryset.values_list('id', flat=True))
+        # valid_id_list = list(queryset.values_list('id', flat=True))
         # print(valid_id_list)
-        random_id_list = random.sample(
-            valid_id_list, min(len(valid_id_list), 5))
-        queryset = self.queryset.filter(id__in=random_id_list)
+        # random_id_list = random.sample(
+        #     valid_id_list, min(len(valid_id_list), 5))
+        # queryset = self.queryset.filter(id__in=random_id_list)
 
         serializer = self.serializer_class(
             queryset, many=True, context={'request': request})
