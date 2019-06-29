@@ -60,7 +60,7 @@ class ServiceFilter(django_rest_filters.FilterSet):
 
     def filter_tags(self, queryset, name, tags):
         if tags:
-            q = queryset.filter(tags__in=tags)
+            q = queryset.filter(tags__in=tags).distinct()
             return q
         else:
             return queryset
