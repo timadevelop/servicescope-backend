@@ -221,7 +221,7 @@ class ServicePromotionViewSet(viewsets.ReadOnlyModelViewSet):
 
     def list(self, request):
         """Custom list processing"""
-        queryset = self.filter_promotion_queryset(self.queryset, request).order_by('?')
+        queryset = self.filter_promotion_queryset(self.queryset, request).order_by('?')[:6]
 
         # valid_id_list = list(queryset.values_list('id', flat=True))
         # print(valid_id_list)
