@@ -190,31 +190,33 @@ class ServicePromotionViewSet(viewsets.ReadOnlyModelViewSet):
 
         queryset = queryset.filter(service__promoted_til__gte=timezone.now())
 
-        condition = Q()
+        condition1 = Q()
 
         if author_id:
-            condition.add(Q(service__author_id=author_id), Q.AND)
+            condition1.add(Q(service__author_id=author_id), Q.AND)
 
         if category:
             # filter service category
             # Always change queryset
-            condition.add(Q(service__category__name__iexact=category), Q.AND)
+            condition1.add(Q(service__category__name__iexact=category), Q.AND)
 
+        condition2 = Q()
         if tags:
             # at least one tag from tags
             # do not change queryset if there are no services with tags
-            condition.add(Q(service__tags__name__in=tags), Q.OR)
+            condition2.add(Q(service__tags__name__in=tags), Q.OR)
 
         if query:
             # filter service title
             # do not change queryset if there are no services with similar title
-            condition.add(Q(service__title__icontains=query), Q.OR)
-            condition.add(Q(service__description__icontains=query), Q.OR)
-            condition.add(Q(service__tags__name__iexact=query), Q.OR)
+            condition2.add(Q(service__title__icontains=query), Q.OR)
+            condition2.add(Q(service__description__icontains=query), Q.OR)
+            condition2.add(Q(service__tags__name__iexact=query), Q.OR)
 
         if location_id:
-            condition.add(Q(service__location_id=location_id), Q.OR)
+            condition2.add(Q(service__location_id=location_id), Q.OR)
 
+        condition = Q(condition1 & condition2)
         # print(condition)
 
         return queryset.filter(condition).distinct()
