@@ -156,6 +156,9 @@ class ServicePromotionViewSet(viewsets.ReadOnlyModelViewSet):
     Services Promotions
     TODO permissions
     """
+
+    PAGE_SIZE = 6
+
     queryset = ServicePromotion.objects
     serializer_class = ServicePromotionSerializer
     permission_classes = (IsOwnerOrReadOnly, )
@@ -190,15 +193,15 @@ class ServicePromotionViewSet(viewsets.ReadOnlyModelViewSet):
 
         queryset = queryset.filter(service__promoted_til__gte=timezone.now())
 
-        condition1 = Q()
+        condition = Q()
 
         if author_id:
-            condition1.add(Q(service__author_id=author_id), Q.AND)
+            condition.add(Q(service__author_id=author_id), Q.AND)
 
         if category:
             # filter service category
             # Always change queryset
-            condition1.add(Q(service__category__name__iexact=category), Q.AND)
+            condition.add(Q(service__category__name__iexact=category), Q.AND)
 
         condition2 = Q()
         if tags:
@@ -216,20 +219,18 @@ class ServicePromotionViewSet(viewsets.ReadOnlyModelViewSet):
         if location_id:
             condition2.add(Q(service__location_id=location_id), Q.OR)
 
-        condition = Q(condition1 & condition2)
-        # print(condition)
+        condition.add(condition2, Q.AND)
 
-        return queryset.filter(condition).distinct()
+        return queryset.filter(condition)
 
     def list(self, request):
         """Custom list processing"""
-        queryset = self.filter_promotion_queryset(self.queryset, request).order_by('?')[:6]
+        queryset = self.filter_promotion_queryset(self.queryset, request).distinct('id')
+        # [:6]
 
-        # valid_id_list = list(queryset.values_list('id', flat=True))
-        # print(valid_id_list)
-        # random_id_list = random.sample(
-        #     valid_id_list, min(len(valid_id_list), 5))
-        # queryset = self.queryset.filter(id__in=random_id_list)
+        valid_id_list = list(queryset.values_list('id', flat=True))
+        random_id_list = random.sample(valid_id_list, min(len(valid_id_list), self.PAGE_SIZE))
+        queryset = self.queryset.filter(id__in=random_id_list)[:self.PAGE_SIZE]
 
         serializer = self.serializer_class(
             queryset, many=True, context={'request': request})
