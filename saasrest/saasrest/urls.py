@@ -31,6 +31,7 @@ import notifications.urls
 import payments.urls
 import public_configs.urls
 import services.urls
+import seeks.urls
 import tags.urls
 import votes.urls
 import feed.urls
@@ -79,6 +80,7 @@ urlpatterns = [
         url(r'', include(payments.urls)),
         url(r'', include(public_configs.urls)),
         url(r'', include(services.urls)),
+        url(r'', include(seeks.urls)),
         url(r'', include(tags.urls)),
         url(r'', include(votes.urls)),
         url(r'', include(feed.urls)),

@@ -74,6 +74,7 @@ INSTALLED_APPS = [
     'payments',
     'public_configs',
     'services',
+    'seeks',
     'tags',
     'votes',
     'feed',
