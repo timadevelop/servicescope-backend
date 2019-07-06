@@ -13,6 +13,8 @@ from social_django.models import UserSocialAuth
 
 from django.urls import reverse
 
+from saas_core.images_compression import compress_image
+
 
 def get_serialized_user_cache_key(user_id):
     return 'AUTHENTICATION_SERIALIZED_USER_{}'.format(user_id)
@@ -141,6 +143,9 @@ class User(AbstractUser):
     def save(self, force_insert=False, force_update=False, *args, **kwargs):
         # invalidate cache
         cache.delete(get_serialized_user_cache_key(self.pk))
+
+        if self.image:
+            self.image = compress_image(self.image)
 
         if self.pk is not None and self.email != self.__original_email:
             email, email_created = EmailAddress.objects.get_or_create(

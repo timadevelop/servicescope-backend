@@ -46,7 +46,7 @@ class FeedPostImage(models.Model):
 
     def save(self, *args, **kwargs):
         """Compress on save"""
-        if not self.id:
+        if self.image:
             self.image = compress_image(self.image)
         super().save(*args, **kwargs)
 

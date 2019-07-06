@@ -15,7 +15,7 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
 
     @database_sync_to_async
     def change_user_online_status(self, is_online):
-        if self.user:
+        if not self.user.is_anonymous:
             self.user.set_online_status(is_online)
             if not is_online:
                 # update last_active
