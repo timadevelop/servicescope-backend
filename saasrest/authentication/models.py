@@ -105,10 +105,12 @@ class User(AbstractUser):
         return 'images/users/%s/%s' % (instance.id, filename)
 
     image = models.ImageField(upload_to=upload_to, blank=True)
-    __original_image = None
 
+    __original_image = None
+    __original_email = None
     def __init__(self, *args, **kwargs):
         super(User, self).__init__(*args, **kwargs)
+        self.__original_email = self.email
         self.__original_image = self.image
 
     def __str__(self):
@@ -139,18 +141,13 @@ class User(AbstractUser):
             return True
         return EmailAddress.objects.filter(user=self, verified=True).exists()
 
-    __original_email = None
-
-    def __init__(self, *args, **kwargs):
-        super(User, self).__init__(*args, **kwargs)
-        self.__original_email = self.email
 
     def save(self, force_insert=False, force_update=False, *args, **kwargs):
         # invalidate cache
         cache.delete(get_serialized_user_cache_key(self.pk))
 
-        if self.image and self.image != self.__original_image:
-            # image updated.
+        if not self.id or self.image != self.__original_image:
+            # image update.
             self.image = compress_image(self.image)
 
         if self.pk is not None and self.email != self.__original_email:

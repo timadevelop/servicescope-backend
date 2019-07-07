@@ -52,7 +52,7 @@ class FeedPostImage(models.Model):
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         """Compress on save"""
-        if self.image and self.image != self.__original_image:
+        if not self.id or self.image != self.__original_image:
             self.image = compress_image(self.image)
         super().save(force_insert=force_insert, force_update=force_update,
                      using=using, update_fields=update_fields)

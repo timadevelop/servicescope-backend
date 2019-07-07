@@ -17,8 +17,8 @@ def compress_image(image):
         background.paste(image_tmp, image_tmp.split()[-1])
         image_tmp = background
 
-    # imageTemproaryResized = imageTemproary.resize( (1020,573) )
-    image_tmp.save(output_io_stream, format='JPEG', quality=40)
+    image_tmp.thumbnail((1600, 1200), Image.ANTIALIAS)
+    image_tmp.save(output_io_stream, format='JPEG', quality=70)
     output_io_stream.seek(0)
 
     uploaded_image = InMemoryUploadedFile(output_io_stream,
