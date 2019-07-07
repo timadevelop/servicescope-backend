@@ -89,13 +89,19 @@ class SeekingImage(models.Model):
     seeking = models.ForeignKey(
         Seeking, on_delete=models.CASCADE, null=False, related_name='images')
     image = models.ImageField(upload_to='images/seekings/%Y/%m/%d')
+    __original_image = None
 
-    def save(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
+        super(SeekingImage, self).__init__(*args, **kwargs)
+        self.__original_image = self.image
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         """Compress on save"""
-        if self.image:
+        if self.image and self.image != self.__original_image:
             self.image = compress_image(self.image)
-        super().save(*args, **kwargs)
-
+        super().save(force_insert=force_insert, force_update=force_update,
+                     using=using, update_fields=update_fields)
+        self.__original_image = self.image
 
 @receiver(post_delete, sender=SeekingImage)
 def submission_delete(sender, instance, **kwargs):

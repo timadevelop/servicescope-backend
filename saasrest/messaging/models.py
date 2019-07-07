@@ -54,9 +54,16 @@ class MessageImage(models.Model):
                                 null=False,
                                 related_name='images')
     image = models.ImageField(upload_to='images/messages/%Y/%m/%d')
+    __original_image = None
 
-    def save(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
+        super(MessageImage, self).__init__(*args, **kwargs)
+        self.__original_image = self.image
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         """Compress on save"""
-        if self.image:
+        if self.image and self.image != self.__original_image:
             self.image = compress_image(self.image)
-        super().save(*args, **kwargs)
+        super().save(force_insert=force_insert, force_update=force_update,
+                     using=using, update_fields=update_fields)
+        self.__original_image = self.image

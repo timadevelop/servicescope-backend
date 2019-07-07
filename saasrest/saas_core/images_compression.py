@@ -6,6 +6,8 @@ from django.core.files.uploadedfile import InMemoryUploadedFile
 
 def compress_image(image):
     """Compress image"""
+    if not image:
+        return image
     image_tmp = Image.open(image)
     output_io_stream = BytesIO()
     fill_color = '#fff'  # your background

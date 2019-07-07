@@ -105,6 +105,11 @@ class User(AbstractUser):
         return 'images/users/%s/%s' % (instance.id, filename)
 
     image = models.ImageField(upload_to=upload_to, blank=True)
+    __original_image = None
+
+    def __init__(self, *args, **kwargs):
+        super(User, self).__init__(*args, **kwargs)
+        self.__original_image = self.image
 
     def __str__(self):
         return 'User {} ({})'.format(self.first_name, self.email)
@@ -144,7 +149,8 @@ class User(AbstractUser):
         # invalidate cache
         cache.delete(get_serialized_user_cache_key(self.pk))
 
-        if self.image:
+        if self.image and self.image != self.__original_image:
+            # image updated.
             self.image = compress_image(self.image)
 
         if self.pk is not None and self.email != self.__original_email:
@@ -160,6 +166,8 @@ class User(AbstractUser):
             email.send_confirmation(request, signup=True)
         super(User, self).save(force_insert, force_update, *args, **kwargs)
         self.__original_email = self.email
+        self.__original_image = self.image
+
 
 
 @receiver(post_save, sender=UserSocialAuth)

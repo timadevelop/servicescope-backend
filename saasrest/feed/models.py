@@ -23,7 +23,7 @@ class FeedPost(models.Model):
 
     score = models.IntegerField(default=0)
     votes = GenericRelation(Vote)
-    
+
     def likes(self):
         return self.votes.filter(activity_type=Vote.UP_VOTE)
 
@@ -38,17 +38,26 @@ class FeedPost(models.Model):
     # Or in a similar way using the Activity model to add the like
     #Vote.objects.create(content_object=post, activity_type=Activity.LIKE, user=request.user)
 
+
 class FeedPostImage(models.Model):
     """FeedPost image"""
     feed_post = models.ForeignKey(
         FeedPost, on_delete=models.CASCADE, null=False, related_name='images')
     image = models.ImageField(upload_to='images/feed_posts/%Y/%m/%d')
+    __original_image = None
 
-    def save(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
+        super(FeedPostImage, self).__init__(*args, **kwargs)
+        self.__original_image = self.image
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         """Compress on save"""
-        if self.image:
+        if self.image and self.image != self.__original_image:
             self.image = compress_image(self.image)
-        super().save(*args, **kwargs)
+        super().save(force_insert=force_insert, force_update=force_update,
+                     using=using, update_fields=update_fields)
+        self.__original_image = self.image
+
 
 @receiver(post_delete, sender=FeedPostImage)
 def submission_delete(sender, instance, **kwargs):
