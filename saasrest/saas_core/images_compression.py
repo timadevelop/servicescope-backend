@@ -17,7 +17,7 @@ def compress_image(image):
         background.paste(image_tmp, image_tmp.split()[-1])
         image_tmp = background
 
-    image_tmp.thumbnail((1600, 1200), Image.ANTIALIAS)
+    image_tmp.thumbnail((1280, 720), Image.ANTIALIAS)
     image_tmp.save(output_io_stream, format='JPEG', quality=70)
     output_io_stream.seek(0)
 
