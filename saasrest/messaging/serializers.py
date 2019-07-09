@@ -2,9 +2,12 @@ from rest_framework import serializers
 
 import authentication.serializers
 
-from .models import Conversation, Message, MessageImage
+from .models import Conversation, Message
 
 from django.utils.translation import ugettext as _
+
+from saas_core.models import Image
+from saas_core.serializers import ImageSerializer
 
 class ConversationSerializer(serializers.HyperlinkedModelSerializer):
 
@@ -77,29 +80,10 @@ class ConversationSerializer(serializers.HyperlinkedModelSerializer):
 
         return value
 
-class MessageImageSerializer(serializers.HyperlinkedModelSerializer):
-    """Message Image Serializer"""
-    class Meta:
-        model = MessageImage
-        fields = ('id', 'url', 'message', 'image', )
-        read_only_fields = ('id', 'url', )
-        required_fields = ('message', 'image', )
-        extra_kwargs = {field: {'required': True} for field in required_fields}
-
-    def get_image(self, data):
-        """
-        image field
-        """
-        # TODO ?
-        request = self.context.get('request')
-        imageurl = data.image.url
-        return request.build_absolute_uri(imageurl)
-
-
 class MessageSerializer(serializers.HyperlinkedModelSerializer):
     """Message Serializer"""
     is_my_message = serializers.SerializerMethodField()
-    images = MessageImageSerializer(many=True, read_only=True)
+    images = ImageSerializer(many=True, read_only=True)
 
     class Meta:
         model = Message
@@ -130,16 +114,16 @@ class MessageSerializer(serializers.HyperlinkedModelSerializer):
         message = super().create(validated_data)
         image_data = self.context.get('view').request.FILES
         for img in image_data.values():
-            img = MessageImage.objects.create(
-                message=message, image=img)
+            img = Image.objects.create(
+                content_object=message, image=img)
         return message
 
     def update(self, instance, validated_data):
         message = super().update(instance, validated_data)
         image_data = self.context.get('view').request.FILES
         for img in image_data.values():
-            img = MessageImage.objects.create(
-                message=message, image=img)
+            img = Image.objects.create(
+                content_object=message, image=img)
         return message
 
     def get_is_my_message(self, instance):

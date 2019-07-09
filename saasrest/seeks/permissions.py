@@ -2,7 +2,7 @@ from rest_framework import permissions
 # from django.contrib.auth.models import User
 
 
-from .models import Seeking, SeekingImage, SeekingPromotion
+from .models import Seeking, SeekingPromotion
 
 
 class IsOwner(permissions.BasePermission):
@@ -14,8 +14,6 @@ class IsOwner(permissions.BasePermission):
 
         if isinstance(obj, Seeking):
             return obj.author == request.user
-        if isinstance(obj, SeekingImage):
-            return obj.seeking.author == request.user
         if isinstance(obj, SeekingPromotion):
             return obj.author == request.user
 

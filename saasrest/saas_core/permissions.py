@@ -4,6 +4,7 @@ from rest_framework import permissions
 
 from authentication.models import User
 
+from saas_core.models import Image
 
 class IsAdminUserOrReadOnly(permissions.IsAdminUser):
 
@@ -43,32 +44,10 @@ class IsOwner(permissions.BasePermission):
             else:
                 return False
 
-        # if isinstance(obj, Review):
-        #     return obj.author == request.user
-        # if isinstance(obj, Service):
-        #     return obj.author == request.user
-        # if isinstance(obj, ServiceImage):
-        #     return obj.service.author == request.user
-        # if isinstance(obj, ServicePromotion):
-        #     return obj.author == request.user
-        # if isinstance(obj, Post):
-        #     return obj.author == request.user
-        # if isinstance(obj, PostImage):
-        #     return obj.post.author == request.user
-        # if isinstance(obj, PostPromotion):
-        #     return obj.author == request.user
-        # if isinstance(obj, Offer):
-        #     return obj.author == request.user
-        # if isinstance(obj, Vote):
-        #     return obj.user == request.user
-        # if isinstance(obj, models.Message):
-        #     return obj.author.id == request.user.id
-        # if isinstance(obj, models.Conversation):
-        #     return obj.users.filter(id=request.user.id)
-        # if isinstance(obj, models.MessageImage):
-        #     return False #?
-        # if isinstance(obj, models.Feedback):
-        #     return False
+        if isinstance(obj, Image):
+            author = getattr(obj.content_object, 'author', None)
+            if author and not author.is_anonymous:
+                return author.id == request.user.id            
 
         # no.
         return False

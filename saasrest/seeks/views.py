@@ -19,9 +19,9 @@ from tags.models import Tag
 from votes.models import Vote
 from votes.serializers import VoteSerializer
 
-from .models import Seeking, SeekingImage, SeekingPromotion
+from .models import Seeking, SeekingPromotion
 from .permissions import IsOwnerOrReadOnly
-from .serializers import (SeekingImageSerializer, SeekingPromotionSerializer,
+from .serializers import (SeekingPromotionSerializer,
                           SeekingSerializer)
 
 
@@ -238,12 +238,3 @@ class SeekingPromotionViewSet(viewsets.ReadOnlyModelViewSet):
             'page': 1,
             'results': serializer.data
         })
-
-
-class SeekingImageViewSet(viewsets.ModelViewSet):
-    """
-    Seeking image viewset
-    """
-    queryset = SeekingImage.objects.all()
-    serializer_class = SeekingImageSerializer
-    permission_classes = (IsOwnerOrReadOnly, )

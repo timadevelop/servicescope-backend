@@ -11,7 +11,6 @@ from django.utils.timezone import now
 from authentication.models import User
 from categories.models import Category
 from locations.models import Location
-from saas_core.images_compression import compress_image
 from tags.models import Tag
 from votes.models import Vote
 
@@ -82,31 +81,6 @@ class Seeking(models.Model):
         self.save()
 
         return seeking_promotion
-
-
-class SeekingImage(models.Model):
-    """Seeking image"""
-    seeking = models.ForeignKey(
-        Seeking, on_delete=models.CASCADE, null=False, related_name='images')
-    image = models.ImageField(upload_to='images/seekings/%Y/%m/%d')
-    __original_image = None
-
-    def __init__(self, *args, **kwargs):
-        super(SeekingImage, self).__init__(*args, **kwargs)
-        self.__original_image = self.image
-
-    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-        """Compress on save"""
-        if not self.id or self.image != self.__original_image:
-            self.image = compress_image(self.image)
-        super().save(force_insert=force_insert, force_update=force_update,
-                     using=using, update_fields=update_fields)
-        self.__original_image = self.image
-
-@receiver(post_delete, sender=SeekingImage)
-def submission_delete(sender, instance, **kwargs):
-    instance.image.delete(False)
-
 
 class SeekingPromotion(models.Model):
     """Seeking promotion"""

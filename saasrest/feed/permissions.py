@@ -1,6 +1,6 @@
 from rest_framework import permissions
 
-from .models import FeedPost, FeedPostImage
+from .models import FeedPost
 
 class IsOwner(permissions.BasePermission):
     """Is owner of service"""
@@ -10,10 +10,7 @@ class IsOwner(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
 
         if isinstance(obj, FeedPost):
-            return obj.author == request.user
-        if isinstance(obj, FeedPostImage):
-            return obj.feed_post.author == request.user
-        
+            return obj.author == request.user       
         # no.
         return False
 

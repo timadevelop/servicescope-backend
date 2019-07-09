@@ -13,6 +13,6 @@ if [ "$SAAS_ENV" = "production" ]; then
     python manage.py runserver "0.0.0.0:${PORT}"
 else
     echo Developement env
-    daphne -b 0.0.0.0 -p ${PORT} saasrest.asgi:application
-    # python manage.py runserver "0.0.0.0:${PORT}"
+    # daphne -b 0.0.0.0 -p ${PORT} saasrest.asgi:application
+    python manage.py runserver "0.0.0.0:${PORT}"
 fi

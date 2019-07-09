@@ -10,22 +10,14 @@ from saas_core.utils import cached_or_new
 from tags.models import Tag
 from votes.serializers import VoteSerializer
 
-from .models import Seeking, SeekingImage, SeekingPromotion
+from .models import Seeking, SeekingPromotion
 
-
-class SeekingImageSerializer(serializers.HyperlinkedModelSerializer):
-    """Seeking image serializer"""
-    class Meta:
-        model = SeekingImage
-        fields = ('id', 'url', 'seeking', 'image', )
-        read_only_fields = fields
-        required_fields = ('seeking', 'image', )
-        extra_kwargs = {field: {'required': True} for field in required_fields}
-
+from saas_core.models import Image
+from saas_core.serializers import ImageSerializer
 
 class SeekingSerializer(serializers.HyperlinkedModelSerializer):
     """Seeking serializer"""
-    images = SeekingImageSerializer(
+    images = ImageSerializer(
         many=True,
         read_only=True)
 
@@ -116,7 +108,7 @@ class SeekingSerializer(serializers.HyperlinkedModelSerializer):
         # create images
         image_data = self.context.get('view').request.FILES
         for img in image_data.values():
-            img = SeekingImage.objects.create(seeking=seeking, image=img)
+            img = Image.objects.create(content_object=seeking, image=img)
         return seeking
 
     def update(self, instance, validated_data):
@@ -124,7 +116,7 @@ class SeekingSerializer(serializers.HyperlinkedModelSerializer):
         # append images on update
         image_data = self.context.get('view').request.FILES
         for img in image_data.values():
-            img = SeekingImage.objects.create(seeking=seeking, image=img)
+            img = Image.objects.create(content_object=seeking, image=img)
         return seeking
 
     def to_representation(self, instance, override=True):

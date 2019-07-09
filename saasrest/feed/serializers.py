@@ -7,28 +7,14 @@ from saas_core.serializers import CreatableSlugRelatedField
 from tags.models import Tag
 from votes.serializers import VoteSerializer
 
-from .models import FeedPost, FeedPostImage
+from .models import FeedPost
 
-
-class FeedPostImageSerializer(serializers.HyperlinkedModelSerializer):
-    """FeedPost image serializer"""
-    class Meta:
-        model = FeedPostImage
-        fields = ('id', 'url', 'feed_post', 'image', )
-        read_only_fields = fields
-        required_fields = ('feed_post', 'image', )
-        extra_kwargs = {field: {'required': True} for field in required_fields}
-
-    def get_image(self, data):
-        """TODO"""
-        request = self.context.get('request')
-        imageurl = data.image.url
-        return request.build_absolute_uri(imageurl)
-
+from saas_core.models import Image
+from saas_core.serializers import ImageSerializer
 
 class FeedPostSerializer(serializers.HyperlinkedModelSerializer):
     """FeedPost serializer"""
-    images = FeedPostImageSerializer(
+    images = ImageSerializer(
         many=True,
         read_only=True)
 
@@ -111,14 +97,14 @@ class FeedPostSerializer(serializers.HyperlinkedModelSerializer):
         feed_post = super().create(validated_data)
         image_data = self.context.get('view').request.FILES
         for img in image_data.values():
-            img = FeedPostImage.objects.create(feed_post=feed_post, image=img)
+            img = Image.objects.create(content_object=feed_post, image=img)
         return feed_post
 
     def update(self, instance, validated_data):
         feed_post = super().update(instance, validated_data)
         image_data = self.context.get('view').request.FILES
         for img in image_data.values():
-            img = FeedPostImage.objects.create(feed_post=feed_post, image=img)
+            img = Image.objects.create(content_object=feed_post, image=img)
         return feed_post
 
     def to_representation(self, instance, override=True):

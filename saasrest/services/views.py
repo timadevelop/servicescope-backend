@@ -13,10 +13,10 @@ from tags.models import Tag
 from votes.models import Vote
 from votes.serializers import VoteSerializer
 
-from .models import Service, ServiceImage, ServicePromotion
+from .models import Service, ServicePromotion
 from .permissions import IsOwnerOrReadOnly
 from saas_core.permissions import IsAuthenticatedAndVerified
-from .serializers import (ServiceImageSerializer, ServicePromotionSerializer,
+from .serializers import (ServicePromotionSerializer,
                           ServiceSerializer)
 
 import random
@@ -243,13 +243,3 @@ class ServicePromotionViewSet(viewsets.ReadOnlyModelViewSet):
             'page': 1,
             'results': serializer.data
         })
-
-
-class ServiceImageViewSet(viewsets.ModelViewSet):
-    """
-    Service image viewset
-    TODO
-    """
-    queryset = ServiceImage.objects.all()
-    serializer_class = ServiceImageSerializer
-    permission_classes = (IsOwnerOrReadOnly, )

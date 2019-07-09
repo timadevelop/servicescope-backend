@@ -22,6 +22,8 @@ from django.contrib import admin
 from django.urls import path
 from rest_framework import routers
 
+import saas_core.urls
+
 import authentication.urls
 import categories.urls
 import feedback.urls
@@ -71,6 +73,7 @@ urlpatterns = [
         path('admin/', admin.site.urls),
         url(r'auth/', include('rest_framework_social_oauth2.urls')),
         # url(r'', include(router.urls)),
+        url(r'', include(saas_core.urls)),
         url(r'', include(authentication.urls)),
         url(r'', include(categories.urls)),
         url(r'', include(locations.urls)),

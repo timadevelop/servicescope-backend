@@ -18,6 +18,8 @@ from tags.models import Tag
 from votes.models import Vote
 
 
+from saas_core.models import Image
+
 class Service(models.Model):
     """Service model"""
     author = models.ForeignKey(
@@ -45,6 +47,8 @@ class Service(models.Model):
 
     score = models.IntegerField(default=0)
     votes = GenericRelation(Vote)
+    images = GenericRelation(Image)
+
     promoted_til = models.DateTimeField(null=True, blank=True)
 
     def likes(self):
@@ -95,31 +99,6 @@ class Service(models.Model):
         self.save()
 
         return service_promotion
-
-
-class ServiceImage(models.Model):
-    """Service image"""
-    service = models.ForeignKey(
-        Service, on_delete=models.CASCADE, null=False, related_name='images')
-    image = models.ImageField(upload_to='images/services/%Y/%m/%d')
-    __original_image = None
-
-    def __init__(self, *args, **kwargs):
-        super(ServiceImage, self).__init__(*args, **kwargs)
-        self.__original_image = self.image
-
-    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-        """Compress on save"""
-        if not self.id or self.image != self.__original_image:
-            self.image = compress_image(self.image)
-        super().save(force_insert=force_insert, force_update=force_update,
-                     using=using, update_fields=update_fields)
-        self.__original_image = self.image
-
-
-@receiver(post_delete, sender=ServiceImage)
-def submission_delete(sender, instance, **kwargs):
-    instance.image.delete(False)
 
 
 class ServicePromotion(models.Model):

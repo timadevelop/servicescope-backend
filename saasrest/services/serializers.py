@@ -10,22 +10,14 @@ from saas_core.utils import cached_or_new
 from tags.models import Tag
 from votes.serializers import VoteSerializer
 
-from .models import Service, ServiceImage, ServicePromotion
+from .models import Service, ServicePromotion
 
-
-class ServiceImageSerializer(serializers.HyperlinkedModelSerializer):
-    """Service image serializer"""
-    class Meta:
-        model = ServiceImage
-        fields = ('id', 'url', 'service', 'image', )
-        read_only_fields = fields
-        required_fields = ('service', 'image', )
-        extra_kwargs = {field: {'required': True} for field in required_fields}
-
+from saas_core.models import Image
+from saas_core.serializers import ImageSerializer
 
 class ServiceSerializer(serializers.HyperlinkedModelSerializer):
     """Service serializer"""
-    images = ServiceImageSerializer(
+    images = ImageSerializer(
         many=True,
         read_only=True)
 
@@ -124,14 +116,14 @@ class ServiceSerializer(serializers.HyperlinkedModelSerializer):
         service = super().create(validated_data)
         image_data = self.context.get('view').request.FILES
         for img in image_data.values():
-            img = ServiceImage.objects.create(service=service, image=img)
+            img = Image.objects.create(content_object=service, image=img)
         return service
 
     def update(self, instance, validated_data):
         service = super().update(instance, validated_data)
         image_data = self.context.get('view').request.FILES
         for img in image_data.values():
-            img = ServiceImage.objects.create(service=service, image=img)
+            img = Image.objects.create(content_object=service, image=img)
         return service
 
     def to_representation(self, instance, override=True):

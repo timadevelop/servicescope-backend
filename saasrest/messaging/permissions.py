@@ -1,6 +1,6 @@
 from rest_framework import permissions
 
-from .models import Message, MessageImage, Conversation
+from .models import Message, Conversation
 
 class IsOwner(permissions.BasePermission):
     def has_permission(self, request, view):
@@ -14,7 +14,5 @@ class IsOwner(permissions.BasePermission):
             return obj.author.id == request.user.id
         if isinstance(obj, Conversation):
             return obj.users.filter(id=request.user.id)
-        if isinstance(obj, MessageImage):
-            return False # TODO?
         # no.
         return False

@@ -4,8 +4,9 @@ from django.db import models
 from authentication.models import User
 
 from django.utils.translation import ugettext as _
+from django.contrib.contenttypes.fields import GenericRelation
 
-from saas_core.images_compression import compress_image
+from saas_core.models import Image
 
 class Conversation(models.Model):
     """Conversation"""
@@ -33,7 +34,8 @@ class Message(models.Model):
         related_name='messages')
 
     text = models.TextField(max_length=1000, blank=True)
-    # related images field
+
+    images = GenericRelation(Image)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -45,25 +47,3 @@ class Message(models.Model):
         else:
             print(self.text)
             return self.text
-
-
-class MessageImage(models.Model):
-    """Message Image"""
-    message = models.ForeignKey(Message,
-                                on_delete=models.CASCADE,
-                                null=False,
-                                related_name='images')
-    image = models.ImageField(upload_to='images/messages/%Y/%m/%d')
-    __original_image = None
-
-    def __init__(self, *args, **kwargs):
-        super(MessageImage, self).__init__(*args, **kwargs)
-        self.__original_image = self.image
-
-    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-        """Compress on save"""
-        if not self.id or self.image != self.__original_image:
-            self.image = compress_image(self.image)
-        super().save(force_insert=force_insert, force_update=force_update,
-                     using=using, update_fields=update_fields)
-        self.__original_image = self.image

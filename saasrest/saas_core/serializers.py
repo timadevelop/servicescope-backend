@@ -3,6 +3,7 @@ from rest_framework import serializers
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils.encoding import smart_text
 
+from .models import Image
 
 class CreatableSlugRelatedField(serializers.SlugRelatedField):
 
@@ -14,3 +15,11 @@ class CreatableSlugRelatedField(serializers.SlugRelatedField):
                       value=smart_text(data))
         except (TypeError, ValueError):
             self.fail('invalid')
+
+
+class ImageSerializer(serializers.HyperlinkedModelSerializer):
+    """image serializer"""
+    class Meta:
+        model = Image
+        fields = ('id', 'url', 'image', )
+        read_only_fields = fields

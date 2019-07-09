@@ -1,8 +1,6 @@
 from rest_framework import permissions
-# from django.contrib.auth.models import User
+from .models import Service, ServicePromotion
 
-
-from .models import Service, ServiceImage, ServicePromotion
 
 
 class IsOwner(permissions.BasePermission):
@@ -14,8 +12,6 @@ class IsOwner(permissions.BasePermission):
 
         if isinstance(obj, Service):
             return obj.author == request.user
-        if isinstance(obj, ServiceImage):
-            return obj.service.author == request.user
         if isinstance(obj, ServicePromotion):
             return obj.author == request.user
 

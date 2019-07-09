@@ -16,11 +16,11 @@ from tags.models import Tag
 from votes.models import Vote
 from votes.serializers import VoteSerializer
 
-from .models import FeedPost, FeedPostImage
+from .models import FeedPost
 
 from .permissions import IsOwnerOrReadOnly
 from saas_core.permissions import IsAuthenticatedAndVerified
-from .serializers import (FeedPostImageSerializer, FeedPostSerializer)
+from .serializers import FeedPostSerializer
 
 import random
 
@@ -115,12 +115,3 @@ class FeedPostViewSet(viewsets.ModelViewSet):
     def downvote(self, request, pk=None):
         return self.vote(request, pk, Vote.DOWN_VOTE)
 
-
-class FeedPostImageViewSet(viewsets.ModelViewSet):
-    """
-    FeedPost image viewset
-    TODO
-    """
-    queryset = FeedPostImage.objects.all()
-    serializer_class = FeedPostImageSerializer
-    permission_classes = (IsOwnerOrReadOnly, )

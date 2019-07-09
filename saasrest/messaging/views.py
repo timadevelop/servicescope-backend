@@ -9,25 +9,9 @@ from asgiref.sync import async_to_sync
 from saas_core.utils import (broadcast_deleted_message, broadcast_message,
                              notify_user)
 
-from .models import Conversation, Message, MessageImage
+from .models import Conversation, Message
 from .permissions import IsOwner
-from .serializers import (ConversationSerializer, MessageImageSerializer,
-                          MessageSerializer)
-
-
-class MessageImageViewSet(viewsets.ModelViewSet):
-    """
-    MessageImage viewset
-    """
-    queryset = MessageImage.objects
-    serializer_class = MessageImageSerializer
-    permission_classes = (IsAuthenticated, IsOwner, )
-
-    def get_queryset(self):
-        if self.request.user:
-            return self.queryset.filter(conversation__users__in=[self.request.user])
-        else:
-            raise PermissionDenied()
+from .serializers import ConversationSerializer, MessageSerializer
 
 
 class MessageViewSet(viewsets.ModelViewSet):
