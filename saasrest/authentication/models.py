@@ -108,6 +108,7 @@ class User(AbstractUser):
 
     __original_image = None
     __original_email = None
+
     def __init__(self, *args, **kwargs):
         super(User, self).__init__(*args, **kwargs)
         self.__original_email = self.email
@@ -120,27 +121,35 @@ class User(AbstractUser):
         return reverse('user-detail', args=[str(self.id)])
 
     def get_online_status_cache_key(self):
-        return 'IS_ONLINE_USER_{}'.format(self.id)
+        return 'ONLINE_CHANNELS_COUNT_USER_{}'.format(self.id)
 
     def set_online_status(self, is_online):
         key = self.get_online_status_cache_key()
-        if is_online:
-            if not cache.has_key(key):
-                cache.set(key, True)
-        else:
+        count = cache.get(key)
+        difference = 1 if is_online else -1
+
+        if count is None:
+            count = 0
+
+        new_count = count + difference
+
+        if new_count == 0:
             cache.delete(key)
+            return None
+
+        cache.set(key, new_count)
+        return new_count
 
     @property
     def is_online(self):
         cache_value = cache.get(self.get_online_status_cache_key())
-        return cache_value == True
+        return cache_value
 
     @property
     def is_verified_email(self):
         if self.is_staff:
             return True
         return EmailAddress.objects.filter(user=self, verified=True).exists()
-
 
     def save(self, force_insert=False, force_update=False, *args, **kwargs):
         # invalidate cache
@@ -164,7 +173,6 @@ class User(AbstractUser):
         super(User, self).save(force_insert, force_update, *args, **kwargs)
         self.__original_email = self.email
         self.__original_image = self.image
-
 
 
 @receiver(post_save, sender=UserSocialAuth)
