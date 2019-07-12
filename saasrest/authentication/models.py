@@ -170,10 +170,10 @@ class User(AbstractUser):
             request.META['SERVER_NAME'] = saasrest.local_settings.API_HOST
             request.META['SERVER_PORT'] = 80
             email.send_confirmation(request, signup=True)
-        super(User, self).save(force_insert, force_update, *args, **kwargs)
         self.__original_email = self.email
         self.__original_image = self.image
-
+        super(User, self).save(force_insert, force_update, *args, **kwargs)
+        
 
 @receiver(post_save, sender=UserSocialAuth)
 def on_user_created(sender, instance, created, **kwargs):
