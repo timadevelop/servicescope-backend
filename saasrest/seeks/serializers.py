@@ -72,7 +72,7 @@ class SeekingSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Seeking
-        fields = ('id', 'url', 'author', 'title', 'description', 'contact_phone', 'color', 'location',
+        fields = ('id', 'url', 'author', 'title', 'description', 'max_price', 'max_price_currency', 'contact_phone', 'color', 'location',
                   'images', 'promoted_til', 'is_promoted', 'created_at', 'updated_at',
                   'tags', 'category', 'score', 'current_user_vote')
         

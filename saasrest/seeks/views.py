@@ -69,10 +69,11 @@ class SeekingViewSet(viewsets.ModelViewSet):
     Seekings Viewset
     """
     queryset = Seeking.objects\
-        .prefetch_related('tags').prefetch_related('images')\
+        .prefetch_related('tags')\
         .select_related('category').select_related('location')\
         .order_by('-created_at')
-
+        # .prefetch_related('images')\
+        
     serializer_class = SeekingSerializer
 
     permission_classes = (IsOwnerOrReadOnly, )

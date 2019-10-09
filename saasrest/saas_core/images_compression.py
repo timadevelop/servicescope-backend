@@ -18,7 +18,7 @@ def compress_image(image):
         image_tmp = background
 
     image_tmp.thumbnail((1280, 720), Image.ANTIALIAS)
-    image_tmp.save(output_io_stream, format='JPEG', quality=70)
+    image_tmp.convert('RGB').save(output_io_stream, format='JPEG', quality=70)
     output_io_stream.seek(0)
 
     uploaded_image = InMemoryUploadedFile(output_io_stream,

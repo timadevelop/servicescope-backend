@@ -1,3 +1,4 @@
+from djmoney.models.fields import MoneyField
 from colorfield.fields import ColorField
 from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.postgres.fields import ArrayField
@@ -14,6 +15,7 @@ from locations.models import Location
 from tags.models import Tag
 from votes.models import Vote
 
+from saas_core.models import Image
 
 class Seeking(models.Model):
     """Seeking model"""
@@ -39,6 +41,9 @@ class Seeking(models.Model):
 
     score = models.IntegerField(default=0)
     votes = GenericRelation(Vote)
+    images = GenericRelation(Image)
+    max_price = MoneyField(max_digits=14, decimal_places=2, default_currency='USD')
+
     promoted_til = models.DateTimeField(null=True, blank=True)
 
     def likes(self):
@@ -81,6 +86,7 @@ class Seeking(models.Model):
         self.save()
 
         return seeking_promotion
+
 
 class SeekingPromotion(models.Model):
     """Seeking promotion"""
