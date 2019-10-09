@@ -29,9 +29,10 @@ class SeekingFilter(django_rest_filters.FilterSet):
     """Custom filter for seekings"""
     class Meta:
         model = Seeking
-        fields = ['tags', 'category',
+        fields = ['tags', 'category', 'max_price',
                   'location_id', 'author_id']
 
+    max_price = django_rest_filters.RangeFilter()
     # tricky part - how to filter by related field?
     # but not by its foreign key (default)
     # `to_field_name` is crucial here
