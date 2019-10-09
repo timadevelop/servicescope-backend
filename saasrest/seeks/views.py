@@ -82,7 +82,7 @@ class SeekingViewSet(viewsets.ModelViewSet):
     filter_backends = (filters.SearchFilter,
                        django_rest_filters.DjangoFilterBackend,
                        filters.OrderingFilter)
-    ordering_fields = ('created_at', 'score', )
+    ordering_fields = ('created_at', 'score', 'max_price', )
     search_fields = ('title', 'description', )
     filter_class = SeekingFilter
 
