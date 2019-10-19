@@ -98,4 +98,4 @@ msgid ""
 msgstr ""
 
 msgid "Not found."
-msgstr "Няма нищо бэ"
+msgstr "Няма нищо"
