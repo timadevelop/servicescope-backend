@@ -71,7 +71,9 @@ def serialize_user_instance(user, context):
         'image': request.build_absolute_uri(user.image.url) if request and user.image else None,
         'date_joined': user.date_joined.isoformat(),
         'last_active': user.last_active.isoformat(),
-        'is_online': user.is_online
+        'is_online': user.is_online,
+        'services_count': user.services.count(),
+        'seekings_count': user.seekings.count()
     }
     return result
 
@@ -122,37 +124,26 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
     """
     Main user serializer
     """
-
+    services_count = serializers.SerializerMethodField()
+    seekings_count = serializers.SerializerMethodField()
     def get_services_count(self, instance):
         return instance.services.count()
-
-    def get_posts_count(self, instance):
-        return 0
-        # return instance.posts.count()
-
-    # def get_income_reviews_count(self, instance):
-    #     return instance.income_reviews.count()
-
-    # def get_offers_count(self, instance):
-    #     return instance.offers.count()
+    def get_seekings_count(self, instance):
+        return instance.seekings.count()
 
     class Meta:
         model = User
         # TODO
         fields = ('id', 'url', 'bio', 'first_name', 'last_name',
-                  'image', 'date_joined', 'last_active', 'is_online')
+                  'image', 'date_joined', 'last_active', 'is_online', 'services_count', 'seekings_count')
         read_only_fields = fields
 
     def to_representation(self, instance):
         response = super().to_representation(instance)
         if (self.context['request']):
-            if not isinstance(self.instance, list):
-                response['services_count'] = self.get_services_count(instance)
-                response['posts_count'] = self.get_posts_count(instance)
-                # response['income_reviews_count'] = self.get_income_reviews_count(
-                # instance)
-                # response['offers_count'] = self.get_offers_count(instance)
-
+            # if not isinstance(self.instance, list):
+            response['services_count'] = self.get_services_count(instance)
+            response['seekings_count'] = self.get_seekings_count(instance)
         return response
 
 
@@ -161,15 +152,22 @@ class PrivateUserSerializer(serializers.HyperlinkedModelSerializer):
     User serializer with private info
     """
     notifications_count = serializers.SerializerMethodField()
+    services_count = serializers.SerializerMethodField()
+    seekings_count = serializers.SerializerMethodField()
 
     def get_notifications_count(self, instance):
         r = instance.notifications.count()
         return r
 
+    def get_services_count(self, instance):
+        return instance.services.count()
+    def get_seekings_count(self, instance):
+        return instance.seekings.count()
+
     class Meta:
         model = User
         # TODO
-        fields = ('id', 'url', 'email', 'phone', 'bio', 'first_name', 'last_name', 'notifications_count',
+        fields = ('id', 'url', 'email', 'phone', 'bio', 'first_name', 'last_name', 'notifications_count', 'services_count', 'seekings_count',
                   'service_promotions', 'services', 'is_verified_email', 'image', 'last_active', 'is_online')
         # outcome_reviews, income_reviwes
         read_only_fields = ('id', 'url', 'is_online', 'last_active', 'is_verified_email',
