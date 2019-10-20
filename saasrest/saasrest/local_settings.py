@@ -1,8 +1,10 @@
 import os
 
 API_HOST = os.environ.get('SAAS_API_HOST')
-print(API_HOST)
 API_PORT = os.environ.get('SAAS_API_PORT')
+
+
+SAAS_WEB_PUBLIC_URL = os.environ.get('SAAS_WEB_PUBLIC_HOST')
 
 # google
 GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID')

@@ -20,6 +20,7 @@ from .local_settings import DB_CONFIG
 from .local_settings import REDIS_HOSTS
 from .local_settings import CELERY_BROKER_URL
 from .local_settings import SECRET_KEY
+from .local_settings import SAAS_WEB_PUBLIC_URL
 import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -124,8 +125,8 @@ SOCIALACCOUNT_QUERY_EMAIL = True
 SOCIALACCOUNT_EMAIL_REQUIRED = True
 
 ACCOUNT_CONFIRM_EMAIL_ON_GET=True
-ACCOUNT_EMAIL_CONFIRMATION_ANONYMOUS_REDIRECT_URL="https://google.com/"
-ACCOUNT_EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL="https://facebook.com/"
+ACCOUNT_EMAIL_CONFIRMATION_ANONYMOUS_REDIRECT_URL='{}/auth/verify-email'.format(SAAS_WEB_PUBLIC_URL)
+ACCOUNT_EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL='{}/auth/verify-email'.format(SAAS_WEB_PUBLIC_URL)
 
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_UNIQUE_EMAIL = True
