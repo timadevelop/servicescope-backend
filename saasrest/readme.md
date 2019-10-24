@@ -14,7 +14,6 @@ For google auth:
 
 ## rest API
 
-- `pip install -r requirements.txt`
 - `cd saasrest`
 - `source ../venv/bin/activate`
 - `pip install -r requirements.txt`

@@ -8,7 +8,6 @@ COPY . /usr/src/app
 
 WORKDIR /usr/src/app/saasrest
 
-RUN pip install -r ../requirements.txt
 RUN pip install -r requirements.txt
 
 RUN apt-get update
