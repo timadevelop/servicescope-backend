@@ -44,7 +44,7 @@ django-rest-framework-social-oauth2==1.1.0
 django-sslserver==0.20
 djangorestframework==3.9.1
 dnspython==1.15.0
-ecdsa==0.13
+ecdsa==0.13.3
 et-xmlfile==1.0.1
 eventlet==0.24.1
 ewmh==0.1.6
