@@ -241,6 +241,6 @@ class PaymentsViewSet(viewsets.ViewSet):
                 user_id, model_id, days, intent['id'])
             # Send email
             send_confirmation_email(service, service_promotion, intent)
-        elif reason == 'promote_post':
+        elif reason == 'promote_seek':
             # TODO
             pass

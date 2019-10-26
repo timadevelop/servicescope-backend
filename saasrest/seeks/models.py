@@ -62,11 +62,14 @@ class Seeking(models.Model):
         return reverse('seeking-detail', args=[str(self.id)])
 
     def promote(self, user, intent_id, days):
+        current_datetime = timezone.now()
         if self.promotions.exists():
             print('update old promotion')
-            seeking_promotion = self.promotions.first()
+            seeking_promotion = self.promotions.order_by('-end_datetime').first()
+
             # add days
-            seeking_promotion.end_datetime = seeking_promotion.end_datetime + \
+            countdown_datetime = seeking_promotion.end_datetime if seeking_promotion.end_datetime < current_datetime else current_datetime
+            seeking_promotion.end_datetime = countdown_datetime + \
                 timezone.timedelta(days=days)
 
             if intent_id:

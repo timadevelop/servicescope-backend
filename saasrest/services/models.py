@@ -20,6 +20,7 @@ from votes.models import Vote
 
 from saas_core.models import Image
 
+
 class Service(models.Model):
     """Service model"""
     author = models.ForeignKey(
@@ -75,11 +76,13 @@ class Service(models.Model):
         return reverse('service-detail', args=[str(self.id)])
 
     def promote(self, user, intent_id, days):
+        current_datetime = timezone.now()
         if self.promotions.exists():
-            print('update old promotion')
-            service_promotion = self.promotions.first()
-            # add days
-            service_promotion.end_datetime = service_promotion.end_datetime + \
+            # print('update old promotion')
+            service_promotion = self.promotions.order_by('-end_datetime').first()
+
+            countdown_datetime = service_promotion.end_datetime if service_promotion.end_datetime < current_datetime else current_datetime
+            service_promotion.end_datetime = countdown_datetime + \
                 timezone.timedelta(days=days)
 
             if intent_id:
@@ -88,7 +91,7 @@ class Service(models.Model):
             print('success')
         else:
             print('create new promotion')
-            end_datetime = timezone.now() + timezone.timedelta(days=days)
+            end_datetime = current_datetime + timezone.timedelta(days=days)
             service_promotion = ServicePromotion.objects.create(
                 author=user, service=self,
                 stripe_payment_intents=[intent_id],
