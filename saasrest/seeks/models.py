@@ -73,7 +73,7 @@ class Seeking(models.Model):
             seeking_promotion = self.promotions.order_by('-end_datetime').first()
 
             # add days
-            countdown_datetime = seeking_promotion.end_datetime if seeking_promotion.end_datetime < current_datetime else current_datetime
+            countdown_datetime = seeking_promotion.end_datetime if seeking_promotion.end_datetime > current_datetime else current_datetime
             seeking_promotion.end_datetime = countdown_datetime + \
                 timezone.timedelta(days=days)
 

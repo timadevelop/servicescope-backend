@@ -85,7 +85,7 @@ class Service(models.Model):
             logger.info('Updating old promotion')
             service_promotion = self.promotions.order_by('-end_datetime').first()
 
-            countdown_datetime = service_promotion.end_datetime if service_promotion.end_datetime < current_datetime else current_datetime
+            countdown_datetime = service_promotion.end_datetime if service_promotion.end_datetime > current_datetime else current_datetime
             service_promotion.end_datetime = countdown_datetime + \
                 timezone.timedelta(days=days)
 
