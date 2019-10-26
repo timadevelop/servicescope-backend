@@ -124,9 +124,11 @@ ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
 SOCIALACCOUNT_QUERY_EMAIL = True
 SOCIALACCOUNT_EMAIL_REQUIRED = True
 
-ACCOUNT_CONFIRM_EMAIL_ON_GET=True
-ACCOUNT_EMAIL_CONFIRMATION_ANONYMOUS_REDIRECT_URL='{}/auth/verify-email'.format(SAAS_WEB_PUBLIC_URL)
-ACCOUNT_EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL='{}/auth/verify-email'.format(SAAS_WEB_PUBLIC_URL)
+ACCOUNT_CONFIRM_EMAIL_ON_GET = True
+ACCOUNT_EMAIL_CONFIRMATION_ANONYMOUS_REDIRECT_URL = '{}/auth/verify-email'.format(
+    SAAS_WEB_PUBLIC_URL)
+ACCOUNT_EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL = '{}/auth/verify-email'.format(
+    SAAS_WEB_PUBLIC_URL)
 
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_UNIQUE_EMAIL = True
@@ -201,6 +203,36 @@ DEBUG_TOOLBAR_PANELS = [
     'debug_toolbar.panels.redirects.RedirectsPanel',
     'debug_toolbar.panels.profiling.ProfilingPanel',
 ]
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'console': {
+            'format': '%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'console',
+        },
+    },
+    'loggers': {
+        # root logger
+        '': {
+            'level': 'INFO',
+            'handlers': ['console'],
+        },
+        # 
+        'saasrest': {
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
+            'handlers': ['console'],
+            # required to avoid double logging with root logger
+            'propagate': False,
+        }, 
+    },
+}
 
 # TODO: check cookie age
 SESSION_COOKIE_AGE = 1209600

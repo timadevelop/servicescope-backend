@@ -20,6 +20,8 @@ from votes.models import Vote
 
 from saas_core.models import Image
 
+import logging
+logger = logging.getLogger(__name__)
 
 class Service(models.Model):
     """Service model"""
@@ -76,9 +78,11 @@ class Service(models.Model):
         return reverse('service-detail', args=[str(self.id)])
 
     def promote(self, user, intent_id, days):
+        logger.info('Trying to promote service #{}, intent_id: {}'.format(self.pk, intent_id))
+
         current_datetime = timezone.now()
         if self.promotions.exists():
-            # print('update old promotion')
+            logger.info('Updating old promotion')
             service_promotion = self.promotions.order_by('-end_datetime').first()
 
             countdown_datetime = service_promotion.end_datetime if service_promotion.end_datetime < current_datetime else current_datetime
@@ -87,20 +91,36 @@ class Service(models.Model):
 
             if intent_id:
                 service_promotion.stripe_payment_intents.append(intent_id)
-            service_promotion.save()
-            print('success')
+
+            try:
+                service_promotion.save()
+            except Exception as e:
+                logger.error(str(e))
+            else:
+                logger.info('Successfully updated old promotion')
         else:
-            print('create new promotion')
+            logger.info('Creating new promotion')
             end_datetime = current_datetime + timezone.timedelta(days=days)
-            service_promotion = ServicePromotion.objects.create(
-                author=user, service=self,
-                stripe_payment_intents=[intent_id],
-                end_datetime=end_datetime)
-            print('success')
+            try:
+                service_promotion = ServicePromotion.objects.create(
+                    author=user, service=self,
+                    stripe_payment_intents=[intent_id],
+                    end_datetime=end_datetime)
+            except Exception as e:
+                logger.error(str(e))
+            else:
+                logger.info("Successfully created new promotion")
 
-        self.promoted_til = service_promotion.end_datetime
-        self.save()
+        logger.info("Updating seek.promoted_til field...")
+        try:
+            self.promoted_til = service_promotion.end_datetime
+            self.save()
+        except Exception as e:
+            logger.error("Error while updating promoted_til field: {}".format(str(e)))
+        else:
+            logger.info("Successfully changed promoted_til field")
 
+        logger.info("Successfully promoted service #{} til {}".format(self.pk, str(self.promoted_til)))
         return service_promotion
 
 

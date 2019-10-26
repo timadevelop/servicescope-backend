@@ -17,6 +17,9 @@ from votes.models import Vote
 
 from saas_core.models import Image
 
+import logging
+logger = logging.getLogger(__name__)
+
 class Seeking(models.Model):
     """Seeking model"""
     author = models.ForeignKey(
@@ -62,9 +65,11 @@ class Seeking(models.Model):
         return reverse('seeking-detail', args=[str(self.id)])
 
     def promote(self, user, intent_id, days):
+        logger.info('Trying to promote seek #{}, intent_id: {}'.format(self.pk, intent_id))
+
         current_datetime = timezone.now()
         if self.promotions.exists():
-            print('update old promotion')
+            logger.info('Updating old promotion')
             seeking_promotion = self.promotions.order_by('-end_datetime').first()
 
             # add days
@@ -74,20 +79,36 @@ class Seeking(models.Model):
 
             if intent_id:
                 seeking_promotion.stripe_payment_intents.append(intent_id)
-            seeking_promotion.save()
-            print('success')
+            try:
+                seeking_promotion.save()
+            except Exception as e:
+                logger.error(str(e))
+            else:
+                logger.info('Successfully updated old promotion')            
         else:
-            print('create new promotion')
+            logger.info('Creating new promotion')
             end_datetime = timezone.now() + timezone.timedelta(days=days)
-            seeking_promotion = SeekingPromotion.objects.create(
-                author=user, seeking=self,
-                stripe_payment_intents=[intent_id],
-                end_datetime=end_datetime)
-            print('success')
+            try:
+                seeking_promotion = SeekingPromotion.objects.create(
+                    author=user, seeking=self,
+                    stripe_payment_intents=[intent_id],
+                    end_datetime=end_datetime)
+            except Exception as e:
+                logger.error(str(e))
+            else:
+                logger.info("Successfully created new promotion")
 
-        self.promoted_til = seeking_promotion.end_datetime
-        self.save()
+        logger.info("Updating seek.promoted_til field...")
+        try:
+            self.promoted_til = seeking_promotion.end_datetime
+            self.save()
+        except Exception as e:
+            logger.error("Error while updating promoted_til field: {}".format(str(e)))
+        else:
+            logger.info("Successfully changed promoted_til field")
 
+
+        logger.info("Successfully promoted seek #{} til {}".format(self.pk, str(self.promoted_til)))
         return seeking_promotion
 
 
