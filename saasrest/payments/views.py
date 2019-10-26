@@ -19,14 +19,13 @@ from .models import Coupon
 from .serializers import CouponSerializer
 from .utils import promote_service, send_confirmation_email, is_valid_payment_intent
 
-"""Filter for email template"""
+import logging
+logger = logging.getLogger(__name__)
 
+"""Filter for email template"""
 
 @register.filter
 def get_item(dictionary, key):
-    # print('get_item')
-    # print(dictionary, key)
-    # print('_-----------------------------____')
     return dictionary.get(key, 'None')
 
 
@@ -58,23 +57,28 @@ class CouponViewSet(viewsets.ReadOnlyModelViewSet):
         if not coupon.valid:
             return Response({'detail': _("Coupon is not valid")}, status=status.HTTP_400_BAD_REQUEST)
 
+        logger.info("Redeem a valid coupon request")
+
         payload = json.loads(request.body)
         reason = payload.get('reason')
-        print(reason)
+        logger.info("Reason: {}".format(reason))
         if self.request.user:
             user_id = self.request.user.id
         else:
+            logger.warning("Unauthanticated user trying to use a coupon")
             raise PermissionDenied()
 
         if coupon.user and coupon.user.id != user_id:
+            logger.warning("Authenticated user #{} trying to use another's user (#{}) coupon".format(user_id, coupon.user.id))
             raise PermissionDenied()
 
         if reason == 'promote_service':
+            logger.info("Coupon:reason:promote_service")
             model_id = payload.get('model_id', None)
             if not model_id:
                 return Response({'detail': _("Provide service id")}, status=status.HTTP_400_BAD_REQUEST)
             model_id = int(model_id)
-
+            
             service, service_promotion = promote_service(
                 user_id, model_id, coupon.days, 'Coupon')
 
@@ -125,8 +129,6 @@ class PaymentsViewSet(viewsets.ViewSet):
 
         if not is_valid_payment_intent(plan, days, amount, currency, reason):
             return Response({'detail': _("Invalid request: plan, days, amount, currency and reason.")}, status=status.HTTP_400_BAD_REQUEST)
-        else:
-            print('valid')
 
         stripe.api_key = settings.STRIPE_TEST_SECRET_KEY
         intent = stripe.PaymentIntent.create(
@@ -166,8 +168,6 @@ class PaymentsViewSet(viewsets.ViewSet):
 
         if not is_valid_payment_intent(plan, days, amount, currency, reason):
             return Response({'detail': _("Invalid request: plan, days, amount, currency and reason.")}, status=status.HTTP_400_BAD_REQUEST)
-        else:
-            print('valid')
 
         stripe.api_key = settings.STRIPE_TEST_SECRET_KEY
         intent = stripe.PaymentIntent.modify(
@@ -190,24 +190,26 @@ class PaymentsViewSet(viewsets.ViewSet):
             headers).get('stripe-signature', None)
         event = None
 
+        logger.info("Stripe webhook")
+
         try:
             event = stripe.Webhook.construct_event(
                 payload, sig_header, settings.STRIPE_WEBHOOK_ENDPOINT_SECRET
             )
         except ValueError:
             # invalid payload
-            print('invalid payload')
+            logger.warn('Stripe invalid payload')
             return Response({"detail": 'Invalid payload'}, status=status.HTTP_400_BAD_REQUEST)
         except stripe.error.SignatureVerificationError:
             # invalid signature
-            print('invalid signature')
+            logger.warn('Stripe invalid signature')
             return Response({"detail": 'Invalid signature'}, status=status.HTTP_400_BAD_REQUEST)
 
         event_dict = event.to_dict()
         if event_dict['type'] == "payment_intent.succeeded":
             intent = event_dict['data']['object']
-            print("Succeeded: ", intent['id'])
-            print("Succeeded metadata: ", intent['metadata'])
+            logger.info("Stripe WH: Succeeded payment intent with id {}".format(intent['id']))
+            logger.info("Stripe WH: Succeeded payment intent metadata: {}".format(intent['metadata']))
             # Fulfill the customer's purchase
             self.process_succeeded_intent(intent)
         elif event_dict['type'] == "payment_intent.payment_failed":
@@ -217,7 +219,7 @@ class PaymentsViewSet(viewsets.ViewSet):
             else:
                 error_message = None
 
-            print("Failed: ", intent['id'], error_message)
+            logger.warn("Stripe WH: Failed payment intent: {}, error_message: {}".format(intent['id'], error_message))
             # TODO: Notify the customer that payment failed
         return Response(status=status.HTTP_200_OK)
 
@@ -227,11 +229,11 @@ class PaymentsViewSet(viewsets.ViewSet):
 
         reason = metadata.get('reason', None)
         if not reason:
-            print('strange!')
-            # TODO
+            logger.warn("No reason provided for successded payment intent with id {}".format(intent['id']))
             return
 
         if reason == 'promote_service':
+            logger.info("PaymentIntent:reason:promote_service")
             metadata = intent['metadata']
             user_id = int(metadata.get('user_id', None))
             model_id = int(metadata.get('model_id', None))
@@ -240,6 +242,7 @@ class PaymentsViewSet(viewsets.ViewSet):
             service, service_promotion = promote_service(
                 user_id, model_id, days, intent['id'])
             # Send email
+            logger.info("Sending confirmation email about service promotion")
             send_confirmation_email(service, service_promotion, intent)
         elif reason == 'promote_seek':
             # TODO

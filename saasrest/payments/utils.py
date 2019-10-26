@@ -5,6 +5,10 @@ from django.template.loader import render_to_string
 from authentication.models import User
 from services.models import Service
 
+import logging
+logger = logging.getLogger(__name__)
+
+
 PROMOTION_REASONS = [
     "promote_service",
     # "promote_post"
@@ -43,20 +47,19 @@ def is_valid_payment_intent(plan, days, amount, currency, reason):
 
 def promote_service(user_id, service_id, days, intent_id):
     """Promotes service"""
-    print('promoting service...{}'.format(service_id))
+    logger.info('Promoting service...{}'.format(service_id))
 
     user = None
     if user_id:
         try:
             user = User.objects.get(id=user_id)
         except User.DoesNotExist:
-            print('error getting user')
+            logger.warning("User does not exists")
 
     try:
         service = Service.objects.get(id=service_id)
     except Service.DoesNotExist:
-        # TODO: log!
-        print('error getting service')
+        logger.error('Error getting service for promotion. Given service id: {}'.format(service_id))
         return
 
     if not service:
@@ -87,6 +90,7 @@ def send_confirmation_email(service, service_promotion, intent):
             html_message=msg_html
         )
     except:
+        logger.error("Error sending order confirmation email. Service Promotion #{}, intent: {}".format(service_promotion.pk, str(intent)))
         return False
 
     return True
