@@ -10,18 +10,14 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.1/ref/settings/
 """
 
-from .local_settings import EMAIL_HOST_PASSWORD, EMAIL_HOST_USER
-from .local_settings import STRIPE_LIVE_MODE, STRIPE_LIVE_PUBLIC_KEY, STRIPE_LIVE_SECRET_KEY, \
-    STRIPE_TEST_PUBLIC_KEY, STRIPE_TEST_SECRET_KEY, STRIPE_WEBHOOK_ENDPOINT_SECRET
-from .local_settings import FACEBOOK_APP_ID, FACEBOOK_APP_SECRET
-from .local_settings import SOCIAL_AUTH_GOOGLE_OAUTH2_KEY, SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET
-from .local_settings import MEMCACHED_LOCATION
-from .local_settings import DB_CONFIG
-from .local_settings import REDIS_HOSTS
-from .local_settings import CELERY_BROKER_URL
-from .local_settings import SECRET_KEY
-from .local_settings import SAAS_WEB_PUBLIC_URL
 import os
+import saasrest.local_settings as local_settings
+from .local_settings import STRIPE_LIVE_MODE, STRIPE_LIVE_PUBLIC_KEY, STRIPE_LIVE_SECRET_KEY, \
+    STRIPE_TEST_PUBLIC_KEY, STRIPE_TEST_SECRET_KEY, STRIPE_WEBHOOK_ENDPOINT_SECRET, \
+    CELERY_BROKER_URL, \
+    SECRET_KEY, \
+    FACEBOOK_APP_ID, FACEBOOK_APP_SECRET, FACEBOOK_ACCESS_TOKEN, FACEBOOK_AD_ACCOUNT_ID, FACEBOOK_PAGE_ID, \
+    SAAS_WEB_PUBLIC_URL
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -79,6 +75,7 @@ INSTALLED_APPS = [
     'tags',
     'votes',
     'feed',
+    'fb_ads',
     # 'api',
     # auth
     'oauth2_provider',
@@ -126,9 +123,9 @@ SOCIALACCOUNT_EMAIL_REQUIRED = True
 
 ACCOUNT_CONFIRM_EMAIL_ON_GET = True
 ACCOUNT_EMAIL_CONFIRMATION_ANONYMOUS_REDIRECT_URL = '{}/auth/verify-email'.format(
-    SAAS_WEB_PUBLIC_URL)
+    local_settings.SAAS_WEB_PUBLIC_URL)
 ACCOUNT_EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL = '{}/auth/verify-email'.format(
-    SAAS_WEB_PUBLIC_URL)
+    local_settings.SAAS_WEB_PUBLIC_URL)
 
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_UNIQUE_EMAIL = True
@@ -278,7 +275,7 @@ CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            "hosts": REDIS_HOSTS,
+            "hosts": local_settings.REDIS_HOSTS,
         },
     },
 }
@@ -291,11 +288,11 @@ DATABASES = {
         # 'ENGINE': 'django.db.backends.sqlite3',
         # 'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': DB_CONFIG['NAME'],
-        'USER': DB_CONFIG['USER'],
-        'PASSWORD': DB_CONFIG['PASSWORD'],
-        'HOST': DB_CONFIG['HOST'],
-        'PORT': DB_CONFIG['PORT']
+        'NAME': local_settings.DB_CONFIG['NAME'],
+        'USER': local_settings.DB_CONFIG['USER'],
+        'PASSWORD': local_settings.DB_CONFIG['PASSWORD'],
+        'HOST': local_settings.DB_CONFIG['HOST'],
+        'PORT': local_settings.DB_CONFIG['PORT']
     }
 }
 
@@ -303,7 +300,7 @@ DATABASES = {
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
-        'LOCATION': MEMCACHED_LOCATION,
+        'LOCATION': local_settings.MEMCACHED_LOCATION,
     }
 }
 
@@ -412,14 +409,16 @@ AUTHENTICATION_BACKENDS = (
 )
 
 
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY=local_settings.GOOGLE_CLIENT_ID
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET=local_settings.GOOGLE_CLIENT_SECRET
 SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = ['email']
 SOCIAL_AUTH_GOOGLE_PROFILE_EXTRA_PARAMS = {
     'fields': 'email,name,first_name,last_name'
 }
 
 # Facebook configuration
-SOCIAL_AUTH_FACEBOOK_KEY = FACEBOOK_APP_ID
-SOCIAL_AUTH_FACEBOOK_SECRET = FACEBOOK_APP_SECRET
+SOCIAL_AUTH_FACEBOOK_KEY = local_settings.FACEBOOK_APP_ID
+SOCIAL_AUTH_FACEBOOK_SECRET = local_settings.FACEBOOK_APP_SECRET
 
 # Define SOCIAL_AUTH_FACEBOOK_SCOPE to get extra permissions from facebook.
 # Email is not sent by default, to get it, you must request the email permission:
@@ -436,4 +435,6 @@ SOCIAL_AUTH_FACEBOOK_PROFILE_EXTRA_PARAMS = {
 EMAIL_USE_TLS = True
 EMAIL_HOST = 'smtp.zoho.com'
 EMAIL_PORT = 587
-DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+DEFAULT_FROM_EMAIL = local_settings.EMAIL_HOST_USER
+EMAIL_HOST_USER = local_settings.EMAIL_HOST_USER
+EMAIL_HOST_PASSWORD = local_settings.EMAIL_HOST_PASSWORD

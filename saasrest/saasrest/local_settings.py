@@ -3,18 +3,29 @@ import os
 API_HOST = os.environ.get('SAAS_API_HOST')
 API_PORT = os.environ.get('SAAS_API_PORT')
 
-
 SAAS_WEB_PUBLIC_URL = os.environ.get('SAAS_WEB_PUBLIC_HOST')
 
+#
 # google
+#
 GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID')
 GOOGLE_CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET')
 
+#
+# Facebook
+#
 FACEBOOK_APP_ID = os.environ.get('FACEBOOK_APP_ID')
 FACEBOOK_APP_SECRET = os.environ.get('FACEBOOK_APP_SECRET')
 
-SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = '{}'.format(GOOGLE_CLIENT_ID)
-SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = '{}'.format(GOOGLE_CLIENT_SECRET)
+# Facebook Ads
+
+# https://business.facebook.com/settings/system-users/<userid>/?business_id=<Your business id>
+# page acccess token (page_mmanage, publish_page, ads_manage, ....)
+FACEBOOK_ACCESS_TOKEN = os.environ.get('FACEBOOK_ACCESS_TOKEN')
+# https://business.facebook.com/settings/ad-accounts/<FACEBOOK_AD_ACCOUNT_ID>?business_id=<Your business id>
+FACEBOOK_AD_ACCOUNT_ID = os.environ.get('FACEBOOK_AD_ACCOUNT_ID')
+# <page url>/about
+FACEBOOK_PAGE_ID = os.environ.get('FACEBOOK_PAGE_ID')
 
 # SECURITY WARNING: keep the secret key used in production secret!
 API_SECRET_KEY = os.environ.get('API_SECRET_KEY')

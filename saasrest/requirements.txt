@@ -21,6 +21,7 @@ chardet==3.0.4
 Click==7.0
 colorama==0.4.1
 constantly==15.1.0
+curlify==2.2.1
 daphne==2.3.0
 decorator==4.4.0
 defusedxml==0.5.0
@@ -48,6 +49,7 @@ ecdsa==0.13.3
 et-xmlfile==1.0.1
 eventlet==0.24.1
 ewmh==0.1.6
+facebook-business==4.0.8
 flake8==3.6.0
 future==0.17.1
 geocoder==1.38.1
@@ -87,7 +89,7 @@ PyHamcrest==1.9.0
 PyJWT==1.6.4
 pynvim==0.3.2
 pyparsing==2.3.1
-python-engineio>=3.9.0
+python-engineio==3.10.0
 python-jose==3.0.1
 python-memcached==1.59
 python-social-auth==0.3.6

@@ -19,6 +19,8 @@ from .models import Coupon
 from .serializers import CouponSerializer
 from .utils import promote_service, send_confirmation_email, is_valid_payment_intent
 
+from fb_ads import utils as fb_ads_utils
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -138,6 +140,30 @@ class PaymentsViewSet(viewsets.ViewSet):
         )
 
         return Response(intent)
+
+    @action(
+        detail=False,
+        methods=['post'],
+        url_path='test_fb_ads',
+        permission_classes=[])
+    def test_fb_ads(self, request):
+        # result = fb_ads_utils.facebookAdsManager.search_targeting_interests('cars')
+        # result = fb_ads_utils.facebookAdsManager.create_campaign()
+
+        # get ad set
+        # result = fb_ads_utils.facebookAdsManager. create_ad_set(23843684809030061, 1000, 'cars')
+        ad_sets = fb_ads_utils.facebookAdsManager.get_ad_sets()
+        if len(ad_sets) > 0:
+            ad_set = ad_sets[0]
+
+        # create post
+        post_id = fb_ads_utils.facebookAdsManager.create_post("Post from API 3")
+
+        print('post_id: {}'.format(post_id))
+        # advertise post
+        ad = fb_ads_utils.facebookAdsManager.advertise_post(post_id, ad_set.get('id'))
+        print(result)
+        return Response(result)
 
     @action(
         detail=False,
