@@ -207,7 +207,7 @@ class PaymentsViewSet(viewsets.ViewSet):
 
         return Response(intent)
 
-    @action(detail=False, methods=['post'], url_path='webhook')
+    @action(detail=False, methods=['post'], url_path='webhook', permission_classes=[])
     def webhook(self, request):
         """Stripe webhook"""
         # TODO: accept only stripe check
