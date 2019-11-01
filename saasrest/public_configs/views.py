@@ -5,13 +5,14 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from saasrest import local_settings
+from saas_core.config import DEFAULT_PERMISSION_CLASSES
 
 class ConfigViewSet(viewsets.ViewSet):
     """
     Config
     # TODO:
     """
-    @action(detail=False, methods=['get'], url_path='get_configuration', permission_classes = [])
+    @action(detail=False, methods=['get'], url_path='get_configuration', permission_classes = DEFAULT_PERMISSION_CLASSES)
     def get_configuration(self, request):
         """TODO"""
         resp = {

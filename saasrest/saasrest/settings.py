@@ -34,8 +34,6 @@ DEBUG = True
 USE_X_FORWARDED_HOST = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-ALLOWED_HOSTS = ['192.168.1.22', 'localhost', '127.0.0.1', "*"]
-
 # 2.5MB - 2621440
 # 5MB - 5242880
 # 10MB - 10485760
@@ -60,6 +58,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # api
     'rest_framework',
+    'rest_framework_api_key',
     'rest_framework.authtoken',
     'saas_core',
     'authentication',
@@ -151,14 +150,12 @@ MIDDLEWARE = [
     #
     'django.middleware.security.SecurityMiddleware',
     'django.middleware.http.ConditionalGetMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    # session
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.middleware.locale.LocaleMiddleware',
-    # CORS
-    'corsheaders.middleware.CorsMiddleware',
     # for admin panel reasons
     'django.contrib.messages.middleware.MessageMiddleware',
     # clickjacking
@@ -167,10 +164,28 @@ MIDDLEWARE = [
     # 'django.middleware.cache.FetchFromCacheMiddleware',
 ]
 
+ALLOWED_HOSTS = ['192.168.1.22', 'localhost', '127.0.0.1', 'demo.brainhub.co', ]
+INTERNAL_IPS = ['192.168.1.22', 'localhost', '127.0.0.1']
+
+# TODO: check cookie age
+DAYS = 30 * 4
+SESSION_COOKIE_AGE = 60 * 60 * 24 * DAYS
+CORS_ORIGIN_ALLOW_ALL = False
+CORS_ALLOW_CREDENTIALS = True
+CORS_ORIGIN_WHITELIST = [
+    # SAAS_WEB_PUBLIC_URL
+]
+
+# API keys configuration
+API_KEY_CUSTOM_HEADER = "HTTP_API_KEY"
+from corsheaders.defaults import default_headers
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    'Api-Key',
+]
+
+
 if DEBUG:
     MIDDLEWARE += ['debug_toolbar.middleware.DebugToolbarMiddleware']
-
-INTERNAL_IPS = ['192.168.1.22', 'localhost', '127.0.0.1', "*"]
 
 
 def show_toolbar(request):
@@ -221,31 +236,16 @@ LOGGING = {
             'level': 'INFO',
             'handlers': ['console'],
         },
-        # 
+        #
         'saasrest': {
             'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
             'handlers': ['console'],
             # required to avoid double logging with root logger
             'propagate': False,
-        }, 
+        },
     },
 }
 
-# TODO: check cookie age
-SESSION_COOKIE_AGE = 1209600
-CORS_ORIGIN_ALLOW_ALL = True
-CORS_ALLOW_CREDENTIALS = True
-# CORS_ORIGIN_WHITELIST = (
-#     'localhost:3000',
-# )
-# CORS_ORIGIN_REGEX_WHITELIST = (
-#     'localhost:3000',
-# )
-
-REST_FRAMEWORK = {
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 10
-}
 ROOT_URLCONF = 'saasrest.urls'
 
 TEMPLATES = [
@@ -371,25 +371,25 @@ OAUTH2_PROVIDER = {
 }
 
 REST_FRAMEWORK = {
-    # 'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.IsAuthenticatedOrReadOnly',),
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        # 'oauth2_provider.ext.rest_framework.OAuth2Authentication',  # django-oauth-toolkit < 1.0.0
-        # django-oauth-toolkit >= 1.0.0
+    'DEFAULT_PERMISSION_CLASSES': [
+        "rest_framework_api_key.permissions.HasAPIKey",
+    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': [
         'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
         'rest_framework_social_oauth2.authentication.SocialAuthentication',
-    ),
-    # 'rest_framework.pagination.LimitOffsetPagination',
+    ],
     'DEFAULT_PAGINATION_CLASS': 'saas_core.paginations.MyPagination',
+    # 'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10,
     'PAGINATE_BY': 10,                 # Default to 10
     # Allow client to override, using `?page_size=xxx`.
     'PAGINATE_BY_PARAM': 'page_size',
     # Maximum limit allowed when using `?page_size=xxx`
     'MAX_PAGINATE_BY': 100,
-    'DEFAULT_FILTER_BACKENDS': ('django_filters.rest_framework.DjangoFilterBackend',),
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend',],
     'DATETIME_FORMAT': "%Y-%m-%dT%H:%M:%S%z",
     'DATETIME_INPUT_FORMATS': ["%Y-%m-%dT%H:%M:%S%z"]
 }
-
 
 AUTHENTICATION_BACKENDS = (
 
@@ -409,8 +409,8 @@ AUTHENTICATION_BACKENDS = (
 )
 
 
-SOCIAL_AUTH_GOOGLE_OAUTH2_KEY=local_settings.GOOGLE_CLIENT_ID
-SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET=local_settings.GOOGLE_CLIENT_SECRET
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = local_settings.GOOGLE_CLIENT_ID
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = local_settings.GOOGLE_CLIENT_SECRET
 SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = ['email']
 SOCIAL_AUTH_GOOGLE_PROFILE_EXTRA_PARAMS = {
     'fields': 'email,name,first_name,last_name'

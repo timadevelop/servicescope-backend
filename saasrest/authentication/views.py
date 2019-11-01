@@ -12,6 +12,7 @@ from saas_core.permissions import IsOwnerOrReadOnly
 from .models import User
 from .serializers import UserSerializer, PrivateUserSerializer
 
+from saas_core.config import DEFAULT_PERMISSION_CLASSES
 
 class UserViewSet(viewsets.ModelViewSet):
     """
@@ -19,7 +20,7 @@ class UserViewSet(viewsets.ModelViewSet):
     """
     queryset = User.objects.order_by('-date_joined')
     serializer_class = UserSerializer
-    permission_classes = (IsOwnerOrReadOnly, )
+    permission_classes = DEFAULT_PERMISSION_CLASSES + [IsOwnerOrReadOnly, ]
 
     def get_serializer(self, *args, **kwargs):
         """

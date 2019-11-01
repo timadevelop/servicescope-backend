@@ -25,6 +25,8 @@ from .serializers import (SeekingPromotionSerializer,
                           SeekingSerializer)
 
 
+from saas_core.config import DEFAULT_PERMISSION_CLASSES
+
 class SeekingFilter(django_rest_filters.FilterSet):
     """Custom filter for seekings"""
     class Meta:
@@ -77,7 +79,7 @@ class SeekingViewSet(viewsets.ModelViewSet):
         
     serializer_class = SeekingSerializer
 
-    permission_classes = (IsOwnerOrReadOnly, )
+    permission_classes = DEFAULT_PERMISSION_CLASSES + [IsOwnerOrReadOnly, ]
 
     filter_backends = (filters.SearchFilter,
                        django_rest_filters.DjangoFilterBackend,
@@ -137,11 +139,11 @@ class SeekingViewSet(viewsets.ModelViewSet):
         else:
             raise PermissionDenied()
 
-    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticatedAndVerified, ])
+    @action(detail=True, methods=['post'], permission_classes=DEFAULT_PERMISSION_CLASSES + [IsAuthenticatedAndVerified, ])
     def upvote(self, request, pk=None):
         return self.vote(request, pk, Vote.UP_VOTE)
 
-    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticatedAndVerified, ])
+    @action(detail=True, methods=['post'], permission_classes=DEFAULT_PERMISSION_CLASSES + [IsAuthenticatedAndVerified, ])
     def downvote(self, request, pk=None):
         return self.vote(request, pk, Vote.DOWN_VOTE)
 
@@ -156,7 +158,7 @@ class SeekingPromotionViewSet(viewsets.ReadOnlyModelViewSet):
 
     queryset = SeekingPromotion.objects
     serializer_class = SeekingPromotionSerializer
-    permission_classes = (IsOwnerOrReadOnly, )
+    permission_classes = DEFAULT_PERMISSION_CLASSES + [IsOwnerOrReadOnly, ]
     filter_backends = (filters.SearchFilter,
                        django_rest_filters.DjangoFilterBackend, )
     search_fields = ()

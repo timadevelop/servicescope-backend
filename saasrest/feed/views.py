@@ -26,6 +26,7 @@ import random
 
 from django.utils.translation import ugettext as _
 
+from saas_core.config import DEFAULT_PERMISSION_CLASSES
 
 class FeedPostFilter(django_rest_filters.FilterSet):
     """Custom filter for feed_posts"""
@@ -61,7 +62,7 @@ class FeedPostViewSet(viewsets.ModelViewSet):
         .order_by('-created_at')
     serializer_class = FeedPostSerializer
 
-    permission_classes = (IsOwnerOrReadOnly, )
+    permission_classes = DEFAULT_PERMISSION_CLASSES + [IsOwnerOrReadOnly, ]
 
     filter_backends = (filters.SearchFilter,
                        django_rest_filters.DjangoFilterBackend,
@@ -107,11 +108,11 @@ class FeedPostViewSet(viewsets.ModelViewSet):
         else:
             raise PermissionDenied()
 
-    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticatedAndVerified, ])
+    @action(detail=True, methods=['post'], permission_classes=DEFAULT_PERMISSION_CLASSES + [IsAuthenticatedAndVerified, ])
     def upvote(self, request, pk=None):
         return self.vote(request, pk, Vote.UP_VOTE)
 
-    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticatedAndVerified, ])
+    @action(detail=True, methods=['post'], permission_classes=DEFAULT_PERMISSION_CLASSES + [IsAuthenticatedAndVerified, ])
     def downvote(self, request, pk=None):
         return self.vote(request, pk, Vote.DOWN_VOTE)
 

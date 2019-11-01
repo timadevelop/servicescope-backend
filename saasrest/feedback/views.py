@@ -8,6 +8,7 @@ from .models import Feedback
 from .permissions import IsOwnerOrReadOnly
 from .serializers import FeedbackSerializer
 
+from saas_core.config import DEFAULT_PERMISSION_CLASSES
 
 class FeedbackViewSet(viewsets.ModelViewSet):
     """
@@ -15,7 +16,7 @@ class FeedbackViewSet(viewsets.ModelViewSet):
     """
     queryset = Feedback.objects.order_by('-created_at')
     serializer_class = FeedbackSerializer
-    permission_classes = (IsAuthenticated, IsOwnerOrReadOnly, )
+    permission_classes = DEFAULT_PERMISSION_CLASSES + [IsAuthenticated, IsOwnerOrReadOnly, ]
     filter_backends = (filters.SearchFilter, DjangoFilterBackend, )
 
     # read only

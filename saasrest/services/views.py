@@ -27,6 +27,7 @@ from django.views.decorators.vary import vary_on_cookie
 
 from django.utils.translation import ugettext as _
 
+from saas_core.config import DEFAULT_PERMISSION_CLASSES
 
 class ServiceFilter(django_rest_filters.FilterSet):
     """Custom filter for services"""
@@ -82,7 +83,7 @@ class ServiceViewSet(viewsets.ModelViewSet):
         .order_by('-created_at')
     serializer_class = ServiceSerializer
 
-    permission_classes = (IsOwnerOrReadOnly, )
+    permission_classes = DEFAULT_PERMISSION_CLASSES + [IsOwnerOrReadOnly, ]
 
     filter_backends = (filters.SearchFilter,
                        django_rest_filters.DjangoFilterBackend,
@@ -142,11 +143,11 @@ class ServiceViewSet(viewsets.ModelViewSet):
         else:
             raise PermissionDenied()
 
-    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticatedAndVerified, ])
+    @action(detail=True, methods=['post'], permission_classes=DEFAULT_PERMISSION_CLASSES + [IsAuthenticatedAndVerified, ])
     def upvote(self, request, pk=None):
         return self.vote(request, pk, Vote.UP_VOTE)
 
-    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticatedAndVerified, ])
+    @action(detail=True, methods=['post'], permission_classes=DEFAULT_PERMISSION_CLASSES + [IsAuthenticatedAndVerified, ])
     def downvote(self, request, pk=None):
         return self.vote(request, pk, Vote.DOWN_VOTE)
 
@@ -161,7 +162,7 @@ class ServicePromotionViewSet(viewsets.ReadOnlyModelViewSet):
 
     queryset = ServicePromotion.objects
     serializer_class = ServicePromotionSerializer
-    permission_classes = (IsOwnerOrReadOnly, )
+    permission_classes = DEFAULT_PERMISSION_CLASSES + [IsOwnerOrReadOnly, ]
     filter_backends = (filters.SearchFilter,
                        django_rest_filters.DjangoFilterBackend, )
     search_fields = ()

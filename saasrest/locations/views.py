@@ -14,13 +14,14 @@ from saas_core.permissions import IsAdminUserOrReadOnly
 from .models import District, Location
 from .serializers import DistrictSerializer, LocationSerializer
 
+from saas_core.config import DEFAULT_PERMISSION_CLASSES
 
 class LocationViewSet(viewsets.ModelViewSet):
     """
     """
     queryset = Location.objects.order_by('kind')
     serializer_class = LocationSerializer
-    permission_classes = (IsAdminUserOrReadOnly, )
+    permission_classes = DEFAULT_PERMISSION_CLASSES + [IsAdminUserOrReadOnly, ]
     filter_backends = (filters.SearchFilter, DjangoFilterBackend, )
     search_fields = ('name', 'ekatte', )
     filter_fields = ('ekatte',)
@@ -99,7 +100,7 @@ class DistrictViewSet(viewsets.ModelViewSet):
     """
     queryset = District.objects.order_by('-id')
     serializer_class = DistrictSerializer
-    permission_classes = (IsAuthenticated, IsAdminUserOrReadOnly, )
+    permission_classes = DEFAULT_PERMISSION_CLASSES + [IsAuthenticated, IsAdminUserOrReadOnly, ]
     filter_backends = (filters.SearchFilter, DjangoFilterBackend, )
     search_fields = ('name',)
     filter_fields = ()

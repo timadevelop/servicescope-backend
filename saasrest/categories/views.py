@@ -11,13 +11,14 @@ from rest_framework.response import Response
 from .models import Category
 from .serializers import CategorySerializer
 
+from saas_core.config import DEFAULT_PERMISSION_CLASSES
 
 # Create your views here.
 class CategoryViewSet(viewsets.ModelViewSet):
     """Category viewset"""
     queryset = Category.objects.order_by('-name')
     serializer_class = CategorySerializer
-    permission_classes = (IsAuthenticatedOrReadOnly, )
+    permission_classes = DEFAULT_PERMISSION_CLASSES + [IsAuthenticatedOrReadOnly, ]
     filter_backends = (filters.SearchFilter, DjangoFilterBackend, )
     search_fields = ('name', )
 

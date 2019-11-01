@@ -13,13 +13,14 @@ from .models import Conversation, Message
 from .permissions import IsOwner
 from .serializers import ConversationSerializer, MessageSerializer
 
+from saas_core.config import DEFAULT_PERMISSION_CLASSES
 
 class MessageViewSet(viewsets.ModelViewSet):
     """
     """
     queryset = Message.objects
     serializer_class = MessageSerializer
-    permission_classes = (IsAuthenticated, IsOwner, )
+    permission_classes = DEFAULT_PERMISSION_CLASSES + [IsAuthenticated, IsOwner, ]
     filter_backends = (filters.SearchFilter,
                        DjangoFilterBackend, filters.OrderingFilter)
     ordering_fields = ('created_at', )
@@ -53,7 +54,7 @@ class ConversationViewSet(viewsets.ModelViewSet):
     """
     queryset = Conversation.objects
     serializer_class = ConversationSerializer
-    permission_classes = (IsAuthenticated, IsOwner, )
+    permission_classes = DEFAULT_PERMISSION_CLASSES + [IsAuthenticated, IsOwner, ]
     filter_backends = (filters.SearchFilter,
                        DjangoFilterBackend, filters.OrderingFilter)
     ordering_fields = ('created_at', 'updated_at')

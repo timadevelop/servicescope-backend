@@ -10,7 +10,7 @@ from channels.auth import AuthMiddlewareStack
 from django.contrib.auth.models import AnonymousUser
 
 from oauth2_provider.models import AccessToken
-
+from asgi_cors import asgi_cors
 
 class TokenAuthMiddleware:
     """

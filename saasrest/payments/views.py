@@ -21,6 +21,8 @@ from .utils import promote_service, send_confirmation_email, is_valid_payment_in
 
 from fb_ads import utils as fb_ads_utils
 
+from saas_core.config import DEFAULT_PERMISSION_CLASSES
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -37,7 +39,7 @@ class CouponViewSet(viewsets.ReadOnlyModelViewSet):
     """
     queryset = Coupon.objects.all()
     serializer_class = CouponSerializer
-    permission_classes = ()
+    permission_classes = DEFAULT_PERMISSION_CLASSES + []
     # filter_backends = (filters.SearchFilter, DjangoFilterBackend, )
     # search_fields = ()
     # filter_fields = ()
@@ -107,7 +109,7 @@ class PaymentsViewSet(viewsets.ViewSet):
         detail=False,
         methods=['post'],
         url_path='create_new_intent',
-        permission_classes=[IsAuthenticated, ])
+        permission_classes=DEFAULT_PERMISSION_CLASSES + [IsAuthenticated, ])
     def create_new_intent(self, request):
         """Endpoint for new PaymentIntent creation"""
         body = json.loads(request.body.decode())
@@ -145,7 +147,7 @@ class PaymentsViewSet(viewsets.ViewSet):
         detail=False,
         methods=['post'],
         url_path='test_fb_ads',
-        permission_classes=[])
+        permission_classes=DEFAULT_PERMISSION_CLASSES + [])
     def test_fb_ads(self, request):
         # result = fb_ads_utils.facebookAdsManager.search_targeting_interests('cars')
         # result = fb_ads_utils.facebookAdsManager.create_campaign()
@@ -169,7 +171,7 @@ class PaymentsViewSet(viewsets.ViewSet):
         detail=False,
         methods=['post'],
         url_path='update_intent',
-        permission_classes=[IsAuthenticated, ])
+        permission_classes=DEFAULT_PERMISSION_CLASSES + [IsAuthenticated, ])
     def update_intent(self, request):
         """Update payment intent endpoint"""
         body = json.loads(request.body.decode())

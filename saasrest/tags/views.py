@@ -12,6 +12,7 @@ from rest_framework.response import Response
 from .models import Tag
 from .serializers import TagSerializer
 
+from saas_core.config import DEFAULT_PERMISSION_CLASSES
 
 # pylint: disable=too-many-ancestors
 class TagViewSet(viewsets.ModelViewSet):
@@ -20,7 +21,7 @@ class TagViewSet(viewsets.ModelViewSet):
     """
     queryset = Tag.objects.order_by('-name')
     serializer_class = TagSerializer
-    permission_classes = (IsAuthenticatedOrReadOnly, )
+    permission_classes = DEFAULT_PERMISSION_CLASSES + [IsAuthenticatedOrReadOnly, ]
     filter_backends = (filters.SearchFilter,
                        django_rest_filters.DjangoFilterBackend, )
     search_fields = ('name', )

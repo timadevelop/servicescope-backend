@@ -6,6 +6,7 @@ from .models import Notification
 from .permissions import IsOwnerOrReadOnly
 from .serializers import NotificationSerializer
 
+from saas_core.config import DEFAULT_PERMISSION_CLASSES
 
 class NotificationViewSet(viewsets.ModelViewSet):
     """
@@ -13,7 +14,7 @@ class NotificationViewSet(viewsets.ModelViewSet):
     """
     queryset = Notification.objects.order_by('-created_at')
     serializer_class = NotificationSerializer
-    permission_classes = (IsAuthenticated, IsOwnerOrReadOnly, )
+    permission_classes = DEFAULT_PERMISSION_CLASSES + [IsAuthenticated, IsOwnerOrReadOnly, ]
     filter_backends = (filters.SearchFilter, DjangoFilterBackend, )
     search_fields = ('recipient__first_name',
                      'recipient__last_name', 'title', 'text')

@@ -3,83 +3,85 @@
 # This file is distributed under the same license as the PACKAGE package.
 # Vlad Timofeev <timadevelop@gmail.com>, 2019.
 #
-#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"PO-Revision-Date: 2019-10-29 19:39+0200\n"
 "Last-Translator: VLAD TIMOFEEV <timadevelop@gmail.com>\n"
 "Language-Team: LANGUAGE <team@brainhub.co>\n"
-"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: \n"
+"X-Generator: Poedit 2.2.4\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Language: bg_BG\n"
 
 #: feed/serializers.py:86 messaging/serializers.py:57 seeks/serializers.py:96
 #: services/serializers.py:105
 msgid "Login please"
-msgstr ""
+msgstr "Влез"
 
 #: feed/serializers.py:92
 msgid "You can not create feed_posts for another user"
-msgstr ""
+msgstr "Не можеш да създаваш feed posts за друг потребител"
 
 #: feed/views.py:101 seeks/views.py:131 services/views.py:136
 msgid "Already voted."
-msgstr ""
+msgstr "Вече е гласувано"
 
 #: messaging/models.py:46
 msgid "sent you attachment"
-msgstr ""
+msgstr "Пращаме ви приложение"
 
 #: messaging/serializers.py:62
 msgid "2 Users required"
-msgstr ""
+msgstr "Необходими са 2ма потребители"
 
 #: messaging/serializers.py:79
 msgid "Conversation exists"
-msgstr ""
+msgstr "Разговорът съществува"
 
 #: messaging/serializers.py:102
 msgid "You're not in conversation"
-msgstr ""
+msgstr "Не сте в разговора"
 
 #: messaging/serializers.py:109
 msgid "Request user must be author"
-msgstr ""
+msgstr "Потребителят заявител трябва да е автор"
 
 #: payments/views.py:59
 msgid "Coupon is not valid"
-msgstr ""
+msgstr "Купонът не е валиден"
 
 #: payments/views.py:75
 msgid "Provide service id"
-msgstr ""
+msgstr "Предостави ID на услуга"
 
 #: payments/views.py:117 payments/views.py:158
 msgid "Request data is not complete"
-msgstr ""
+msgstr "Заявката за данни не е завършена"
 
 #: payments/views.py:124 payments/views.py:165
 msgid "Wrong plan, reason or currency"
-msgstr ""
+msgstr "Неправилен план, основание или валута"
 
 #: payments/views.py:127 payments/views.py:168
 msgid "Invalid request: plan, days, amount, currency and reason."
-msgstr ""
+msgstr "Невалидна заявка: план, дни, сума, валута и основание"
 
 #: seeks/serializers.py:102
 msgid "You can not create seekings for another user"
-msgstr ""
+msgstr "Не може да създавате търсения за друг потребител"
 
 #: services/serializers.py:111
 msgid "You can not create services for another user"
-msgstr ""
+msgstr "Не може да създавате услуги за друг потребител"
 
 #: templates/allauth/account/email/email_confirmation_message.txt:1
 #: templates/allauth/account/email/email_confirmation_signup_message.txt:1
-#, python-format
+#, fuzzy, python-format
 msgid ""
 "Hello from Services.io!\n"
 "\n"
@@ -88,6 +90,11 @@ msgid ""
 "\n"
 "To confirm this is correct, go to %(activate_url)s\n"
 msgstr ""
+"Здравей от GetMaker!\n"
+"\n"
+"Получаваш този имейл защото потребител %(user_display) е дал твоя имейл "
+"адрес за връзка със свой account.\n"
+"\n"
 
 #: templates/allauth/account/email/email_confirmation_message.txt:7
 #: templates/allauth/account/email/email_confirmation_signup_message.txt:7
@@ -96,6 +103,8 @@ msgid ""
 "Thank you from %(site_name)s!\n"
 "%(site_domain)s"
 msgstr ""
+"Благодарим ти от %(site_name)s!\n"
+"%(site_domain)s"
 
 msgid "Not found."
-msgstr "Няма нищо"
+msgstr "Не е намерено"
