@@ -9,6 +9,8 @@ python manage.py migrate
 
 if [ "$SAAS_ENV" = "production" ]; then
     echo Production env
+    pip install uvicorn gunicorn
+    gunicorn saasrest.asgi --bind 0.0.0.0:$PORT -k uvicorn.workers.UvicornWorker --workers 5
     # daphne -b 0.0.0.0 -p ${PORT} saasrest.asgi:application
 else
     echo Developement env
