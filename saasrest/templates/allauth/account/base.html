@@ -4,13 +4,14 @@
     <title>{% block head_title %}{% endblock %}</title>
     {% block extra_head %}
     {% endblock %}
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static '/style.css' %}">
   </head>
   <body>
     {% block body %}
 
     {% if messages %}
-    <div>
-      <strong>Messages:</strong>
+    <div class="messages">
       <ul>
         {% for message in messages %}
         <li>{{message}}</li>

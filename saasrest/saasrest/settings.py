@@ -142,7 +142,7 @@ REST_AUTH_REGISTER_SERIALIZERS = {
     "REGISTER_SERIALIZER": "authentication.serializers.CustomRegisterSerializer",
 }
 SITE_ID = 1
-
+SITE_NAME = 'GetMaker.io'
 ACCOUNT_ADAPTER = 'authentication.adapters.CustomUserAccountAdapter'
 
 MIDDLEWARE = [
