@@ -13,8 +13,6 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from rest_auth.registration.views import VerifyEmailView, RegisterView
-from allauth.account.views import email_verification_sent, confirm_email as allauthemailconfirmation
 from django.conf import settings
 from django.conf.urls import include, url
 from django.conf.urls.static import static
@@ -71,7 +69,6 @@ router = routers.DefaultRouter()
 urlpatterns = [
     url(r'^saas_api/', include([
         path('admin/', admin.site.urls),
-        url(r'auth/', include('rest_framework_social_oauth2.urls')),
         # url(r'', include(router.urls)),
         url(r'', include(saas_core.urls)),
         url(r'', include(authentication.urls)),
@@ -87,13 +84,6 @@ urlpatterns = [
         url(r'', include(tags.urls)),
         url(r'', include(votes.urls)),
         url(r'', include(feed.urls)),
-        # url(r'^rest-auth/', include('rest_auth.urls')),
-        url(r'auth/registration/',
-            include('rest_auth.registration.urls')),
-        url(r'^auth/account-confirm-email/(?P<key>[-:\w]+)/$', allauthemailconfirmation,
-            name='account_confirm_email'),
-        url(r'^auth/account-confirm-email/', email_verification_sent,
-            name='account_email_verification_sent'),
     ]))
 ]
 

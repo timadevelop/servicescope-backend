@@ -43,7 +43,6 @@ class UserViewSet(viewsets.ModelViewSet):
             instance=request.user, many=False, context={'request': request})
         return Response(serializer.data)
 
-
 # class CustomRegisterView(RegisterView):
 #     """
 #     register view

@@ -5,6 +5,12 @@ from django.core.cache import cache
 
 from .models import User, get_serialized_user_cache_key
 
+from rest_auth.serializers import PasswordResetSerializer
+from allauth.account.forms import ResetPasswordForm, ResetPasswordKeyForm
+
+class PasswordSerializer(PasswordResetSerializer):
+    password_reset_form_class = ResetPasswordForm
+    password_reset_form_key = ResetPasswordKeyForm
 
 class CustomRegisterSerializer(RegisterSerializer):
     """

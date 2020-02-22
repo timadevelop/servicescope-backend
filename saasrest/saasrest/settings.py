@@ -136,6 +136,7 @@ AUTH_USER_MODEL = 'authentication.User'
 
 REST_AUTH_SERIALIZERS = {
     "USER_DETAILS_SERIALIZER": "authentication.serializers.CustomUserDetailsSerializer",
+    "PASSWORD_RESET_SERIALIZER": "authentication.serializers.PasswordSerializer",
 }
 REST_AUTH_REGISTER_SERIALIZERS = {
     "REGISTER_SERIALIZER": "authentication.serializers.CustomRegisterSerializer",
@@ -164,7 +165,7 @@ MIDDLEWARE = [
     # 'django.middleware.cache.FetchFromCacheMiddleware',
 ]
 
-ALLOWED_HOSTS = ['192.168.1.22', 'localhost', '127.0.0.1', 'demo.brainhub.co', ]
+ALLOWED_HOSTS = ['192.168.1.22', 'localhost', '127.0.0.1', 'demo.brainhub.co', 'api' ]
 INTERNAL_IPS = ['192.168.1.22', 'localhost', '127.0.0.1']
 
 # TODO: check cookie age
