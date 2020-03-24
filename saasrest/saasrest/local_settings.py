@@ -1,9 +1,13 @@
 import os
 
-API_HOST = os.environ.get('SAAS_API_HOST')
-API_PORT = os.environ.get('SAAS_API_PORT')
+API_PUBLIC_HOST = os.environ.get('API_PUBLIC_HOST')
+API_PUBLIC_PORT = os.environ.get('API_PUBLIC_PORT')
+API_PUBLIC_URL = os.environ.get('API_PUBLIC_URL')
 
-SAAS_WEB_PUBLIC_URL = os.environ.get('SAAS_WEB_PUBLIC_URL')
+ALLOWED_HOSTS = os.environ.get('API_ALLOWED_HOSTS').split(',')
+
+
+WEBCLIENT_PUBLIC_URL = os.environ.get('WEBCLIENT_PUBLIC_URL')
 
 #
 # google
@@ -36,13 +40,13 @@ API_CLIENT_ID = os.environ.get('API_CLIENT_ID')
 API_CLIENT_SECRET = os.environ.get('API_CLIENT_SECRET')
 
 
-CELERY_USERNAME = os.environ.get('CELERY_USERNAME')
-CELERY_PASSWORD = os.environ.get('CELERY_PASSWORD')
-
-RABBITMQ_HOST = os.environ.get('RABBITMQ_HOST')
-RABBITMQ_PORT = os.environ.get('RABBITMQ_PORT')
-# Celery
-CELERY_BROKER_URL = 'amqp://{}:{}@{}:{}'.format(CELERY_USERNAME, CELERY_PASSWORD, RABBITMQ_HOST, RABBITMQ_PORT)
+# CELERY_USERNAME = os.environ.get('CELERY_USERNAME')
+# CELERY_PASSWORD = os.environ.get('CELERY_PASSWORD')
+# 
+# RABBITMQ_HOST = os.environ.get('RABBITMQ_HOST')
+# RABBITMQ_PORT = os.environ.get('RABBITMQ_PORT')
+# # Celery
+# CELERY_BROKER_URL = 'amqp://{}:{}@{}:{}'.format(CELERY_USERNAME, CELERY_PASSWORD, RABBITMQ_HOST, RABBITMQ_PORT)
 
 # redis
 REDIS_HOST = os.environ.get('REDIS_HOST')

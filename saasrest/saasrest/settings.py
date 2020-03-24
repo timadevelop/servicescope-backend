@@ -14,10 +14,9 @@ import os
 import saasrest.local_settings as local_settings
 from .local_settings import STRIPE_LIVE_MODE, STRIPE_LIVE_PUBLIC_KEY, STRIPE_LIVE_SECRET_KEY, \
     STRIPE_TEST_PUBLIC_KEY, STRIPE_TEST_SECRET_KEY, STRIPE_WEBHOOK_ENDPOINT_SECRET, \
-    CELERY_BROKER_URL, \
     SECRET_KEY, \
     FACEBOOK_APP_ID, FACEBOOK_APP_SECRET, FACEBOOK_ACCESS_TOKEN, FACEBOOK_AD_ACCOUNT_ID, FACEBOOK_PAGE_ID, \
-    SAAS_WEB_PUBLIC_URL
+    WEBCLIENT_PUBLIC_URL, ALLOWED_HOSTS
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -89,7 +88,7 @@ INSTALLED_APPS = [
     # 'allauth.socialaccount.providers.facebook',
     # 'allauth.socialaccount.providers.twitter',
     # tasks
-    'celery',
+    # 'celery',
     'colorfield',
     'djmoney',
     'import_export',
@@ -102,8 +101,8 @@ INSTALLED_APPS = [
 ]
 
 # CELERY_TIMEZONE = 'UTC'
-CELERY_ENABLE_UTC = True
-CELERY_TIMEZONE = 'Europe/Sofia'
+# CELERY_ENABLE_UTC = True
+# CELERY_TIMEZONE = 'Europe/Sofia'
 
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
@@ -122,9 +121,9 @@ SOCIALACCOUNT_EMAIL_REQUIRED = True
 
 ACCOUNT_CONFIRM_EMAIL_ON_GET = True
 ACCOUNT_EMAIL_CONFIRMATION_ANONYMOUS_REDIRECT_URL = '{}/auth/verify-email'.format(
-    local_settings.SAAS_WEB_PUBLIC_URL)
+    local_settings.WEBCLIENT_PUBLIC_URL)
 ACCOUNT_EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL = '{}/auth/verify-email'.format(
-    local_settings.SAAS_WEB_PUBLIC_URL)
+    local_settings.WEBCLIENT_PUBLIC_URL)
 
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_UNIQUE_EMAIL = True
@@ -165,7 +164,7 @@ MIDDLEWARE = [
     # 'django.middleware.cache.FetchFromCacheMiddleware',
 ]
 
-ALLOWED_HOSTS = ['192.168.1.22', 'localhost', '127.0.0.1', 'demo.brainhub.co', 'api' ]
+ALLOWED_HOSTS = ['192.168.1.22', 'localhost', '127.0.0.1'] + ALLOWED_HOSTS
 INTERNAL_IPS = ['192.168.1.22', 'localhost', '127.0.0.1']
 
 # TODO: check cookie age
@@ -174,7 +173,7 @@ SESSION_COOKIE_AGE = 60 * 60 * 24 * DAYS
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
 CORS_ORIGIN_WHITELIST = [
-    # SAAS_WEB_PUBLIC_URL
+    # WEBCLIENT_PUBLIC_URL
 ]
 
 # API keys configuration

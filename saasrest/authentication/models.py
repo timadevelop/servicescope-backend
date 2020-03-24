@@ -167,8 +167,8 @@ class User(AbstractUser):
             email.verified = False
             email.save()
             request = HttpRequest()
-            request.META['SERVER_NAME'] = saasrest.local_settings.API_HOST
-            request.META['SERVER_PORT'] = 80
+            request.META['SERVER_NAME'] = saasrest.local_settings.API_PUBLIC_HOST
+            request.META['SERVER_PORT'] = saasrest.local_settings.API_PUBLIC_PORT
             email.send_confirmation(request, signup=True)
         self.__original_email = self.email
         self.__original_image = self.image
@@ -186,6 +186,6 @@ def on_user_created(sender, instance, created, **kwargs):
             email.verified = False
             email.save()
             request = HttpRequest()
-            request.META['SERVER_NAME'] = saasrest.local_settings.API_HOST
-            request.META['SERVER_PORT'] = 80
+            request.META['SERVER_NAME'] = saasrest.local_settings.API_PUBLIC_HOST
+            request.META['SERVER_PORT'] = saasrest.local_settings.API_PUBLIC_PORT
             email.send_confirmation(request, signup=True)
