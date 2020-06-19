@@ -12,6 +12,8 @@ backports.csv==1.0.7
 billiard==3.5.0.5
 black==18.9b0
 BlurWal==1.0.1
+boto3==1.14.6
+botocore==1.17.6
 CacheControl==0.12.5
 case==1.5.3
 celery==4.2.1
@@ -44,14 +46,17 @@ django-oauth-toolkit==1.2.0
 django-rest-auth==0.9.3
 django-rest-framework-social-oauth2==1.1.0
 django-sslserver==0.20
+django-storages==1.9.1
 djangorestframework==3.9.1
 djangorestframework-api-key==1.4.1
 dnspython==1.15.0
+docutils==0.15.2
 ecdsa==0.13.3
 et-xmlfile==1.0.1
 eventlet==0.24.1
 ewmh==0.1.6
 facebook-business==4.0.8
+filelock==3.0.12
 flake8==3.6.0
 future==0.17.1
 geocoder==1.38.1
@@ -65,6 +70,7 @@ hyperlink==19.0.0
 idna==2.7
 incremental==17.5.0
 jdcal==1.4.1
+jmespath==0.10.0
 kombu==4.3.0
 linecache2==1.0.0
 lockfile==0.12.2
@@ -94,6 +100,7 @@ PyHamcrest==1.9.0
 PyJWT==1.6.4
 pynvim==0.3.2
 pyparsing==2.3.1
+python-dateutil==2.8.1
 python-engineio==3.10.0
 python-jose==3.0.1
 python-memcached==1.59
@@ -109,6 +116,7 @@ requests==2.22.0
 requests-oauthlib==1.0.0
 retrying==1.3.3
 rsa==4.0
+s3transfer==0.3.3
 six==1.11.0
 social-auth-app-django==3.1.0
 social-auth-core==2.0.0

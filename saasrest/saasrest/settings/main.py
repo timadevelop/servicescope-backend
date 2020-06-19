@@ -40,15 +40,28 @@ if local_settings.DEBUG:
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
-STATIC_URL = '/saas_api/static/'
+# NOTE: Static files should be served using nginx/apache behind cloudflare/cloudfront
+STATIC_URL = local_settings.STATIC_URL
 STATIC_ROOT = os.path.join(BASE_DIR, "collected_static")
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'static'),
 )
 
-MEDIA_URL = '/saas_api/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, "media")
-
+# Media files
+if local_settings.USE_S3:
+    # aws settings
+    AWS_DEFAULT_ACL = None
+    AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
+    AWS_S3_OBJECT_PARAMETERS = {'CacheControl': 'max-age=86400'}
+    # s3 public media settings
+    PUBLIC_MEDIA_LOCATION = 'media'
+    MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{PUBLIC_MEDIA_LOCATION}/'
+    DEFAULT_FILE_STORAGE = 'saasrest.settings.storage_backends.PublicMediaStorage'
+else:
+    # NOTE: Media files should be served on services like Amazon S3
+    # DO NOT keep media and any user files inside docker volumes.
+    MEDIA_URL = local_settings.DEV_MEDIA_URL
+    MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 # CELERY_TIMEZONE = 'UTC'
 # CELERY_ENABLE_UTC = True
@@ -158,20 +171,6 @@ CHANNEL_LAYERS = {
             "hosts": local_settings.REDIS_HOSTS,
         },
     },
-}
-
-# Database
-# https://docs.djangoproject.com/en/2.1/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': local_settings.DB_CONFIG['NAME'],
-        'USER': local_settings.DB_CONFIG['USER'],
-        'PASSWORD': local_settings.DB_CONFIG['PASSWORD'],
-        'HOST': local_settings.DB_CONFIG['HOST'],
-        'PORT': local_settings.DB_CONFIG['PORT']
-    }
 }
 
 # Caching

@@ -103,6 +103,45 @@ EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
 # Cache
 MEMCACHED_LOCATION = os.environ.get('MEMCACHED_LOCATION')
 
-# S3
+# Static files
+STATIC_URL = os.environ.get('DEV_STATIC_URL', '/saas_api/static/')
 
-USE_S3 = os.getenv('USE_S3', 'FALSE')
+# Media files
+USE_S3_ENV = os.getenv('USE_S3', 'FALSE')
+USE_S3 = USE_S3_ENV == 'TRUE'
+
+if USE_S3:
+    # aws settings
+    AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
+    AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
+    AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
+    print("USE S3: ", AWS_STORAGE_BUCKET_NAME)
+
+DEV_MEDIA_URL = os.environ.get('DEV_MEDIA_URL', '/saas_api/media/')
+
+# Database
+# https://docs.djangoproject.com/en/2.1/ref/settings/#databases
+
+if 'RDS_HOSTNAME' in os.environ:
+    # Use RDS Database.
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.environ['RDS_DB_NAME'],
+            'USER': os.environ['RDS_USERNAME'],
+            'PASSWORD': os.environ['RDS_PASSWORD'],
+            'HOST': os.environ['RDS_HOSTNAME'],
+            'PORT': os.environ['RDS_PORT'],
+        }
+    }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': DB_CONFIG['NAME'],
+            'USER': DB_CONFIG['USER'],
+            'PASSWORD': DB_CONFIG['PASSWORD'],
+            'HOST': DB_CONFIG['HOST'],
+            'PORT': DB_CONFIG['PORT']
+        }
+    }
