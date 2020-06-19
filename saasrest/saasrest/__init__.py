@@ -7,6 +7,6 @@ import django
 
 # __all__ = ('celery_app',)
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'saasrest.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'saasrest.settings.main')
 
 django.setup()

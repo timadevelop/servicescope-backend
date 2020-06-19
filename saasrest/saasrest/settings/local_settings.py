@@ -1,13 +1,32 @@
 import os
 
+ENV = os.environ.get('ENV', 'development')
+
+DEBUG = True
+if ENV == 'production':
+    DEBUG = False
+
+#
+#
+#
+
 API_PUBLIC_HOST = os.environ.get('API_PUBLIC_HOST')
 API_PUBLIC_PORT = os.environ.get('API_PUBLIC_PORT')
 API_PUBLIC_URL = os.environ.get('API_PUBLIC_URL')
 
 ALLOWED_HOSTS = os.environ.get('API_ALLOWED_HOSTS').split(',')
-
+ALLOWED_HOSTS = ['192.168.1.22', 'localhost', '127.0.0.1'] + ALLOWED_HOSTS
+INTERNAL_IPS = ['192.168.1.22', 'localhost', '127.0.0.1']
 
 WEBCLIENT_PUBLIC_URL = os.environ.get('WEBCLIENT_PUBLIC_URL')
+
+#
+# general
+#
+
+DJANGO_LOG_LEVEL = os.getenv('DJANGO_LOG_LEVEL', 'INFO')
+SITE_ID = os.environ.get('SITE_ID', 1)
+SITE_NAME = os.environ.get('SITE_NAME', 'Serviscope.bg')
 
 #
 # google
@@ -42,7 +61,7 @@ API_CLIENT_SECRET = os.environ.get('API_CLIENT_SECRET')
 
 # CELERY_USERNAME = os.environ.get('CELERY_USERNAME')
 # CELERY_PASSWORD = os.environ.get('CELERY_PASSWORD')
-# 
+#
 # RABBITMQ_HOST = os.environ.get('RABBITMQ_HOST')
 # RABBITMQ_PORT = os.environ.get('RABBITMQ_PORT')
 # # Celery
@@ -57,7 +76,8 @@ STRIPE_LIVE_PUBLIC_KEY = os.environ.get('STRIPE_LIVE_PUBLIC_KEY')
 STRIPE_LIVE_SECRET_KEY = os.environ.get('STRIPE_LIVE_SECRET_KEY')
 STRIPE_TEST_PUBLIC_KEY = os.environ.get('STRIPE_TEST_PUBLIC_KEY')
 STRIPE_TEST_SECRET_KEY = os.environ.get('STRIPE_TEST_SECRET_KEY')
-STRIPE_WEBHOOK_ENDPOINT_SECRET = os.environ.get('STRIPE_WEBHOOK_ENDPOINT_SECRET')
+STRIPE_WEBHOOK_ENDPOINT_SECRET = os.environ.get(
+    'STRIPE_WEBHOOK_ENDPOINT_SECRET')
 
 STRIPE_LIVE_MODE = os.environ.get('STRIPE_LIVE_MODE')
 if STRIPE_LIVE_MODE == 'True':
@@ -72,11 +92,17 @@ DB_CONFIG = {
     'USER': 'postgres',
     'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),
     'PORT': os.environ.get('POSTGRES_PORT'),
-    'HOST': os.environ.get('POSTGRES_HOST'), # set in docker-compose.yml
+    'HOST': os.environ.get('POSTGRES_HOST'),  # set in docker-compose.yml
 }
 
+EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.zoho.com')
+EMAIL_PORT = os.environ.get('EMAIL_PORT', 587)
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
 
 # Cache
 MEMCACHED_LOCATION = os.environ.get('MEMCACHED_LOCATION')
+
+# S3
+
+USE_S3 = os.getenv('USE_S3', 'FALSE')

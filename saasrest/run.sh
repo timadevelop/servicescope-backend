@@ -14,11 +14,8 @@ if [ "$ENV" = "production" ]; then
     echo Production env. Running on port $API_INTERNAL_PORT
     pip install uvicorn gunicorn
     gunicorn saasrest.asgi --bind 0.0.0.0:$API_INTERNAL_PORT -k uvicorn.workers.UvicornWorker --workers 5
-    # daphne -b 0.0.0.0 -p ${API_INTERNAL_PORT} saasrest.asgi:application
 else
     echo Development env. Running on port $API_INTERNAL_PORT
     # daphne -b 0.0.0.0 -p ${API_INTERNAL_PORT} saasrest.asgi:application
-    # pip install uvicorn gunicorn
-    # gunicorn saasrest.asgi --log-level critical --bind 0.0.0.0:$PORT -k uvicorn.workers.UvicornWorker --workers 5
     python manage.py runserver "0.0.0.0:${API_INTERNAL_PORT}"
 fi

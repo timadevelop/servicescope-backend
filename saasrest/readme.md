@@ -1,16 +1,6 @@
 # Saas rest api
 
-
-## configuration
-See `./saasrest/settings.py`
-
-For google auth: 
-0. create Google API Project:
-1. Google API key
-2. Create a client id
-3. enable Google+ API
-
-- `cp local_settings-distrib.py local_settings.py` and edit your settings.
+Just use my docker configuration.
 
 ## rest API
 
@@ -23,7 +13,3 @@ For google auth:
 ## Celery workers:
 
 - `~/.local/bin/celery -A saasrest worker -B --loglevel=info`
-
-###
-
-- collect static on prod

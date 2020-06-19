@@ -1,4 +1,5 @@
 from __future__ import absolute_import, unicode_literals
+import django
 import os
 from celery import Celery
 from celery.schedules import crontab
@@ -6,9 +7,8 @@ from django.conf import settings
 
 from celery.decorators import periodic_task
 # set the default Django settings module for the 'celery' program.
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'saasrest.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'saasrest.settings.main')
 
-import django
 django.setup()
 # broker url will be loaded from settings configuration
 app = Celery('saasrest',

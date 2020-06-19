@@ -6,7 +6,7 @@ from django.dispatch import receiver
 from django.http import HttpRequest
 from django.utils import timezone
 
-import saasrest.local_settings
+from django.conf import settings
 from allauth.account.models import EmailAddress
 from allauth.account.utils import send_email_confirmation
 from social_django.models import UserSocialAuth
@@ -167,13 +167,13 @@ class User(AbstractUser):
             email.verified = False
             email.save()
             request = HttpRequest()
-            request.META['SERVER_NAME'] = saasrest.local_settings.API_PUBLIC_HOST
-            request.META['SERVER_PORT'] = saasrest.local_settings.API_PUBLIC_PORT
+            request.META['SERVER_NAME'] = settings.API_PUBLIC_HOST
+            request.META['SERVER_PORT'] = settings.API_PUBLIC_PORT
             email.send_confirmation(request, signup=True)
         self.__original_email = self.email
         self.__original_image = self.image
         super(User, self).save(force_insert, force_update, *args, **kwargs)
-        
+
 
 @receiver(post_save, sender=UserSocialAuth)
 def on_user_created(sender, instance, created, **kwargs):
@@ -186,6 +186,6 @@ def on_user_created(sender, instance, created, **kwargs):
             email.verified = False
             email.save()
             request = HttpRequest()
-            request.META['SERVER_NAME'] = saasrest.local_settings.API_PUBLIC_HOST
-            request.META['SERVER_PORT'] = saasrest.local_settings.API_PUBLIC_PORT
+            request.META['SERVER_NAME'] = settings.API_PUBLIC_HOST
+            request.META['SERVER_PORT'] = settings.API_PUBLIC_PORT
             email.send_confirmation(request, signup=True)
