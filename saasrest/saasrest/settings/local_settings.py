@@ -85,16 +85,6 @@ if STRIPE_LIVE_MODE == 'True':
 else:
     STRIPE_LIVE_MODE = False
 
-# print('db port {}'.format(os.environ.get('POSTGRES_PORT')))
-# DATABASE
-DB_CONFIG = {
-    'NAME': 'postgres',
-    'USER': 'postgres',
-    'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),
-    'PORT': os.environ.get('POSTGRES_PORT'),
-    'HOST': os.environ.get('POSTGRES_HOST'),  # set in docker-compose.yml
-}
-
 EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.zoho.com')
 EMAIL_PORT = os.environ.get('EMAIL_PORT', 587)
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
@@ -139,10 +129,10 @@ else:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
-            'NAME': DB_CONFIG['NAME'],
-            'USER': DB_CONFIG['USER'],
-            'PASSWORD': DB_CONFIG['PASSWORD'],
-            'HOST': DB_CONFIG['HOST'],
-            'PORT': DB_CONFIG['PORT']
+            'NAME': 'postgres',
+            'USER': 'postgres',
+            'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),
+            'HOST': os.environ.get('POSTGRES_HOST'),
+            'PORT': os.environ.get('POSTGRES_PORT')
         }
     }
