@@ -115,7 +115,7 @@ if USE_S3:
     AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
     AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
     AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
-    print("USE S3: ", AWS_STORAGE_BUCKET_NAME)
+    print("Using S3 bucket for media files: ", AWS_STORAGE_BUCKET_NAME)
 
 DEV_MEDIA_URL = os.environ.get('DEV_MEDIA_URL', '/saas_api/media/')
 
@@ -124,6 +124,7 @@ DEV_MEDIA_URL = os.environ.get('DEV_MEDIA_URL', '/saas_api/media/')
 
 if 'RDS_HOSTNAME' in os.environ:
     # Use RDS Database.
+    print("Using RDS Database with PostgreSQL engine")
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
