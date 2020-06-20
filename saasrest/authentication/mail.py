@@ -2,8 +2,9 @@ from django.conf import settings
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 
+
 def send_email_validation(strategy, backend, code, partial_token):
-    print(strategy, backend, code, partial_token)
+    # print(strategy, backend, code, partial_token)
     # """Sends email confirmation email"""
 
     # msg_plain = render_to_string(

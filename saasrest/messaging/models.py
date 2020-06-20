@@ -8,6 +8,7 @@ from django.contrib.contenttypes.fields import GenericRelation
 
 from saas_core.models import Image
 
+
 class Conversation(models.Model):
     """Conversation"""
     title = models.TextField(max_length=30, blank=False)
@@ -45,5 +46,4 @@ class Message(models.Model):
         if not self.text or self.text == 'null':
             return "{} {}".format(self.author.first_name, _("sent you attachment"))
         else:
-            print(self.text)
             return self.text

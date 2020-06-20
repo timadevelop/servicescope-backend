@@ -23,6 +23,8 @@ https://developers.facebook.com/docs/marketing-api/buying-api/ad-units/
 https://github.com/facebook/facebook-python-business-sdk/blob/15c8b3e453f6115d029a2b5270c710d04e1c1c81/examples/MultiPromoteYourPage.py
 
 """
+
+
 class FacebookAdsManager:
     account = AdAccount(AD_ACCOUNT_ID)
 
@@ -30,6 +32,7 @@ class FacebookAdsManager:
     Gets all campaigns for current account
     @returns [ {id: <campaign_id>}, {id: ....}, .... ]
     """
+
     def get_campaigns(self):
         campaigns_cursor = self.account.get_campaigns()
         return [doc for doc in campaigns_cursor]
@@ -38,6 +41,7 @@ class FacebookAdsManager:
     Creates campaign
     @returns {id: <new_campaign_id>}
     """
+
     def create_campaign(self):
         fields = []
         params = {
@@ -45,10 +49,9 @@ class FacebookAdsManager:
             'objective': 'LINK_CLICKS',
             'status': 'PAUSED',
         }
-        result = self.account.create_campaign(fields=fields,params=params)
+        result = self.account.create_campaign(fields=fields, params=params)
         ad_campaign_id = result.get_id()
         return result
-
 
     """
     Searches targeting interests
@@ -64,6 +67,7 @@ class FacebookAdsManager:
         }
     ]
     """
+
     def search_targeting_interests(self, query):
         params = {
             'q': query,
@@ -77,6 +81,7 @@ class FacebookAdsManager:
     Generates targeting spec by query like "cars"
     TODO: optimize
     """
+
     def generate_targeting_spec(self, interests_query):
         def normalize(interest):
             return interest.get("id")
@@ -91,13 +96,14 @@ class FacebookAdsManager:
     """
     Create a new Ad Set
     """
+
     def create_ad_set(self, campaign_id, budget, targeting_query):
         today = timezone.datetime.today()
         start_time = str(today + timezone.timedelta(weeks=1))
         end_time = str(today + timezone.timedelta(weeks=2))
 
         targeting = self.generate_targeting_spec(targeting_query)
-        print(targeting)
+        # print(targeting)
         # new AdSet instance
         adset = AdSet(parent_id=AD_ACCOUNT_ID)
         adset.update({
@@ -126,12 +132,14 @@ class FacebookAdsManager:
         }
     ]
     """
+
     def get_ad_sets(self):
         return [adset for adset in self.account.get_ad_sets(fields=[AdSet.Field.name, AdSet.Field.id])]
 
     """
     Advertise facebook page post
     """
+
     def advertise_post(self, post_id, adset_id):
         def create_ad_creative(name):
             # see https://github.com/facebook/facebook-python-business-sdk/blob/2c6ea98825ff293c0fb33738fa7322dcef9e2e07/examples/AdAccountAdCreativesPost.py#L35
@@ -142,7 +150,8 @@ class FacebookAdsManager:
                 'name': name,
                 'object_story_id': '{}'.format(post_id)
             }
-            return self.account.create_ad_creative(fields=fields,params=params)
+            return self.account.create_ad_creative(fields=fields, params=params)
+
         def create_ad(name, creative_id, status):
             fields = [
             ]
@@ -154,13 +163,16 @@ class FacebookAdsManager:
             }
             return self.account.create_ad(fields=fields, params=params)
 
-        ad_creative = create_ad_creative('Sample Post Ad Creative for post#{}'.format(post_id))
-        created_ad = create_ad('Sample Ad for post#{}'.format(post_id), ad_creative.get_id(), 'PAUSED')
+        ad_creative = create_ad_creative(
+            'Sample Post Ad Creative for post#{}'.format(post_id))
+        created_ad = create_ad('Sample Ad for post#{}'.format(
+            post_id), ad_creative.get_id(), 'PAUSED')
         return created_ad
 
     """
     Create a new facebook page post
     """
+
     def create_post(self, message):
         fields = [
         ]
@@ -178,9 +190,11 @@ class FacebookAdsManager:
     Delete facebook page post by id
     Example: .delete_post("435524993668529_511529099401451")
     """
+
     def delete_post(self, post_id):
         fields = []
         params = {}
-        return PagePost(post_id).api_delete(fields=fields,params=params)
+        return PagePost(post_id).api_delete(fields=fields, params=params)
+
 
 facebookAdsManager = FacebookAdsManager()

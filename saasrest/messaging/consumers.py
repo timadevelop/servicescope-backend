@@ -125,7 +125,6 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
         the use of channels.auth.AuthMiddlewareStack in routing) is
         allowed to subscribe to the requested object.
         """
-        print('got json:', content)
         if content['type'] == 'join_room_request':
             payload = content["payload"]
             room_name = payload["room_name"]
