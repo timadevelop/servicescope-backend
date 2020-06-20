@@ -5,10 +5,12 @@
     <mj-preview>Email confirmation</mj-preview>
     <mj-attributes>
       <mj-all font-family="'Helvetica Neue', Helvetica, Arial, sans-serif"></mj-all>
-      <mj-text font-weight="400" font-size="16px" color="#000000" line-height="24px" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif"></mj-text>
+      <mj-text font-weight="400" font-size="16px" color="#000000" line-height="24px"
+        font-family="'Helvetica Neue', Helvetica, Arial, sans-serif"></mj-text>
     </mj-attributes>
     <mj-style inline="inline">
-      .body-section { -webkit-box-shadow: 1px 4px 11px 0px rgba(0, 0, 0, 0.15); -moz-box-shadow: 1px 4px 11px 0px rgba(0, 0, 0, 0.15); box-shadow: 1px 4px 11px 0px rgba(0, 0, 0, 0.15); }
+      .body-section { -webkit-box-shadow: 1px 4px 11px 0px rgba(0, 0, 0, 0.15); -moz-box-shadow: 1px 4px 11px 0px
+      rgba(0, 0, 0, 0.15); box-shadow: 1px 4px 11px 0px rgba(0, 0, 0, 0.15); }
     </mj-style>
     <mj-style inline="inline">
       .text-link { color: #5e6ebf }
@@ -21,15 +23,18 @@
   <mj-body background-color="#E7E7E7" width="600px">
     <mj-section full-width="full-width" background-color="#040B4F" padding-bottom="0">
       <mj-column width="100%">
-        <mj-image src="https://ci6.googleusercontent.com/proxy/o2cEoMPpSugaYPjzgxnUWSZOVRKAOQAtitRIvdrnEI_p7MR7fEbFJPWAa4dL8gdhjvbjUbWTz6Z6TKwySP_2AmHS5BBUDwQp6Z9EkwhrvDUHOV0ATjTNsv7yH7xFlJnajreIf01s=s0-d-e1-ft#http://i1.cmail19.com/ei/d/20/15C/FD3/061916/temp_import/csfinal/StripeLogoblue.png"
+        <mj-image
+          src="https://ci6.googleusercontent.com/proxy/o2cEoMPpSugaYPjzgxnUWSZOVRKAOQAtitRIvdrnEI_p7MR7fEbFJPWAa4dL8gdhjvbjUbWTz6Z6TKwySP_2AmHS5BBUDwQp6Z9EkwhrvDUHOV0ATjTNsv7yH7xFlJnajreIf01s=s0-d-e1-ft#http://i1.cmail19.com/ei/d/20/15C/FD3/061916/temp_import/csfinal/StripeLogoblue.png"
           alt="" align="center" width="150px" />
-        <mj-text color="#ffffff" font-weight="bold" align="center" text-transform="uppercase" font-size="16px" letter-spacing="1px" padding-top="30px">
+        <mj-text color="#ffffff" font-weight="bold" align="center" text-transform="uppercase" font-size="16px"
+          letter-spacing="1px" padding-top="30px">
           Email Confirmation
-          <br/>
+          <br />
         </mj-text>
-        <mj-text color="#17CBC4" align="center" font-size="13px" padding-top="0" font-weight="bold" text-transform="uppercase" letter-spacing="1px" line-height="20px">
+        <mj-text color="#17CBC4" align="center" font-size="13px" padding-top="0" font-weight="bold"
+          text-transform="uppercase" letter-spacing="1px" line-height="20px">
           Sofia, Bulgaria
-          <br/> Vasya levski 394
+          <br /> Vasya levski 394
         </mj-text>
       </mj-column>
     </mj-section>
@@ -37,37 +42,41 @@
       <mj-column width="100%" background-color="#1F2D78">
         <mj-image src="https://i.imgur.com/8CncWWT.png" alt="Confirmed order image" align="center" width="150px" />
         <mj-text color="#ffffff" align="center" font-size="22px" letter-spacing="1px" padding-top="10px">
-          Successfully registered on <b>Services.io</b>
-          <br/>
+          Successfully registered on <b>Servicescope</b>
+          <br />
         </mj-text>
       </mj-column>
     </mj-section>
     <mj-section background-color="#1f2e78">
       <mj-column width="100%">
         <mj-text color="#ffffff" align="center" font-size="12px" letter-spacing="1px" padding-top="0px">
-          Some text gere
-          <br/>
+          Confirm your email
+          <br />
         </mj-text>
       </mj-column>
     </mj-section>
-    <mj-wrapper background-color="#ffffff" padding-right="15px" padding-left="15px" padding-top="0" padding-bottom="0" css-class="body-section">
+    <mj-wrapper background-color="#ffffff" padding-right="15px" padding-left="15px" padding-top="0" padding-bottom="0"
+      css-class="body-section">
       <mj-section padding-bottom="0">
         <mj-column width="100%">
           <mj-text color="#212b35" font-weight="bold" font-size="20px">
             Complete registration
           </mj-text>
           <mj-text color="#637381" font-size="15px">
-            Hi, you're receiving this e-mail because user <b>{{ user_display }}</b> has given yours as an e-mail address to connect their account.
+            Hi, you're receiving this e-mail because user <b>{{ user_display }}</b> has given yours as an e-mail address
+            to connect their account.
           </mj-text>
           <mj-text color="#637381" font-size="15px">
-            To confirm this is correct, click verify button or click on the following link: <a href="{{ activate_url }}" style="color: #637381; text-decoration: underline;">verify link</a>.
+            To confirm this is correct, click verify button or click on the following link: <a href="{{ activate_url }}"
+              style="color: #637381; text-decoration: underline;">verify link</a>.
           </mj-text>
         </mj-column>
       </mj-section>
 
       <mj-section padding-top="0" padding-bottom="0">
         <mj-column>
-          <mj-button background-color="#5e6ebf" align="right" color="#ffffff" font-size="17px" font-weight="bold" href="{{ activate_url }}" width="100%">
+          <mj-button background-color="#5e6ebf" align="right" color="#ffffff" font-size="17px" font-weight="bold"
+            href="{{ activate_url }}" width="100%">
             Verify
           </mj-button>
         </mj-column>
@@ -75,7 +84,8 @@
       <mj-section padding-top="0">
         <mj-column>
           <mj-text color="#637381" font-size="15px">
-            If you have any questions, send us an email at <a href="email:team@brainhub.co" style="color: #637381; text-decoration: underline;">team@brainhub.co</a> and we'll be happy to help.
+            If you have any questions, send us an email at <a href="email:team@brainhub.co"
+              style="color: #637381; text-decoration: underline;">team@brainhub.co</a> and we'll be happy to help.
           </mj-text>
         </mj-column>
       </mj-section>
@@ -98,7 +108,9 @@
             Some text here
           </mj-text>
           <mj-text color="#445566" font-size="11px" align="center" line-height="16px">
-            You are receiving this email advertisement because you registered with COMPANY Accountants. (123 Main Street, Sofix, not TX 18701) and agreed to receive emails from us regarding new features, events and special offers.
+            You are receiving this email advertisement because you registered with COMPANY Accountants. (123 Main
+            Street, Sofix, not TX 18701) and agreed to receive emails from us regarding new features, events and special
+            offers.
           </mj-text>
           <mj-text color="#445566" font-size="11px" align="center" line-height="16px">
             &copy; Company Accountants Inc., All Rights Reserved.
