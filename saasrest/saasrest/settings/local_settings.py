@@ -89,6 +89,7 @@ EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.zoho.com')
 EMAIL_PORT = os.environ.get('EMAIL_PORT', 587)
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
+EMAIL_FROM_USER = os.environ.get('EMAIL_FROM_USER')
 
 # Cache
 MEMCACHED_LOCATION = os.environ.get('MEMCACHED_LOCATION')

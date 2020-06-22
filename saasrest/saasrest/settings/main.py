@@ -210,9 +210,12 @@ LOCALE_PATHS = (
 )
 
 # Emails
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
 EMAIL_USE_TLS = True
 EMAIL_HOST = local_settings.EMAIL_HOST
 EMAIL_PORT = local_settings.EMAIL_PORT
-DEFAULT_FROM_EMAIL = local_settings.EMAIL_HOST_USER
+DEFAULT_FROM_EMAIL = local_settings.EMAIL_FROM_USER
+
 EMAIL_HOST_USER = local_settings.EMAIL_HOST_USER
 EMAIL_HOST_PASSWORD = local_settings.EMAIL_HOST_PASSWORD
