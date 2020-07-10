@@ -4,7 +4,7 @@ pip install -r requirements.txt
 # pip install --upgrade --force-reinstall -r requirements.txt
 python manage.py collectstatic --noinput
 python manage.py compilemessages -l bg
-python manage.py makemigrations saas_core authentication categories locations feedback messaging notifications payments public_configs services tags votes feed
+python manage.py makemigrations saas_core authentication categories locations feedback messaging notifications payments public_configs services tags votes feed seeks
 python manage.py makemigrations
 
 python manage.py migrate

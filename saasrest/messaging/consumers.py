@@ -68,6 +68,7 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
 
         # guard
         if not self.user or self.user.is_anonymous:
+            await self.accept()
             await self.close()
         else:
             try:
@@ -84,6 +85,7 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
                 })
                 await self.change_user_online_status(True)
             except:
+                await self.accept()
                 await self.close()
 
     async def join_room(self, room_name):
