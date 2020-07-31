@@ -113,7 +113,7 @@ DEV_MEDIA_URL = os.environ.get('DEV_MEDIA_URL', '/saas_api/media/')
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
 
-if 'RDS_HOSTNAME' in os.environ:
+if 'RDS_HOSTNAME' in os.environ and os.environ.get('RDS_HOSTNAME'):
     # Use RDS Database.
     print("Using RDS Database with PostgreSQL engine")
     DATABASES = {
