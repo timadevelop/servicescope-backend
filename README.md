@@ -29,7 +29,12 @@
 ## 📦 Install, Usage, Development
 
 This repo depends on a lot of ENV variables and it's easier to use it using our *docker* configurations.
-See [timadevelop/saasContainer](https://github.com/timadevelop/saasContainer) for further instructions
+See [timadevelop/servicescope-containers](https://github.com/timadevelop/servicescope-containers) for further instructions
+
+## 🔗 Links
+
+- [timadevelop/servicescope-web-client](https://github.com/timadevelop/servicescope-web-client)
+- [timadevelop/servicescope-containers](https://github.com/timadevelop/servicescope-containers)
 
 ## 🤝 Contact
 
