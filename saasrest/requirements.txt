@@ -129,7 +129,7 @@ Twisted>=20.3.0
 txaio==18.8.1
 unittest2==1.1.0
 urllib3==1.25.6
-uvicorn==0.11.1
+uvicorn==0.11.7
 uvloop==0.14.0
 vine==1.2.0
 virtualenv==16.0.0
