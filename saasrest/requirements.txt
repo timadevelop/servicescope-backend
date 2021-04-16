@@ -36,7 +36,7 @@ django-allauth==0.38.0
 django-braces==1.13.0
 django-colorfield==0.1.15
 django-cors-headers==2.4.0
-django-debug-toolbar==1.11
+django-debug-toolbar==1.11.1
 django-debug-toolbar-request-history==0.0.10
 django-filter==2.1.0
 django-import-export==1.2.0
