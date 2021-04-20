@@ -6,7 +6,7 @@ asgi-cors==0.3
 asgiref==3.2.3
 async-timeout==3.0.1
 attrs==19.3.0
-autobahn==19.3.3
+autobahn==20.12.3
 Automat==0.7.0
 backports.csv==1.0.7
 billiard==3.5.0.5
