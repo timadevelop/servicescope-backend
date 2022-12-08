@@ -17,7 +17,7 @@ botocore==1.17.6
 CacheControl==0.12.5
 case==1.5.3
 celery==4.2.1
-certifi==2018.10.15
+certifi==2022.12.7
 channels==2.4.0
 channels-redis==2.4.2
 chardet==3.0.4
